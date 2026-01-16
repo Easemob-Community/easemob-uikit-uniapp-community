@@ -39,6 +39,7 @@ const sendVideoMessage = (res: any) => {
     return;
   }
   const token = conn.token;
+  const filename = tempFilePath.replace(/^.*[\\\/]/, "").split("?")[0] || "video.mp4";
   const requestParams = {
     url: uploadUrl,
     filePath: tempFilePath,
@@ -55,7 +56,8 @@ const sendVideoMessage = (res: any) => {
     chatType: convStore.currConversation!.conversationType,
     //@ts-ignore
     body: {
-      url: tempFilePath
+      url: tempFilePath,
+      filename: filename,
     },
     ext: {
       ease_chat_uikit_user_info: {
