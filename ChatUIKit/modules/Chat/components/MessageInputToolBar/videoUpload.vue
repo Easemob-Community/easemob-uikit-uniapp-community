@@ -8,9 +8,9 @@
 import ItemContainer from "./itemContainer.vue";
 import { ASSETS_URL } from "../../../../const/index";
 import type { InputToolbarEvent } from "../../../../types/index";
-import { inject } from "vue";
+import { inject, computed } from "vue";
 import { t } from "../../../../locales/index";
-import { ChatUIKit } from "../../../../index";
+import { useConvStore, useMessageStore, useAppUserStore, useConnStore } from "../../../../stores";
 import { chatSDK } from "../../../../sdk";
 
 const videoButton = ASSETS_URL + "icon/videoButton.png";
@@ -19,9 +19,14 @@ const title = t("videoUpload");
 
 const toolbarInject = inject<InputToolbarEvent>("InputToolbarEvent");
 
-const conn = ChatUIKit.getChatConn();
+// Pinia stores
+const convStore = useConvStore();
+const messageStore = useMessageStore();
+const appUserStore = useAppUserStore();
+const connStore = useConnStore();
 
-const convStore = ChatUIKit.convStore;
+const conn = computed(() => connStore.getChatConn);
+const selfUserInfo = computed(() => appUserStore.getSelfUserInfo());
 
 const chooseVideo = () => {
   uni.chooseVideo({
@@ -34,12 +39,12 @@ const chooseVideo = () => {
 
 const sendVideoMessage = (res: any) => {
   const tempFilePath = res?.tempFilePath;
-  const uploadUrl = `${conn.apiUrl}/${conn.orgName}/${conn.appName}/chatfiles`;
+  const uploadUrl = `${conn.value.apiUrl}/${conn.value.orgName}/${conn.value.appName}/chatfiles`;
   if (!tempFilePath) {
     return;
   }
-  const token = conn.token;
-  const filename = tempFilePath.replace(/^.*[\\\/]/, "").split("?")[0] || "video.mp4";
+  const token = conn.value.token;
+  const filename = tempFilePath.replace(/^.*[\\/]/, "").split("?")[0] || "video.mp4";
   const requestParams = {
     url: uploadUrl,
     filePath: tempFilePath,
@@ -61,13 +66,13 @@ const sendVideoMessage = (res: any) => {
     },
     ext: {
       ease_chat_uikit_user_info: {
-        avatarURL: ChatUIKit.appUserStore.getSelfUserInfo().avatar,
-        nickname: ChatUIKit.appUserStore.getSelfUserInfo().name
+        avatarURL: selfUserInfo.value.avatar,
+        nickname: selfUserInfo.value.name
       }
     }
   });
   toolbarInject?.closeToolbar();
-  ChatUIKit.messageStore.sendMessage(videoMsg, () => {
+  messageStore.sendMessage(videoMsg, () => {
     return uni.uploadFile(requestParams);
   });
 };

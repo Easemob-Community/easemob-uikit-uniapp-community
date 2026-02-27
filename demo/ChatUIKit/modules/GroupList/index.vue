@@ -19,24 +19,22 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import GroupItem from "./components/GroupItem/index.vue";
 import Empty from "../../components/Empty/index.vue";
 import NavBar from "../../components/NavBar/index.vue";
-import type { Chat } from "../../sdk";
-import { ChatUIKit } from "../../index";
-import { ref, onUnmounted } from "vue";
+import { useGroupStore } from "../../stores";
 import { t } from "../../locales/index";
-import { autorun } from "mobx";
 
-const groupList = ref<Chat.GroupInfo[]>([]);
+// Pinia store
+const groupStore = useGroupStore();
+
+/** 使用 computed 替代 autorun */
+const groupList = computed(() => groupStore.joinedGroupList);
 
 const onBack = () => {
   uni.navigateBack();
 };
-
-const unwatchGroupList = autorun(() => {
-  groupList.value = ChatUIKit.groupStore.joinedGroupList;
-});
 
 const toChatPage = (id: string) => {
   uni.navigateTo({
@@ -44,9 +42,7 @@ const toChatPage = (id: string) => {
   });
 };
 
-onUnmounted(() => {
-  unwatchGroupList();
-});
+// 无需手动卸载 computed
 </script>
 
 <style lang="scss" scoped>

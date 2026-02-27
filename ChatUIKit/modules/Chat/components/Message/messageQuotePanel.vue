@@ -8,24 +8,21 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onUnmounted } from "vue";
-import { ChatUIKit } from "../../../../index";
+import { computed } from "vue";
+import { useMessageStore } from "../../../../stores";
 import MessageQuote from "./messageQuote.vue";
-import { autorun } from "mobx";
 
-const quoteMsg = ref(null);
+// Pinia store
+const messageStore = useMessageStore();
 
-autorun(() => {
-  quoteMsg.value = ChatUIKit.messageStore.quoteMessage;
-});
+/** 使用 computed 替代 autorun */
+const quoteMsg = computed(() => messageStore.quoteMessage);
 
 const cancelQuote = () => {
-  ChatUIKit.messageStore.setQuoteMessage(null);
+  messageStore.setQuoteMessage(null);
 };
 
-onUnmounted(() => {
-  cancelQuote();
-});
+// 无需手动卸载 computed
 </script>
 
 <style lang="scss" scoped>

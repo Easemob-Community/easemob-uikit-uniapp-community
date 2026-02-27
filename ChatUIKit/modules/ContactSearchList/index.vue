@@ -27,21 +27,22 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from "vue";
 import NavBar from "../../components/NavBar/index.vue";
 import SearchInput from "../../components/SearchInput/index.vue";
 import UserItem from "../ContactList/components/UserItem/index.vue";
 import Empty from "../../components/Empty/index.vue";
-import { ChatUIKit } from "../../index";
+import { useContactStore, useAppUserStore } from "../../stores";
 import { t } from "../../locales";
 import { onLoad } from "@dcloudio/uni-app";
-import { ref, computed } from "vue";
 
 const searchValue = ref("");
 const searchRef = ref(null);
-
 let sourceUrl = "";
 
-const emits = defineEmits(["on"]);
+// Pinia stores
+const contactStore = useContactStore();
+const appUserStore = useAppUserStore();
 
 const onInput = (value: string) => {
   searchValue.value = value;
@@ -51,9 +52,9 @@ const searchList = computed(() => {
   if (!searchValue.value) {
     return [];
   }
-  return ChatUIKit.contactStore.contacts.filter((item) => {
-    return ChatUIKit.appUserStore
-      .getUserInfoFromStore(item.userId)
+  return contactStore.contacts.filter((item) => {
+    return appUserStore
+      .getUserInfo(item.userId)
       .name.includes(searchValue.value);
   });
 });
@@ -80,7 +81,7 @@ const onBack = () => {
 };
 
 onLoad((option) => {
-  sourceUrl = option.url;
+  sourceUrl = option?.url;
 });
 </script>
 

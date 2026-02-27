@@ -327,6 +327,9 @@ export function checkCharacter(character: string) {
 
 export function groupByName(name: string) {
   let initial = "#";
+  if (!name || typeof name !== 'string') {
+    return initial;
+  }
   if (checkCharacter(name.substring(0, 1)) == "en") {
     initial = name.substring(0, 1).toUpperCase();
   } else if (checkCharacter(name.substring(0, 1)) == "zh") {

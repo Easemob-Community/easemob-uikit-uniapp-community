@@ -53,11 +53,9 @@
 import MessageItem from "./messageItem.vue";
 import MessageTime from "./messageTime.vue";
 import NoticeMessageItem from "./noticeMessageItem.vue";
-import { ref, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, computed, watch } from "vue";
 import type { MixedMessageBody, Chat } from "../../../../types/index";
-import { ChatUIKit } from "../../../../index";
-import { autorun } from "mobx";
-import { deepClone } from "../../../../utils/index";
+import { useMessageStore } from "../../../../stores";
 import { t } from "../../../../locales";
 
 interface Props {
@@ -66,27 +64,30 @@ interface Props {
 }
 const props = defineProps<Props>();
 
+// Pinia store
+const messageStore = useMessageStore();
+
 const scrollTop = ref(0);
-
 const isLoading = ref(false);
-
 const currentViewMsgId = ref<string>("");
-
-const messageStore = ChatUIKit.messageStore;
-
-const isLast = ref(true);
-
-const cursor = ref("");
-
 const selectedMsgId = ref("");
-
 const blinkMsgId = ref(""); // 闪烁的消息id
-
-const msgs = ref<MixedMessageBody[]>([]);
-
 const isOpacity = ref(true);
 
-let uninstallMsgWatch: any = null;
+/** 使用 computed 获取消息列表 */
+const msgs = computed(() => {
+  return messageStore.getConversationMessages(props.conversationId);
+});
+
+/** 是否还有更多历史消息 */
+const isLast = computed(() => {
+  return !messageStore.hasMoreHistory(props.conversationId);
+});
+
+/** 获取 cursor 用于分页加载 */
+const cursor = computed(() => {
+  return messageStore.conversationMessagesMap[props.conversationId]?.cursor || "";
+});
 
 const onMessageLongPress = (msgId: string) => {
   selectedMsgId.value = msgId;
@@ -96,41 +97,38 @@ const resetMessageState = () => {
   selectedMsgId.value = "";
 };
 
-onMounted(() => {
-  uninstallMsgWatch = autorun(() => {
-    const convMessageInfo = deepClone(
-      messageStore.conversationMessagesMap.get(props.conversationId)
-    );
-    if (convMessageInfo) {
-      const oldMsgs = [...msgs.value];
-      msgs.value = convMessageInfo.messageIds.map((id) => {
-        return deepClone(ChatUIKit.messageStore.messageMap.get(id));
-      });
-      isLast.value = convMessageInfo.isLast;
-      cursor.value = convMessageInfo.cursor;
-      const isSameLength =
-        oldMsgs.length === msgs.value.length && oldMsgs.length !== 0;
-      if (isLoading.value || currentViewMsgId.value || isSameLength) {
-        return;
-      }
-      nextTick(() => {
-        scrollToBottom();
-        setTimeout(() => {
-          isOpacity.value = false;
-        }, 200);
-      });
+// 监听消息列表变化，自动滚动到底部
+watch(
+  () => msgs.value.length,
+  (newLength, oldLength) => {
+    if (isLoading.value || currentViewMsgId.value || (oldLength && newLength === oldLength)) {
+      return;
     }
-  });
+    nextTick(() => {
+      scrollToBottom();
+      setTimeout(() => {
+        isOpacity.value = false;
+      }, 200);
+    });
+  }
+);
+
+onMounted(() => {
   // 如果没拉取过历史消息，拉取历史消息
-  if (
-    !messageStore.conversationMessagesMap.has(props.conversationId) ||
-    messageStore.conversationMessagesMap.get(props.conversationId)
-      ?.isGetHistoryMessage !== true
-  ) {
+  const convMsgInfo = messageStore.conversationMessagesMap[props.conversationId];
+  if (!convMsgInfo || convMsgInfo.isGetHistoryMessage !== true) {
     messageStore.getHistoryMessages({
       conversationId: props.conversationId,
       conversationType: props.conversationType
     } as Chat.ConversationItem);
+  } else {
+    // 已有消息，滚动到底部
+    nextTick(() => {
+      scrollToBottom();
+      setTimeout(() => {
+        isOpacity.value = false;
+      }, 200);
+    });
   }
 });
 
@@ -139,7 +137,7 @@ const getHistoryMessage = async () => {
     return;
   }
   isLoading.value = true;
-  const firstMessageId = msgs.value[0].id || "";
+  const firstMessageId = msgs.value[0]?.id || "";
   // #ifdef MP-WEIXIN
   currentViewMsgId.value = firstMessageId;
   // #endif
@@ -191,8 +189,10 @@ const setViewMsgId = (msgId: string) => {
   }, 1000);
 };
 
+// 无需手动卸载 computed
+
 onUnmounted(() => {
-  uninstallMsgWatch && uninstallMsgWatch();
+  // 清理工作（如有需要）
 });
 
 defineExpose({

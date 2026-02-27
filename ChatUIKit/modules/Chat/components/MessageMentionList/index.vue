@@ -28,7 +28,7 @@
               :key="item.member || item.owner"
               :user="{ userId: item.member || item.owner }"
               v-show="
-                (item.member || item.owner) !== ChatUIKit.getChatConn().user
+                (item.member || item.owner) !== currentUserId
               "
               @tap="onSelect(item.member || item.owner)"
             />
@@ -40,14 +40,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import Popup from "../../../../components/Popup/index.vue";
 import UserItem from "../../../ContactList/components/UserItem/index.vue";
 import { t } from "../../../../locales/index";
-import { ChatUIKit } from "../../../../index";
-import { Chat } from "../../../../sdk";
+import { useConvStore, useGroupStore, useConnStore } from "../../../../stores";
 import { GET_GROUP_MEMBERS_PAGESIZE, AT_ALL, ASSETS_URL } from "../../../../const/index";
-
 
 const MentionAll = ASSETS_URL + "icon/alAll.png";
 
@@ -56,14 +54,21 @@ const memberList = ref<Chat.GroupMember[]>([]);
 const hasMore = ref(true);
 const popupRef = ref(null);
 
+// Pinia stores
+const convStore = useConvStore();
+const groupStore = useGroupStore();
+const connStore = useConnStore();
+
+const currentUserId = computed(() => connStore.getChatConn.user);
+
 let loading = false;
 let pageNum = 1;
 
 const listGroupMembers = async () => {
   loading = true;
-  const groupId = ChatUIKit.convStore.currConversation?.conversationId || "";
+  const groupId = convStore.currConversation?.conversationId || "";
   try {
-    const res = await ChatUIKit.groupStore.getGroupMembers(groupId, pageNum);
+    const res = await groupStore.getGroupMembers(groupId, pageNum);
     const dt = res.data || [];
     memberList.value.push(...dt);
 

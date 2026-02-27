@@ -73,6 +73,7 @@
 </template>
 
 <script lang="ts" setup>
+import { computed, getCurrentInstance } from "vue";
 import Avatar from "../../../../components/Avatar/index.vue";
 import TextMessage from "./messageTxt.vue";
 import ImageMessage from "./messageImage.vue";
@@ -84,8 +85,7 @@ import MessageQuote from "./messageQuote.vue";
 import MessageActions from "./messageActions.vue";
 import MessageStatus from "./messageStatus.vue";
 import type { MixedMessageBody } from "../../../../types/index";
-import { ref, computed, getCurrentInstance } from "vue";
-import { ChatUIKit } from "../../../../index";
+import { useAppUserStore, useConfigStore, useConnStore, useMessageStore } from "../../../../stores";
 import { getTimeStringAutoShort } from "../../../../utils/index";
 import { USER_AVATAR_URL } from "../../../../const/index";
 
@@ -97,31 +97,35 @@ const props = defineProps<Props>();
 
 const emits = defineEmits(["onLongPress", "jumpToMessage"]);
 
+// Pinia stores
+const appUserStore = useAppUserStore();
+const configStore = useConfigStore();
+const connStore = useConnStore();
+const messageStore = useMessageStore();
+
 const jumpToMessage = (id) => {
   emits("jumpToMessage", id);
 };
 
 const instance = getCurrentInstance();
-
 const actionRef = ref(null);
 
-const appUserStore = ChatUIKit.appUserStore;
-
 const getUserInfo = (id: string) => {
-  return appUserStore.getUserInfoFromStore(id || "");
+  return appUserStore.getUserInfo(id || "");
 };
 
-const messageStatus = ChatUIKit.getFeatureConfig().messageStatus;
+const messageStatus = computed(() => configStore.featureConfig.messageStatus);
 
-const isSelf =
-  ChatUIKit.getChatConn().user === props.msg.from || props.msg.from === "";
+const isSelf = computed(() => 
+  connStore.getChatConn.user === props.msg.from || props.msg.from === ""
+);
 
-const extUserInfo = props.msg.ext?.ease_chat_uikit_user_info || {};
+const extUserInfo = computed(() => props.msg.ext?.ease_chat_uikit_user_info || {});
 
 const bubbleClass = computed(() => {
   let className = "msg-bubble";
   if (props.msg.type !== "img" && props.msg.type !== "video") {
-    if (isSelf) {
+    if (isSelf.value) {
       className = "msg-bubble msg-bubble-self-bg";
     } else {
       className = "msg-bubble msg-bubble-bg";

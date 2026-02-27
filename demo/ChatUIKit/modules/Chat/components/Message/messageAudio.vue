@@ -31,9 +31,9 @@
 
 <script lang="ts" setup>
 import type { Chat } from "../../../../types/index";
-import { ChatUIKit } from "../../../../index";
+import { useMessageStore, useConnStore } from "../../../../stores";
 import { ASSETS_URL } from "../../../../const/index";
-import { ref, onUnmounted, watch } from "vue";
+import { ref, onUnmounted, watch, computed } from "vue";
 
 const ReceiveAudioIcon = ASSETS_URL + "icon/receiveAudio.png";
 const SendAudioIcon = ASSETS_URL + "icon/sendAudio.png";
@@ -43,12 +43,18 @@ const ReceiveAudioPlayingIcon = ASSETS_URL + "icon/receiveAudioPlaying.gif";
 interface Props {
   msg: Chat.AudioMsgBody;
 }
-const conn = ChatUIKit.getChatConn();
+
 const props = defineProps<Props>();
+
+// Pinia stores
+const messageStore = useMessageStore();
+const connStore = useConnStore();
+
+const conn = computed(() => connStore.getChatConn);
+const isSelf = computed(() => messageStore.checkMessageFromIsSelf(props.msg));
+
 const audioContextMap = new Map<string, UniApp.InnerAudioContext>();
 const playing = ref(false);
-const isSelf = ChatUIKit.messageStore.checkMessageFromIsSelf(props.msg);
-const messageStore = ChatUIKit.messageStore;
 
 const toggle = async () => {
   const audioContext = getAudioContext();
@@ -79,7 +85,7 @@ const formatAudioToMp3 = () => {
       header: {
         "X-Requested-With": "XMLHttpRequest",
         Accept: "audio/mp3",
-        Authorization: "Bearer " + conn.token
+        Authorization: "Bearer " + conn.value.token
       },
 
       success: (res) => {

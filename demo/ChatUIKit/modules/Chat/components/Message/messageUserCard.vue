@@ -17,7 +17,7 @@
 import Avatar from "../../../../components/Avatar/index.vue";
 import { USER_AVATAR_URL } from "../../../../const";
 import { Chat } from "../../../../types";
-import { ChatUIKit } from "../../../../index";
+import { useMessageStore, useAppUserStore } from "../../../../stores";
 import { t } from "../../../../locales";
 import { computed } from "vue";
 
@@ -26,12 +26,14 @@ interface Props {
 }
 const props = defineProps<Props>();
 
-const isSelfMessage = ChatUIKit.messageStore.checkMessageFromIsSelf(props.msg);
+// Pinia stores
+const messageStore = useMessageStore();
+const appUserStore = useAppUserStore();
+
+const isSelfMessage = computed(() => messageStore.checkMessageFromIsSelf(props.msg));
 
 const userInfo = computed(() => {
-  const info = ChatUIKit.appUserStore.getUserInfoFromStore(
-    props.msg.customExts.uid
-  );
+  const info = appUserStore.getUserInfo(props.msg.customExts.uid);
   return {
     nickname: info?.nickname || props.msg.customExts.nickname,
     avatar: info?.avatar || props.msg.customExts.avatar
@@ -71,7 +73,7 @@ const userInfo = computed(() => {
 .tag {
   font-size: 12px;
   font-style: normal;
-  font-weight: 400;
+  font: 400;
   line-height: 14px;
 }
 </style>

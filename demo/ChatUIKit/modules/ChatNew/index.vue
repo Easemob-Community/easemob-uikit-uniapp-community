@@ -24,18 +24,27 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import SearchButton from "../../components/SearchButton/index.vue";
 import NavBar from "../../components/NavBar/index.vue";
 import UserItem from "../ContactList/components/UserItem/index.vue";
 import Empty from "../../components/Empty/index.vue";
 import IndexedList from "../../components/IndexedList/index.vue";
-import { ChatUIKit } from "../../index";
+import { useContactStore, useAppUserStore } from "../../stores";
 import { t } from "../../locales";
-import { Chat } from "../../sdk";
-import { autorun } from "mobx";
-import { ref, onUnmounted } from "vue";
 
-const contactList = ref<Chat.ContactItem[]>([]);
+// Pinia stores
+const contactStore = useContactStore();
+const appUserStore = useAppUserStore();
+
+/** 使用 computed 替代 autorun */
+const contactList = computed(() => {
+  return contactStore.contacts.map((contact) => ({
+    ...contact,
+    ...appUserStore.getUserInfo(contact.userId),
+    id: contact.userId
+  }));
+});
 
 const toContactSearch = () => {
   uni.redirectTo({
@@ -43,27 +52,17 @@ const toContactSearch = () => {
   });
 };
 
-const toChatPage = (item: Chat.ContactItem) => {
+const toChatPage = (item) => {
   uni.redirectTo({
     url: `/ChatUIKit/modules/Chat/index?type=singleChat&id=${item.userId}`
   });
 };
 
-const unwatchContactList = autorun(() => {
-  contactList.value = ChatUIKit.contactStore.contacts.map((contact) => ({
-    ...contact,
-    ...ChatUIKit.appUserStore.getUserInfoFromStore(contact.userId),
-    id: contact.userId
-  }));
-});
-
 const onBack = () => {
   uni.navigateBack();
 };
 
-onUnmounted(() => {
-  unwatchContactList;
-});
+// 无需手动卸载 computed
 </script>
 
 <style lang="scss" scoped>

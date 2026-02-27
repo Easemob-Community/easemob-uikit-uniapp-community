@@ -37,20 +37,25 @@
 import NavBar from "../../ChatUIKit/components/NavBar/index.vue";
 import Avatar from "../../ChatUIKit/components/Avatar/index.vue";
 import MenuItem from "../../ChatUIKit/components/MenuItem/index.vue";
-import { ref, onUnmounted } from "vue";
+import { ref, onUnmounted, watch } from "vue";
 import { ChatUIKit } from "../../ChatUIKit/index";
 import { getInsideUploadUrl } from "@/const/index";
 import { USER_AVATAR_URL } from "../../ChatUIKit/const";
 import { t } from "../../const/locales";
-import { autorun } from "mobx";
+
 
 const userId = ChatUIKit.getChatConn().user;
 
 const userInfo = ref({});
 
-const unwatchUserInfo = autorun(() => {
-  userInfo.value = ChatUIKit.appUserStore.getSelfUserInfo();
-});
+// 使用 watch 替代 autorun
+const stopWatch = watch(
+  () => ChatUIKit.appUserStore.getSelfUserInfo,
+  (newUserInfo) => {
+    userInfo.value = newUserInfo;
+  },
+  { immediate: true }
+);
 
 const onBack = () => {
   uni.navigateBack();
@@ -87,7 +92,7 @@ const changeAvatar = () => {
 };
 
 onUnmounted(() => {
-  unwatchUserInfo();
+  stopWatch();
 });
 </script>
 

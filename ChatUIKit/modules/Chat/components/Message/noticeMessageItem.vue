@@ -6,16 +6,14 @@
           <view v-if="noticeType === 'recall'">
             {{
               `"${
-                appUserStore.getUserInfoFromStore(msg?.noticeInfo?.ext?.from)
-                  .name
+                appUserStore.getUserInfo(msg?.noticeInfo?.ext?.from).name
               }" ${t("recallNotice")}`
             }}
           </view>
           <view v-else-if="noticeType === 'group'">
             {{
               `"${
-                appUserStore.getUserInfoFromStore(msg?.noticeInfo?.ext?.from)
-                  .name
+                appUserStore.getUserInfo(msg?.noticeInfo?.ext?.from).name
               }" ${noticeExt.operation} ${t("group")}`
             }}
           </view>
@@ -27,16 +25,21 @@
 
 <script lang="ts" setup>
 import type { MixedMessageBody } from "../../../../types/index";
-import { ChatUIKit } from "../../../../index";
+import { useAppUserStore } from "../../../../stores";
 import { t } from "../../../../locales/index";
+import { computed } from "vue";
+
 interface Props {
   msg: MixedMessageBody;
 }
-const appUserStore = ChatUIKit.appUserStore;
+
 const props = defineProps<Props>();
-const { msg } = props;
-const noticeExt = msg.noticeInfo?.ext || {};
-const noticeType = msg.noticeInfo?.noticeType;
+
+// Pinia store
+const appUserStore = useAppUserStore();
+
+const noticeExt = computed(() => props.msg.noticeInfo?.ext || {});
+const noticeType = computed(() => props.msg.noticeInfo?.noticeType);
 </script>
 
 <style lang="scss" scoped>

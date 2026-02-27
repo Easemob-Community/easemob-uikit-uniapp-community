@@ -24,7 +24,8 @@
 
 <script lang="ts" setup>
 import { ref, computed } from "vue";
-import { ChatUIKit } from "../../index";
+import { useConfigStore, useAppUserStore } from "../../stores";
+
 interface Props {
   src: string;
   alt?: string;
@@ -47,7 +48,10 @@ const props = defineProps<Props>();
 const isError = ref(false);
 const isLoading = ref(true);
 
-const featureConfig = ChatUIKit.getFeatureConfig();
+// Pinia stores
+const configStore = useConfigStore();
+const featureConfig = configStore.getFeatureConfig;
+const themeConfig = configStore.getThemeConfig;
 
 const showPresence = computed(() => {
   return props.withPresence && featureConfig.usePresence;
@@ -80,7 +84,7 @@ const imageSrc = computed(() => {
   return props.src || props.placeholder;
 });
 const size = props.size || 50; // 默认大小为50px
-const shape = props.shape || ChatUIKit.getThemeConfig().avatarShape;
+const shape = props.shape || themeConfig.avatarShape;
 
 const onError = () => {
   isError.value = true;

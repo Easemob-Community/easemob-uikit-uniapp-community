@@ -24,22 +24,30 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onUnmounted } from "vue";
-import { ChatUIKit } from "../../../../index";
-import { autorun } from "mobx";
+import { ref, computed, watch } from "vue";
+import { useMessageStore } from "../../../../stores";
 import { t } from "../../../../locales/index";
 import { Chat } from "../../../../types/index";
 import { formatTextMessage } from "../../../../utils/index";
 import { chatSDK } from "../../../../sdk";
 
-const editingMsg = ref(null);
+// Pinia store
+const messageStore = useMessageStore();
+
 const txt = ref("");
 const isFocus = ref(true);
 
-const unwatchEditingMsg = autorun(() => {
-  editingMsg.value = ChatUIKit.messageStore.editingMessage;
-  txt.value = editingMsg.value?.msg;
-});
+/** 使用 computed 替代 autorun */
+const editingMsg = computed(() => messageStore.editingMessage);
+
+/** 监听 editingMsg 变化，更新文本 */
+watch(
+  () => editingMsg.value,
+  (newMsg) => {
+    txt.value = newMsg?.msg || "";
+  },
+  { immediate: true }
+);
 
 const editAble = computed(() => {
   return (
@@ -48,25 +56,23 @@ const editAble = computed(() => {
 });
 
 const cancelEdit = () => {
-  ChatUIKit.messageStore.setEditingMessage(null);
+  messageStore.setEditingMessage(null);
 };
 
 const editMessage = () => {
-  if (editAble.value) {
+  if (editAble.value && editingMsg.value) {
     const modifiedMsg = chatSDK.message.create({
       to: editingMsg.value.to,
       type: editingMsg.value.type,
       chatType: editingMsg.value.chatType,
       msg: txt.value
     }) as Chat.ModifiedMsg;
-    ChatUIKit.messageStore.modifyServerMessage(editingMsg.value, modifiedMsg);
-    ChatUIKit.messageStore.setEditingMessage(null);
+    messageStore.modifyServerMessage(editingMsg.value, modifiedMsg);
+    messageStore.setEditingMessage(null);
   }
 };
 
-onUnmounted(() => {
-  unwatchEditingMsg();
-});
+// 无需手动卸载 computed
 </script>
 
 <style lang="scss" scoped>

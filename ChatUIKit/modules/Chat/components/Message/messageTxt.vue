@@ -24,19 +24,23 @@ import type { Chat } from "../../../../types/index";
 import { renderTxt } from "../../../../utils/index";
 import { t } from "../../../../locales/index";
 import { computed } from "vue";
-import { ChatUIKit } from "../../../../index";
+import { useConnStore } from "../../../../stores";
 
 interface Props {
   msg: Chat.TextMsgBody;
 }
 const props = defineProps<Props>();
 
+// Pinia store
+const connStore = useConnStore();
+
 const data = computed(() => {
   return renderTxt(props.msg.msg);
 });
 
-const isSelf =
-  props.msg.from === ChatUIKit.getChatConn().user || props.msg.from === "";
+const isSelf = computed(() => 
+  props.msg.from === connStore.getChatConn.user || props.msg.from === ""
+);
 </script>
 
 <style lang="scss" scoped>

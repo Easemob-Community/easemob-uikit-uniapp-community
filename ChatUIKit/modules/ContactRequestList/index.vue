@@ -19,31 +19,28 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import NavBar from "../../components/NavBar/index.vue";
 import Empty from "../../components/Empty/index.vue";
 import RequestItem from "./components/RequestItem/index.vue";
 import { t } from "../../locales/index";
-import { ChatUIKit } from "../../index";
-import { ContactNotice } from "../../types/index";
-import { ref, onUnmounted } from "vue";
-import { autorun } from "mobx";
+import { useContactStore } from "../../stores";
 
-const contactApplyRequestList = ref<ContactNotice[]>([]);
+// Pinia store
+const contactStore = useContactStore();
 
-const unwatchContactApplyRequestList = autorun(() => {
-  contactApplyRequestList.value =
-    ChatUIKit.contactStore.contactsNoticeInfo.list.filter((info) => {
-      return info.ext === "invited";
-    });
+/** 使用 computed 替代 autorun */
+const contactApplyRequestList = computed(() => {
+  return contactStore.contactsNoticeInfo.list.filter((info) => {
+    return info.ext === "invited";
+  });
 });
 
 const onBack = () => {
   uni.navigateBack();
 };
 
-onUnmounted(() => {
-  unwatchContactApplyRequestList();
-});
+// 无需手动卸载 computed
 </script>
 
 <style lang="scss" scoped>

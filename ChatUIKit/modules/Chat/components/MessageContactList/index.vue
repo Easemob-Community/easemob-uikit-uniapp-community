@@ -30,24 +30,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onUnmounted } from "vue";
+import { computed, ref } from "vue";
 import Popup from "../../../../components/Popup/index.vue";
 import IndexedList from "../../../../components/IndexedList/index.vue";
 import UserItem from "../../../ContactList/components/UserItem/index.vue";
 import { t } from "../../../../locales/index";
-import { ChatUIKit } from "../../../../index";
-import { Chat } from "../../../../sdk";
-import { autorun } from "mobx";
+import { useContactStore, useAppUserStore } from "../../../../stores";
 
 const emits = defineEmits(["onSelect"]);
 const popupRef = ref(null);
 
-const contactList = ref<Chat.ContactItem[]>([]);
+// Pinia stores
+const contactStore = useContactStore();
+const appUserStore = useAppUserStore();
 
-const unwatchContactList = autorun(() => {
-  contactList.value = ChatUIKit.contactStore.contacts.map((contact) => ({
+/** 使用 computed 替代 autorun */
+const contactList = computed(() => {
+  return contactStore.contacts.map((contact) => ({
     ...contact,
-    ...ChatUIKit.appUserStore.getUserInfoFromStore(contact.userId),
+    ...appUserStore.getUserInfo(contact.userId),
     id: contact.userId
   }));
 });
@@ -66,9 +67,7 @@ defineExpose({
   hidePopup
 });
 
-onUnmounted(() => {
-  unwatchContactList();
-});
+// 无需手动卸载 computed
 </script>
 
 <style lang="scss" scoped>

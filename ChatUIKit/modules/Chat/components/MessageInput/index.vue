@@ -41,14 +41,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from "vue";
+import { ref, nextTick, computed } from "vue";
 import AudioMessageSender from "../MessageInputToolBar/audioSender.vue";
 import {
   formatTextMessage,
   formatMessage,
   isAndroid
 } from "../../../../utils/index";
-import { ChatUIKit } from "../../../../index";
+import { useConvStore, useMessageStore, useAppUserStore, useConfigStore } from "../../../../stores";
 import { t } from "../../../../locales/index";
 import { AT_ALL } from "../../../../const/index";
 import { MessageQuoteExt } from "../../../../types/index";
@@ -59,9 +59,17 @@ interface Props {
   preventEvent: boolean; // 输入框是否禁止事件
 }
 
-const featureConfig = ChatUIKit.getFeatureConfig();
+// Pinia stores
+const convStore = useConvStore();
+const messageStore = useMessageStore();
+const appUserStore = useAppUserStore();
+const configStore = useConfigStore();
 
-const isShowToolbar = featureConfig.inputVideo || featureConfig.inputImage;
+const featureConfig = computed(() => configStore.featureConfig);
+
+const isShowToolbar = computed(() => 
+  featureConfig.value.inputVideo || featureConfig.value.inputImage
+);
 
 const props = defineProps<Props>();
 
@@ -76,14 +84,9 @@ const emits = defineEmits([
   "onMention"
 ]);
 
-const convStore = ChatUIKit.convStore;
-
 const isFocus = ref(false);
-
 const audioPopupRef = ref(null);
-
 const text = ref("");
-
 const mentionUserIds = ref<string[]>([]);
 
 const showAudioPopup = async () => {
@@ -119,12 +122,12 @@ const onInputTap = () => {
 
 const onInput = (e: any) => {
   // uni-app recognizes mention messages
-  const text = e?.detail?.value;
+  const inputText = e?.detail?.value;
   if (
-    ChatUIKit.getFeatureConfig().inputMention &&
-    ChatUIKit.convStore.currConversation?.conversationType === "groupChat"
+    featureConfig.value.inputMention &&
+    convStore.currConversation?.conversationType === "groupChat"
   ) {
-    if (text.endsWith("@") || text.endsWith("@\n")) {
+    if (inputText.endsWith("@") || inputText.endsWith("@\n")) {
       isFocus.value = false;
       emits("onMention", true);
     }
@@ -139,18 +142,21 @@ const handleSendMessage = async () => {
   }
   let msgQuoteExt: MessageQuoteExt = {} as MessageQuoteExt;
   let isAtAll = false;
-  mentionUserIds.value;
   if (mentionUserIds.value.includes(AT_ALL)) isAtAll = true;
-  const quoteMessage = ChatUIKit.messageStore.quoteMessage;
+  
+  const quoteMessage = messageStore.quoteMessage;
+  const selfUserInfo = appUserStore.getSelfUserInfo();
+  
   if (quoteMessage) {
     msgQuoteExt = {
       msgID: quoteMessage.serverMsgId || quoteMessage.id,
       msgPreview: formatMessage(quoteMessage),
-      msgSender: ChatUIKit.appUserStore.getSelfUserInfo().nickname || "",
+      msgSender: selfUserInfo.nickname || "",
       msgType: quoteMessage.type
     };
-    ChatUIKit.messageStore.setQuoteMessage(null);
+    messageStore.setQuoteMessage(null);
   }
+  
   const msg = chatSDK.message.create({
     to: convStore.currConversation!.conversationId,
     chatType: convStore.currConversation!.conversationType,
@@ -159,16 +165,18 @@ const handleSendMessage = async () => {
     ext: {
       em_at_list: isAtAll ? AT_ALL : mentionUserIds.value,
       ease_chat_uikit_user_info: {
-        avatarURL: ChatUIKit.appUserStore.getSelfUserInfo().avatar,
-        nickname: ChatUIKit.appUserStore.getSelfUserInfo().name
+        avatarURL: selfUserInfo.avatar,
+        nickname: selfUserInfo.name
       },
       msgQuote: msgQuoteExt?.msgID ? msgQuoteExt : undefined
     }
   });
+  
   text.value = "";
   mentionUserIds.value = [];
+  
   try {
-    await ChatUIKit.messageStore.sendMessage(msg);
+    await messageStore.sendMessage(msg);
     nextTick(() => {
       emits("onMessageSend");
     });
@@ -202,6 +210,7 @@ defineExpose({
   }
 });
 </script>
+
 <style lang="scss" scoped>
 @import url("./style.scss");
 </style>

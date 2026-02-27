@@ -22,59 +22,57 @@
 <script setup lang="ts">
 import Avatar from "../../../../components/Avatar/index.vue";
 import NavBar from "../../../../components/NavBar/index.vue";
-import { ref, computed, onMounted, onUnmounted } from "vue";
-import { ChatUIKit } from "../../../../index";
-import { Chat } from "../../../../types";
+import { computed, onMounted, onUnmounted } from "vue";
+import { 
+  useConversationStore, 
+  useAppUserStore, 
+  useGroupStore,
+  useConfigStore 
+} from "../../../../stores";
+import type { Chat } from "../../../../types";
 import { USER_AVATAR_URL, GROUP_AVATAR_URL } from "../../../../const";
-import { autorun } from "mobx";
 
-type ChatNavInfo = {
-  avatar: string;
-  name: string;
-  id: string;
-  conversationType?: Chat.ChatType;
-  presenceExt?: string;
-  isOnline?: boolean;
-};
+// Pinia stores
+const convStore = useConversationStore();
+const appUserStore = useAppUserStore();
+const groupStore = useGroupStore();
+const configStore = useConfigStore();
 
-const info = ref<ChatNavInfo>({
-  avatar: "",
-  name: "",
-  id: ""
+const featureConfig = configStore.getFeatureConfig;
+
+/**
+ * 关键优化：使用 computed 替代 autorun
+ * 自动追踪 currConversation 变化
+ */
+const info = computed(() => {
+  const conv = convStore.currConversation;
+  if (!conv) {
+    return { avatar: "", name: "", id: "" };
+  }
+
+  if (conv.conversationType === "singleChat") {
+    const userinfo = appUserStore.getUserInfo(conv.conversationId);
+    return {
+      name: userinfo.name,
+      id: conv.conversationId,
+      avatar: userinfo.avatar,
+      conversationType: conv.conversationType,
+      presenceExt: userinfo.presenceExt,
+      isOnline: userinfo.isOnline
+    };
+  } else {
+    const groupInfo = groupStore.getGroupInfoFromStore(conv.conversationId);
+    return {
+      name: groupStore.getGroupName(conv.conversationId),
+      id: conv.conversationId,
+      avatar: groupStore.getGroupAvatar(conv.conversationId),
+      conversationType: conv.conversationType
+    };
+  }
 });
 
 const isSingleChat = computed(() => {
   return info.value.conversationType === "singleChat";
-});
-
-const featureConfig = ChatUIKit.getFeatureConfig();
-
-const unwatchUserInfo = autorun(() => {
-  const conv = ChatUIKit.convStore.currConversation;
-  if (conv?.conversationType === "singleChat") {
-    const userinfo = ChatUIKit.appUserStore.getUserInfoFromStore(
-      conv.conversationId
-    );
-    info.value = {
-      name: userinfo?.name,
-      id: conv.conversationId,
-      avatar: userinfo?.avatar,
-      conversationType: conv.conversationType,
-      presenceExt: userinfo?.presenceExt,
-      isOnline: userinfo?.isOnline
-    };
-  } else if (conv?.conversationType === "groupChat") {
-    const groupInfo = ChatUIKit.groupStore.getGroupInfoFromStore(
-      conv.conversationId
-    );
-
-    info.value = {
-      name: groupInfo?.groupName || conv.conversationId,
-      id: conv.conversationId,
-      avatar: ChatUIKit.groupStore.getGroupAvatar(conv.conversationId),
-      conversationType: conv.conversationType
-    };
-  }
 });
 
 const onBack = () => {
@@ -82,28 +80,29 @@ const onBack = () => {
 };
 
 onMounted(() => {
-  if (featureConfig.usePresence && isSingleChat) {
+  if (featureConfig.usePresence && isSingleChat.value && info.value.id) {
     // 获取用户在线状态
-    ChatUIKit.appUserStore.getUsersPresenceFromServer({
+    appUserStore.getUsersPresenceFromServer({
       userIdList: [info.value.id]
     });
     // 订阅用户在线状态
-    ChatUIKit.appUserStore.subscribePresence({
+    appUserStore.subscribePresence({
       userIdList: [info.value.id]
     });
   }
 });
 
 onUnmounted(() => {
-  if (featureConfig.usePresence && isSingleChat) {
+  if (featureConfig.usePresence && isSingleChat.value && info.value.id) {
     // 取消订阅用户在线状态
-    ChatUIKit.appUserStore.unsubscribePresence({
+    appUserStore.unsubscribePresence({
       userIdList: [info.value.id]
     });
   }
-  unwatchUserInfo();
+  // 无需手动卸载 computed！
 });
 </script>
+
 <style lang="scss" scoped>
 @import url("../../../../styles/common.scss");
 

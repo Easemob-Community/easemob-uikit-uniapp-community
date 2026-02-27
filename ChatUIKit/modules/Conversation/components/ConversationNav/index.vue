@@ -39,16 +39,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from "vue";
 import Avatar from "../../../../components/Avatar/index.vue";
 import NavBar from "../../../../components/NavBar/index.vue";
 import PopMenu from "../../../../components/PopMenu/index.vue";
-import { ref, onUnmounted } from "vue";
-import { ChatUIKit } from "../../../../index";
+import { useAppUserStore } from "../../../../stores";
 import { t } from "../../../../locales/index";
 import { USER_AVATAR_URL, ASSETS_URL } from "../../../../const/index";
 import { isWXProgram } from "../../../../utils/index";
-import { UserInfoWithPresence } from "../../../../types/index";
-import { autorun } from "mobx";
 
 const ChatMenuIcon = ASSETS_URL + "icon/chat.png";
 const AddContactMenuIcon = ASSETS_URL + "icon/addContact.png";
@@ -66,7 +64,11 @@ const PopMenuStyle = isWXProgram
       top: "calc(var(--status-bar-height) + 50px"
     };
 
-const userInfo = ref<UserInfoWithPresence>({} as UserInfoWithPresence);
+// Pinia store
+const appUserStore = useAppUserStore();
+
+/** 使用 computed 替代 autorun */
+const userInfo = computed(() => appUserStore.getSelfUserInfo());
 
 const options = [
   {
@@ -85,10 +87,6 @@ const options = [
     icon: CreateGroupIcon
   }
 ];
-
-const unwatchUserInfo = autorun(() => {
-  userInfo.value = ChatUIKit.appUserStore.getSelfUserInfo();
-});
 
 const handleMenuTap = (params) => {
   switch (params.type) {
@@ -112,10 +110,9 @@ const handleMenuTap = (params) => {
   }
 };
 
-onUnmounted(() => {
-  unwatchUserInfo();
-});
+// 无需手动卸载 computed
 </script>
+
 <style lang="scss" scoped>
 .title {
   width: 50px;

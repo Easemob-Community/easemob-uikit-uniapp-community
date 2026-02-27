@@ -35,7 +35,7 @@
               v-if="conversation.atType && conversation.atType !== 'NONE'"
               class="mention-tag"
             >
-              {{ conversation.atType === "ALL" ? t("atAllTag") : t("atTag") }}
+              {{ conversation.atType === 'ALL' ? t("atAllTag") : t("atTag") }}
             </view>
             <view
               class="last-msg ellipsis"
@@ -56,8 +56,6 @@
                 <span v-if="item.type === 'text'"> {{ item.value }}</span>
                 <!-- emoji -->
                 <image v-else class="msg-emoji" :src="item.value" />
-                <!-- emoji alt -->
-                <!-- <span v-else> {{ item.alt }}</span> -->
               </span>
             </view>
             <view v-else class="last-msg ellipsis">
@@ -96,12 +94,11 @@
 <script setup lang="ts">
 import Avatar from "../../../../components/Avatar/index.vue";
 import { t } from "../../../../locales/index";
-import { ref, onUnmounted, computed } from "vue";
-import { ChatUIKit } from "../../../../index";
+import { ref, computed } from "vue";
+import { useConversationStore, useGroupStore, useAppUserStore, useConfigStore } from "../../../../stores";
 import { renderTxt, formatMessage } from "../../../../utils/index";
 import { USER_AVATAR_URL, GROUP_AVATAR_URL } from "../../../../const/index";
-import { autorun } from "mobx";
-import {
+import type {
   MixedMessageBody,
   Chat,
   UIKITConversationItem
@@ -113,33 +110,45 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-
 const emits = defineEmits(["mute", "pin", "delete", "leftSwipe"]);
 
 let startX = 0;
+const isTapDelete = ref(false);
 
-const conversationInfo = ref<any>({});
+// Pinia stores
+const convStore = useConversationStore();
+const groupStore = useGroupStore();
+const appUserStore = useAppUserStore();
+const configStore = useConfigStore();
 
-const isMute = ref<Boolean>(false);
+const featureConfig = configStore.getFeatureConfig;
 
-const isTapDelete = ref<Boolean>(false);
+/**
+ * 关键优化：使用 computed 替代 autorun
+ * computed 自动追踪依赖，无需手动管理订阅
+ */
+const isMute = computed(() => {
+  return convStore.getConversationMuteStatus(props.conversation.conversationId);
+});
 
-const featureConfig = ChatUIKit.getFeatureConfig();
+const conversationInfo = computed(() => {
+  const convId = props.conversation.conversationId;
+  if (props.conversation.conversationType === "groupChat") {
+    return {
+      name: groupStore.getGroupName(convId),
+      avatar: groupStore.getGroupAvatar(convId)
+    };
+  } else {
+    return appUserStore.getUserInfo(convId);
+  }
+});
 
 const getLastMsgFrom = (msg: MixedMessageBody) => {
   if (props.conversation.conversationType === "groupChat") {
-    const from = msg.from || ChatUIKit.getChatConn().user;
-    const nickname = ChatUIKit.appUserStore.getUserInfoFromStore(from).nickname;
-    if (nickname) {
-      return nickname;
-    }
-    if (msg.ext?.ease_chat_uikit_user_info.nickname) {
-      return msg.ext.ease_chat_uikit_user_info.nickname;
-    }
-    return from;
-  } else {
-    return "";
+    const from = msg.from || useConnStore().getChatConn.user;
+    return appUserStore.getUserInfo(from).nickname || from;
   }
+  return "";
 };
 
 const menuList = computed(() => {
@@ -182,27 +191,7 @@ const currentMenuList = computed(() => {
   return isTapDelete.value ? confirmDeleteMenu.value : menuList.value;
 });
 
-const uninstallIsMuteWatch = autorun(() => {
-  isMute.value = ChatUIKit.convStore.getConversationMuteStatus(
-    props.conversation.conversationId
-  );
-});
-
-const uninstallConvInfoWatch = autorun(() => {
-  const convId = props.conversation.conversationId;
-  if (props.conversation.conversationType === "groupChat") {
-    const groupInfo = ChatUIKit.groupStore.getGroupInfoFromStore(convId);
-    conversationInfo.value = {
-      name: groupInfo?.groupName || convId,
-      avatar: ChatUIKit.groupStore.getGroupAvatar(convId)
-    };
-  } else {
-    return (conversationInfo.value =
-      ChatUIKit.appUserStore.getUserInfoFromStore(convId));
-  }
-});
-
-const { getConversationTime } = ChatUIKit.convStore;
+const { getConversationTime } = convStore;
 
 const getAvatarPlaceholder = () => {
   return props.conversation.conversationType === "groupChat"
@@ -241,12 +230,12 @@ const handleMenuClick = (action: string) => {
 };
 
 // 滑动开始
-const touchStartHandler = (e) => {
+const touchStartHandler = (e: any) => {
   startX = e.touches[0].pageX;
 };
 
 // 滑动事件处理
-const touchMoveHandler = (e) => {
+const touchMoveHandler = (e: any) => {
   if (menuList.value.length === 0) return;
   const pageX = e.touches[0].pageX;
   const moveX = pageX - startX;
@@ -261,18 +250,10 @@ const touchMoveHandler = (e) => {
   }
 };
 
-onUnmounted(() => {
-  uninstallConvInfoWatch();
-  uninstallIsMuteWatch();
-});
+// 需要导入 useConnStore
+import { useConnStore } from "../../../../stores";
 </script>
 
-<style lang="scss">
-.conversation-item-wrap {
-  &:active {
-    background-color: #f5f5f5;
-  }
-}
-@import url("../../../../styles/common.scss");
-@import url("./style.scss");
+<style lang="scss" scoped>
+@import "./style.scss";
 </style>

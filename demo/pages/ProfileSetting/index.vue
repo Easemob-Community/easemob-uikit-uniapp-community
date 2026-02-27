@@ -28,19 +28,24 @@
 <script setup lang="ts">
 import NavBar from "../../ChatUIKit/components/NavBar/index.vue";
 import UIKITButton from "../../ChatUIKit/components/Button/index.vue";
-import { ref, onUnmounted, computed } from "vue";
+import { ref, onUnmounted, computed, watch } from "vue";
 import { ChatUIKit } from "../../ChatUIKit/index";
 import { t } from "../../const/locales";
-import { autorun } from "mobx";
+
 
 const inputValue = ref("");
 
 const userInfo = ref({});
 
-const unwatchUserInfo = autorun(() => {
-  userInfo.value = ChatUIKit.appUserStore.getSelfUserInfo();
-  inputValue.value = userInfo.value.name;
-});
+// 使用 watch 替代 autorun
+const stopWatch = watch(
+  () => ChatUIKit.appUserStore.getSelfUserInfo,
+  (newUserInfo) => {
+    userInfo.value = newUserInfo;
+    inputValue.value = newUserInfo.name;
+  },
+  { immediate: true }
+);
 
 const disabled = computed(() => {
   return inputValue.value === userInfo.value.name;
@@ -64,7 +69,7 @@ const onBack = () => {
 };
 
 onUnmounted(() => {
-  unwatchUserInfo();
+  stopWatch();
 });
 </script>
 

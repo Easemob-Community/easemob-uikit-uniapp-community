@@ -20,14 +20,12 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import Avatar from "../../../../components/Avatar/index.vue";
 import type { Chat } from "../../../../sdk";
 import { USER_AVATAR_URL } from "../../../../const/index";
-import { ChatUIKit } from "../../../../index";
-import { ref, onUnmounted } from "vue";
+import { useAppUserStore, useContactStore } from "../../../../stores";
 import { t } from "../../../../locales";
-import { UserInfoWithPresence } from "../../../../types/index";
-import { autorun } from "mobx";
 
 interface Props {
   user: Chat.ContactItem;
@@ -36,22 +34,22 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const userInfo = ref<UserInfoWithPresence>({} as UserInfoWithPresence);
+// Pinia stores
+const appUserStore = useAppUserStore();
+const contactStore = useContactStore();
 
-const unwatchUserInfo = autorun(() => {
-  userInfo.value = ChatUIKit.appUserStore.getUserInfoFromStore(
-    props.user.userId
-  );
+/** 使用 computed 替代 autorun */
+const userInfo = computed(() => {
+  return appUserStore.getUserInfo(props.user.userId);
 });
 
 const acceptContactInvite = () => {
-  ChatUIKit.contactStore.acceptContactInvite(props.user.userId);
+  contactStore.acceptContactInvite(props.user.userId);
 };
 
-onUnmounted(() => {
-  unwatchUserInfo();
-});
+// 无需手动卸载 computed
 </script>
+
 <style lang="scss" scoped>
 @import url("../../../../styles/common.scss");
 .item-wrap {

@@ -1,73 +1,45 @@
 <template>
-  <view class="item-wrap">
-    <Avatar
-      class="avatar"
-      :size="40"
-      :src="groupAvatar"
-      :placeholder="GROUP_AVATAR_URL"
-    />
-    <view class="right">
-      <view class="name ellipsis">{{ props.group.groupName }}</view>
-    </view>
+  <view class="group-item-wrap" @tap="onTap">
+    <Avatar :src="groupAvatar" :placeholder="GROUP_AVATAR_URL" />
+    <view class="group-name">{{ groupName }}</view>
   </view>
 </template>
 
 <script setup lang="ts">
 import Avatar from "../../../../components/Avatar/index.vue";
-import type { Chat } from "../../../../sdk";
+import { computed } from "vue";
+import { useGroupStore } from "../../../../../stores";
 import { GROUP_AVATAR_URL } from "../../../../const/index";
-import { ChatUIKit } from "../../../../index";
-import { autorun } from "mobx";
-import { ref, onUnmounted } from "vue";
 
 interface Props {
-  group: Chat.GroupInfo;
+  groupId: string;
 }
 
 const props = defineProps<Props>();
 
-const groupAvatar = ref("");
+const groupStore = useGroupStore();
 
-const unwatchGroupAvatar = autorun(() => {
-  groupAvatar.value = ChatUIKit.groupStore.getGroupAvatar(props.group.groupId);
-});
+const groupName = computed(() => groupStore.getGroupName(props.groupId));
+const groupAvatar = computed(() => groupStore.getGroupAvatar(props.groupId));
 
-onUnmounted(() => {
-  unwatchGroupAvatar();
-});
+const emits = defineEmits(["onTap"]);
+
+const onTap = () => {
+  emits("onTap", props.groupId);
+};
 </script>
 <style lang="scss" scoped>
-@import url("../../../../styles/common.scss");
-.item-wrap {
+.group-item-wrap {
   display: flex;
-  box-sizing: border-box;
-  width: 100%;
-  height: 60px;
   align-items: center;
-  padding-left: 16px;
-  &:active {
-    background-color: #f5f5f5;
-  }
+  padding: 10px;
+  background: #fff;
+  border-bottom: 0.5px solid #e3e6e8;
 }
 
-.avatar {
-  margin-right: 12px;
-  flex-shrink: 0;
-}
-
-.name {
+.group-name {
+  margin-left: 12px;
   font-size: 16px;
   color: #171a1c;
-  line-height: 22px;
-  font-weight: 500;
-}
-
-.right {
-  flex: 1;
-  width: 0;
-  display: flex;
-  height: 100%;
-  align-items: center;
-  border-bottom: 0.5px solid #e3e6e8;
 }
 </style>

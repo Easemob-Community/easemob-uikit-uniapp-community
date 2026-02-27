@@ -52,21 +52,26 @@
 <script setup lang="ts">
 import Avatar from "../../ChatUIKit/components/Avatar/index.vue";
 import MenuItem from "../../ChatUIKit/components/MenuItem/index.vue";
-import { ref, onUnmounted } from "vue";
+import { ref, watch, onUnmounted } from "vue";
 import { t } from "../../const/locales";
 import { ChatUIKit } from "../../ChatUIKit/index";
 import { CHAT_STORE } from "@/const/index";
 import { USER_AVATAR_URL } from "../../ChatUIKit/const";
 import { UserInfoWithPresence } from "../../ChatUIKit/types";
-import { autorun } from "mobx";
+
 
 const userId = ChatUIKit.getChatConn().user;
 
 const userInfo = ref<UserInfoWithPresence>({} as UserInfoWithPresence);
 
-const unwatchUserInfo = autorun(() => {
-  userInfo.value = ChatUIKit.appUserStore.getSelfUserInfo();
-});
+// 使用 watch 替代 autorun
+const stopWatch = watch(
+  () => ChatUIKit.appUserStore.getSelfUserInfo,
+  (newUserInfo) => {
+    userInfo.value = newUserInfo;
+  },
+  { immediate: true }
+);
 
 const copy = () => {
   uni.setClipboardData({
@@ -101,7 +106,7 @@ const toPresenceSetting = () => {
 };
 
 onUnmounted(() => {
-  unwatchUserInfo();
+  stopWatch();
 });
 </script>
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+import { watch } from "vue";
 import { ChatUIKit } from "./ChatUIKit";
 import {
   APPKEY,
@@ -9,7 +10,6 @@ import {
 } from "@/const/index";
 import websdk from "easemob-websdk/uniApp/Easemob-chat";
 import { EasemobChatStatic } from "easemob-websdk/Easemob-chat";
-import { autorun, runInAction } from "mobx";
 
 const chat = new (websdk as unknown as EasemobChatStatic).connection({
   appKey: APPKEY,
@@ -41,24 +41,6 @@ ChatUIKit.init({
 
 uni.$UIKit = ChatUIKit;
 
-// 监听群组变化获取群组头像
-autorun(() => {
-  const groupIds = ChatUIKit.groupStore.joinedGroupList
-    .filter((group) => {
-      // 过滤掉已经有头像的群组
-      return !ChatUIKit.groupStore.isHasGroupAvatar(group.groupId);
-    })
-    .map((group) => {
-      // 设置头像空头像, 避免重复请求
-      ChatUIKit.groupStore.setGroupAvatar(group.groupId, "");
-      return group.groupId;
-    });
-
-  if (groupIds.length > 0) {
-    getGroupAvatarUrl(groupIds);
-  }
-});
-
 // 获取群组头像
 const getGroupAvatarUrl = async (groupIds: string[]) => {
   for (let groupId of groupIds) {
@@ -69,15 +51,37 @@ const getGroupAvatarUrl = async (groupIds: string[]) => {
           Authorization: "Bearer " + ChatUIKit.getChatConn().accessToken
         }
       });
-      runInAction(() => {
-        // 设置群组头像
-        ChatUIKit.groupStore.setGroupAvatar(groupId, res.data.avatarUrl);
-      });
+      // Pinia 不需要 runInAction
+      ChatUIKit.groupStore.setGroupAvatar(groupId, res.data.avatarUrl);
     } catch (error) {
       console.error("Failed to fetch group avatar:", groupId, error);
     }
   }
 };
+
+// 使用 watch 替代 autorun（在全局作用域监听）
+watch(
+  () => ChatUIKit.groupStore.joinedGroupList,
+  (joinedGroupList) => {
+    if (!joinedGroupList || joinedGroupList.length === 0) return;
+    
+    const groupIds = joinedGroupList
+      .filter((group) => {
+        // 过滤掉已经有头像的群组
+        return group && group.groupId && !ChatUIKit.groupStore.isHasGroupAvatar(group.groupId);
+      })
+      .map((group) => {
+        // 设置头像空头像, 避免重复请求
+        ChatUIKit.groupStore.setGroupAvatar(group.groupId, "");
+        return group.groupId;
+      });
+
+    if (groupIds.length > 0) {
+      getGroupAvatarUrl(groupIds);
+    }
+  },
+  { deep: true, immediate: false }
+);
 
 const autoLogin = async () => {
   try {

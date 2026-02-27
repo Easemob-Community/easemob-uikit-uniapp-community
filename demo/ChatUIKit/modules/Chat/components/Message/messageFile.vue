@@ -10,17 +10,23 @@
 
 <script lang="ts" setup>
 import type { Chat } from "../../../../types/index";
-import { ChatUIKit } from "../../../../index";
+import { useMessageStore } from "../../../../stores";
 import { logger } from "../../../../log";
 import { t } from "../../../../locales";
+import { computed } from "vue";
+
 interface Props {
   msg: Chat.FileMsgBody;
 }
 
 const props = defineProps<Props>();
-const fileLength = props.msg.file_length || props.msg.body.file_length;
-const isSelf = ChatUIKit.messageStore.checkMessageFromIsSelf(props.msg);
-const fileSize = (fileLength / 1024).toFixed(2) + "kb";
+
+// Pinia store
+const messageStore = useMessageStore();
+
+const fileLength = computed(() => props.msg.file_length || props.msg.body.file_length);
+const isSelf = computed(() => messageStore.checkMessageFromIsSelf(props.msg));
+const fileSize = computed(() => (fileLength.value / 1024).toFixed(2) + "kb");
 
 const previewFile = () => {
   /*  #ifdef WEB  */

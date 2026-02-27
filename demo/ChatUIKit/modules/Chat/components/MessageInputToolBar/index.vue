@@ -24,13 +24,17 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import ImageUpload from "./imageUpload.vue";
 import VideoUpload from "./videoUpload.vue";
 import FileUpload from "./fileUpload.vue";
 import UserCard from "./userCard.vue";
-import { ChatUIKit } from "../../../../index";
+import { useConfigStore } from "../../../../stores";
 
-const featureConfig = ChatUIKit.getFeatureConfig();
+// Pinia store
+const configStore = useConfigStore();
+
+const featureConfig = computed(() => configStore.featureConfig);
 
 const emits = defineEmits(["onUserCardButtonTap"]);
 
@@ -38,6 +42,7 @@ const selectUserCard = () => {
   emits("onUserCardButtonTap");
 };
 </script>
+
 <style lang="scss" scoped>
 .message-input-toolbar {
   background: #f9fafa;

@@ -82,13 +82,23 @@ import MessageEdit from "./components/Message/messageEdit.vue";
 import MessageMentionList from "./components/MessageMentionList/index.vue";
 import MessageContactList from "./components/MessageContactList/index.vue";
 import { t } from "../../locales/index";
-import { ref, onMounted, computed, onUnmounted, provide } from "vue";
+import { ref, onMounted, computed, onUnmounted, provide, watch } from "vue";
 import { onLoad, onUnload } from "@dcloudio/uni-app";
 import type { InputToolbarEvent, Chat } from "../../types/index";
-import { autorun } from "mobx";
-import { ChatUIKit } from "../../index";
+import { 
+  useMessageStore, 
+  useConvStore, 
+  useAppUserStore,
+  useConfigStore 
+} from "../../stores";
 import { AT_ALL } from "../../const/index";
 import { chatSDK } from "../../sdk";
+
+// Pinia stores
+const messageStore = useMessageStore();
+const convStore = useConvStore();
+const appUserStore = useAppUserStore();
+const configStore = useConfigStore();
 
 const msgListRef = ref(null);
 const msgInputRef = ref(null);
@@ -97,27 +107,31 @@ const contactListRef = ref(null);
 const conversationId = ref("");
 const isShowToolbar = ref(false);
 const isShowEmojiPicker = ref(false);
-const isEditingMessage = ref(false);
 const keyboardHeight = ref("0px");
 const conversationType = ref<Chat.ConversationItem["conversationType"]>(
   "" as Chat.ConversationItem["conversationType"]
 );
-const featureConfig = ChatUIKit.getFeatureConfig();
+
+const featureConfig = computed(() => configStore.featureConfig);
+
 const isShowMask = computed(() => {
   return isShowToolbar.value || isShowEmojiPicker.value;
 });
 
-const unwatchEditingMsg = autorun(() => {
-  isEditingMessage.value = !!ChatUIKit.messageStore.editingMessage;
-});
+/** 使用 computed 替代 autorun */
+const isEditingMessage = computed(() => !!messageStore.editingMessage);
 
-const unwatchQuoteMsg = autorun(() => {
-  if (ChatUIKit.messageStore.quoteMessage) {
-    msgInputRef?.value?.setIsFocus(true);
-  } else {
-    msgInputRef?.value?.setIsFocus(false);
+/** 使用 watch 监听 quoteMessage 变化 */
+watch(
+  () => messageStore.quoteMessage,
+  (quoteMsg) => {
+    if (quoteMsg) {
+      msgInputRef?.value?.setIsFocus(true);
+    } else {
+      msgInputRef?.value?.setIsFocus(false);
+    }
   }
-});
+);
 
 const onKeyboardHeightChange = ({ height }) => {
   keyboardHeight.value = height + "px";
@@ -151,12 +165,12 @@ const selectUserCard = () => {
   contactListRef?.value?.showPopup();
 };
 
-const onSelectMentionItem = (userIds) => {
+const onSelectMentionItem = (userIds: string[]) => {
   const userNicks = userIds.map((userId) => {
     if (userId === AT_ALL) {
       return t("mentionAll");
     }
-    return ChatUIKit.appUserStore.getUserInfoFromStore(userId).name;
+    return appUserStore.getUserInfo(userId).name;
   });
 
   let str = userNicks.join("");
@@ -168,18 +182,20 @@ const onSelectMentionItem = (userIds) => {
   msgInputRef?.value.insertText(str);
 };
 
-const onSelectUserCard = (userIds) => {
+const onSelectUserCard = (userIds: string[]) => {
   const userId = userIds[0];
-  const userInfo = ChatUIKit.appUserStore.getUserInfoFromStore(userId);
+  const userInfo = appUserStore.getUserInfo(userId);
+  const selfUserInfo = appUserStore.getSelfUserInfo();
+  
   // 创建名片消息
   const userCardMsg = chatSDK.message.create({
     type: "custom",
-    to: ChatUIKit.convStore.currConversation!.conversationId,
-    chatType: ChatUIKit.convStore.currConversation!.conversationType,
+    to: convStore.currConversation!.conversationId,
+    chatType: convStore.currConversation!.conversationType,
     ext: {
       ease_chat_uikit_user_info: {
-        avatarURL: ChatUIKit.appUserStore.getSelfUserInfo().avatar,
-        nickname: ChatUIKit.appUserStore.getSelfUserInfo().name
+        avatarURL: selfUserInfo.avatar,
+        nickname: selfUserInfo.name
       }
     },
     customEvent: "userCard",
@@ -189,33 +205,32 @@ const onSelectUserCard = (userIds) => {
       uid: userId
     }
   });
-  ChatUIKit.messageStore.sendMessage(userCardMsg);
+  messageStore.sendMessage(userCardMsg);
 };
 
 onMounted(() => {
   if (!conversationId.value && !conversationType.value) {
     return;
   }
-  ChatUIKit.convStore.markConversationRead({
+  convStore.markConversationRead({
     conversationId: conversationId.value,
     conversationType: conversationType.value
   });
 });
 
 onUnmounted(() => {
-  ChatUIKit.messageStore.setQuoteMessage(null);
-  ChatUIKit.messageStore.setEditingMessage(null);
-  ChatUIKit.messageStore.cleanupRemovedMessages(conversationId.value);
-  ChatUIKit.convStore.setCurrentConversation(null);
-  unwatchQuoteMsg();
-  unwatchEditingMsg();
+  messageStore.setQuoteMessage(null);
+  messageStore.setEditingMessage(null);
+  // messageStore.cleanupRemovedMessages(conversationId.value);
+  convStore.setCurrentConversation(null);
+  // 无需手动卸载 computed 和 watch
 });
 
 onLoad((option) => {
-  conversationType.value = option?.type;
+  conversationType.value = option?.type as Chat.ConversationItem["conversationType"];
   conversationId.value = option?.id;
   if (option?.id) {
-    ChatUIKit.convStore.setCurrentConversation({
+    convStore.setCurrentConversation({
       conversationId: conversationId.value,
       conversationType: conversationType.value
     });
@@ -233,6 +248,7 @@ provide<InputToolbarEvent>("InputToolbarEvent", {
   closeToolbar
 });
 </script>
+
 <style lang="scss" scoped>
 @import url("./style.scss");
 </style>

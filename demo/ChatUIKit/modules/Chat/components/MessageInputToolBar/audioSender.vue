@@ -41,7 +41,7 @@
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import Popup from "../../../../components/Popup/index.vue";
 import { t } from "../../../../locales/index";
-import { ChatUIKit } from "../../../../index";
+import { useConvStore, useMessageStore, useAppUserStore, useConnStore } from "../../../../stores";
 import { chatSDK } from "../../../../sdk";
 import { logger } from "../../../../log";
 import permission from "../../../../utils/permission.js";
@@ -50,20 +50,28 @@ import { isIOS } from "../../../../utils/index";
 type RecordStatus = "record" | "recording" | "recordEnd";
 
 const audioPopupRef = ref(null);
-const conn = ChatUIKit.getChatConn();
-const convStore = ChatUIKit.convStore;
+
+// Pinia stores
+const convStore = useConvStore();
+const messageStore = useMessageStore();
+const appUserStore = useAppUserStore();
+const connStore = useConnStore();
+
+const conn = computed(() => connStore.getChatConn);
+const selfUserInfo = computed(() => appUserStore.getSelfUserInfo());
+
 const recordStatus = ref<RecordStatus>("record");
 const recorder = ref<UniApp.RecorderManager>();
 const startTime = ref<number>(0);
 const duration = ref<number>(0);
 const isPlaying = ref(false);
 const audioFilePath = ref("");
+
 const maskClosable = computed(() => {
   return recordStatus.value === "record";
 });
 
 let audioContext: UniApp.InnerAudioContext | null = null;
-
 let timerId: any = 0;
 
 // 最大录音时长
@@ -83,7 +91,7 @@ const hideAudioPopup = () => audioPopupRef.value.closePopup();
 
 // 开始录音
 const startRecording = () => {
-  ChatUIKit.messageStore.setPlayingAudioMessageId(""); // 清空播放的音频
+  messageStore.setPlayingAudioMessageId(""); // 清空播放的音频
   duration.value = 0;
   startTime.value = Date.now();
   recordStatus.value = "recording";
@@ -168,13 +176,13 @@ const createAudioContext = () => {
 // 上传并发送音频
 const uploadAndSendAudio = () => {
   if (!audioFilePath.value) return;
-  const uploadUrl = `${conn.apiUrl}/${conn.orgName}/${conn.appName}/chatfiles`;
+  const uploadUrl = `${conn.value.apiUrl}/${conn.value.orgName}/${conn.value.appName}/chatfiles`;
   const file = audioFilePath.value;
   const audioLength = elapsedTime.value;
 
   hideAudioPopup();
 
-  const token = conn.token;
+  const token = conn.value.token;
   const requestParams = {
     url: uploadUrl,
     filePath: file,
@@ -195,12 +203,12 @@ const uploadAndSendAudio = () => {
     },
     ext: {
       ease_chat_uikit_user_info: {
-        avatarURL: ChatUIKit.appUserStore.getSelfUserInfo().avatar,
-        nickname: ChatUIKit.appUserStore.getSelfUserInfo().name
+        avatarURL: selfUserInfo.value.avatar,
+        nickname: selfUserInfo.value.name
       }
     }
   });
-  ChatUIKit.messageStore.sendMessage(audioMsg, () => {
+  messageStore.sendMessage(audioMsg, () => {
     return uni.uploadFile(requestParams);
   });
   resetRecording();

@@ -1,132 +1,86 @@
 <template>
   <view class="contact-list-wrap">
-    <view class="header-wrap">
-      <ContactNav />
-      <SearchButton @tap="toSearchPage" class="contact-search" />
-    </view>
-    <!-- nav占位 -->
+    <ContactNav />
     <view :class="isWXProgram ? 'wx-block' : 'block'"></view>
-    <IndexedList class="contact-index-list" :options="contactList">
-      <template v-slot:header>
-        <view class="contact-menu-wrap">
-          <MenuItem
-            @tap="toRequestListPage"
-            class="contact-menu"
-            :title="t('newRequest')"
-          >
-            <template v-slot:right>
-              <view class="request-count" v-if="contactRequestCount">
-                {{ contactRequestCount > 99 ? "99+" : contactRequestCount }}
-              </view>
-            </template>
-          </MenuItem>
-
-          <MenuItem
-            @tap="toGroupPage"
-            class="contact-menu"
-            :title="t('groupList')"
-          >
-            <template v-slot:right>
-              <view class="count" v-if="joinedGroupCount">
-                {{ joinedGroupCount }}
-              </view>
-            </template>
-          </MenuItem>
-        </view>
-      </template>
-      <template v-slot:indexedItem="slotProps">
-        <UserItem
-          :user="slotProps.item"
-          @tap="toChatPage(slotProps.item.userId)"
-        />
-      </template>
-    </IndexedList>
+    <view class="contact-list">
+      <IndexedList
+        :options="contactList"
+        :hasGroupItem="true"
+        :hasNewRequestItem="true"
+        @onGroupTap="onGroupTap"
+        @onContactTap="onContactTap"
+        @onNewRequestTap="onNewRequestTap"
+        :requestCount="contactRequestCount"
+        :groupCount="joinedGroupCount"
+      >
+        <template v-slot:indexedItem="slotProps">
+          <UserItem @tap="onContactTap(slotProps.item.userId)" :user="slotProps.item" />
+        </template>
+      </IndexedList>
+    </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import SearchButton from "../../components/SearchButton/index.vue";
-import MenuItem from "../../components/MenuItem/index.vue";
-import UserItem from "./components/UserItem/index.vue";
-import IndexedList from "../../components/IndexedList/index.vue";
 import ContactNav from "./components/ContactNav/index.vue";
-import type { Chat } from "../../sdk";
-import { t } from "../../locales/index";
-import { ChatUIKit } from "../../index";
-import { ref, onUnmounted } from "vue";
+import IndexedList from "../../components/IndexedList/index.vue";
+import { computed } from "vue";
+import { useContactStore, useGroupStore, useAppUserStore } from "../../stores";
+import UserItem from "./components/UserItem/index.vue";
 import { isWXProgram } from "../../utils/index";
-import { autorun } from "mobx";
 
-const contactList = ref<Chat.ContactItem[]>([]);
-const joinedGroupCount = ref(0);
-const contactRequestCount = ref(0);
+const contactStore = useContactStore();
+const groupStore = useGroupStore();
 
-const unwatchContactRequestCount = autorun(() => {
-  contactRequestCount.value =
-    ChatUIKit.contactStore.contactsNoticeInfo.unReadCount;
-});
+// Pinia stores
+const appUserStore = useAppUserStore();
 
-const unwatchContactList = autorun(() => {
-  contactList.value = ChatUIKit.contactStore.contacts.map((contact) => ({
+/** 使用 computed 替代 autorun，合并联系人信息和用户信息 */
+const contactList = computed(() => {
+  return contactStore.contacts.map((contact) => ({
     ...contact,
-    ...ChatUIKit.appUserStore.getUserInfoFromStore(contact.userId),
+    ...appUserStore.getUserInfo(contact.userId),
     id: contact.userId
   }));
 });
+const contactRequestCount = computed(() => contactStore.contactsNoticeInfo.unReadCount);
+const joinedGroupCount = computed(() => groupStore.groupList.length);
 
-const unwatchJoinedGroupCount = autorun(() => {
-  joinedGroupCount.value = ChatUIKit.groupStore.joinedGroupList.length;
-});
-
-const toChatPage = (id: string) => {
+const onGroupTap = () => {
   uni.navigateTo({
-    url: `/ChatUIKit/modules/Chat/index?type=singleChat&id=${id}`
+    url: "/ChatUIKit/modules/GroupList/index"
   });
 };
 
-const toGroupPage = () => {
+const onContactTap = (userId: string) => {
   uni.navigateTo({
-    url: `/ChatUIKit/modules/GroupList/index`
+    url: `/ChatUIKit/modules/Chat/index?type=singleChat&id=${userId}`
   });
 };
 
-const toSearchPage = () => {
+const onNewRequestTap = () => {
   uni.navigateTo({
-    url: `/ChatUIKit/modules/ContactSearchList/index`
+    url: "/ChatUIKit/modules/ContactRequestList/index"
   });
 };
-
-const toRequestListPage = () => {
-  uni.navigateTo({
-    url: `/ChatUIKit/modules/ContactRequestList/index`
-  });
-};
-
-onUnmounted(() => {
-  unwatchContactList();
-  unwatchContactRequestCount();
-  unwatchJoinedGroupCount();
-});
 </script>
-
 <style lang="scss" scoped>
-.contact-menu-wrap {
-  display: flex;
-  flex-direction: column;
+@import url("../../styles/common.scss");
+
+.contact-list-wrap {
+  height: 100%;
+  background: #f9fafa;
 }
-.contact-menu {
-  padding-left: 16px;
+
+.contact-list {
+  height: 100%;
 }
 
 .block {
-  height: calc(104px + var(--status-bar-height))
+  height: calc(52px + var(--status-bar-height));
 }
 
 .wx-block {
-  height: 151px;
+  height: calc(76px + var(--status-bar-height));
 }
-</style>
-
-<style lang="scss" scoped>
-@import "./style.scss";
 </style>

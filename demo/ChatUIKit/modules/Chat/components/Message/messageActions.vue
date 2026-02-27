@@ -30,7 +30,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from "vue";
 import type { MixedMessageBody } from "../../../../types/index";
-import { ChatUIKit } from "../../../../index";
+import { useMessageStore, useConvStore, useConfigStore } from "../../../../stores";
 import { ASSETS_URL } from "../../../../const/index";
 import { renderTxt } from "../../../../utils/index";
 import { t } from "../../../../locales";
@@ -51,6 +51,7 @@ interface MenuItem {
   icon: string;
   action: () => void;
 }
+
 const props = defineProps<Props>();
 const showActions = ref(false);
 const elementPosition = ref("");
@@ -63,7 +64,12 @@ const windowSize = ref({
   height: 0
 });
 
-const isSelf = ChatUIKit.messageStore.checkMessageFromIsSelf(props.msg);
+// Pinia stores
+const messageStore = useMessageStore();
+const convStore = useConvStore();
+const configStore = useConfigStore();
+
+const isSelf = computed(() => messageStore.checkMessageFromIsSelf(props.msg));
 
 const setMenuItems = () => {
   const list: Array<MenuItem> = [];
@@ -74,13 +80,13 @@ const setMenuItems = () => {
     (props.msg.status === "sent" || props.msg.status === "read") &&
     currentTime - msgTime < recallLimit;
   const isMsgEditable =
-    isSelf &&
+    isSelf.value &&
     props.msg.type === "txt" &&
     props.msg.status !== "failed" &&
     props.msg.status !== "sending";
   const isMsgReplyable =
     props.msg.status !== "failed" && props.msg.status !== "sending";
-  const featureConfig = ChatUIKit.getFeatureConfig();
+  const featureConfig = configStore.featureConfig;
 
   // 文本消息类型时显示 "复制"
   if (featureConfig.copyMessage && props.msg.type === "txt") {
@@ -117,7 +123,7 @@ const setMenuItems = () => {
     });
 
   // 自己的消息可以显示可撤回的显示 "撤回"
-  if (isSelf) {
+  if (isSelf.value) {
     if (featureConfig.recallMessage && isRecallAllowed) {
       list.push({
         label: t("recallBtn"),
@@ -156,9 +162,9 @@ const computedRightMenuStyle = computed(() => {
 
 const popupClassName = computed(() => {
   if (elementPosition.value === "nearTop") {
-    return isSelf ? "right-up-box" : "left-up-box";
+    return isSelf.value ? "right-up-box" : "left-up-box";
   } else if (elementPosition.value === "nearBottom") {
-    return isSelf ? "right-down-box" : "left-down-box";
+    return isSelf.value ? "right-down-box" : "left-down-box";
   }
   return "";
 });
@@ -206,27 +212,27 @@ const copyMessage = () => {
 };
 
 const quoteMessage = () => {
-  ChatUIKit.messageStore.setQuoteMessage(props.msg);
+  messageStore.setQuoteMessage(props.msg);
   showActions.value = false;
 };
 
 const editMessage = () => {
-  ChatUIKit.messageStore.setEditingMessage(props.msg);
+  messageStore.setEditingMessage(props.msg as any);
   showActions.value = false;
 };
 
 const deleteMessage = () => {
-  ChatUIKit.messageStore.deleteMessage(
+  messageStore.deleteMessage(
     {
       conversationType: props.msg.chatType,
-      conversationId: ChatUIKit.convStore.getCvsIdFromMessage(props.msg)
+      conversationId: convStore.getCvsIdFromMessage(props.msg)
     },
     props.msg
   );
 };
 
 const recallMessage = () => {
-  ChatUIKit.messageStore.recallMessage(props.msg);
+  messageStore.recallMessage(props.msg);
   showActions.value = false;
 };
 

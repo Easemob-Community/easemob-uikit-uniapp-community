@@ -22,7 +22,7 @@
         <GroupItem
           v-if="item.conversationType === 'groupChat'"
           :group="
-            ChatUIKit.groupStore.getGroupInfoFromStore(item.conversationId)
+            groupStore.getGroupInfo(item.conversationId)
           "
         />
         <UserItem v-else :user="{ userId: item.conversationId }" />
@@ -33,17 +33,22 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from "vue";
 import NavBar from "../../components/NavBar/index.vue";
 import SearchInput from "../../components/SearchInput/index.vue";
 import GroupItem from "../GroupList/components/GroupItem/index.vue";
 import UserItem from "../ContactList/components/UserItem/index.vue";
 import Empty from "../../components/Empty/index.vue";
-import { ChatUIKit } from "../../index";
+import { useConvStore, useAppUserStore, useGroupStore } from "../../stores";
 import { t } from "../../locales";
-import { ref, computed } from "vue";
 
 const searchValue = ref("");
 const searchRef = ref(null);
+
+// Pinia stores
+const convStore = useConvStore();
+const appUserStore = useAppUserStore();
+const groupStore = useGroupStore();
 
 const onInput = (value: string) => {
   searchValue.value = value;
@@ -53,14 +58,14 @@ const searchList = computed(() => {
   if (!searchValue.value) {
     return [];
   }
-  return ChatUIKit.convStore.conversationList.filter((item) => {
+  return convStore.sortedConversationList.filter((item) => {
     if (item.conversationType === "singleChat") {
-      return ChatUIKit.appUserStore
-        .getUserInfoFromStore(item.conversationId)
+      return appUserStore
+        .getUserInfo(item.conversationId)
         .name.includes(searchValue.value);
     } else {
-      return ChatUIKit.groupStore
-        .getGroupInfoFromStore(item.conversationId)
+      return groupStore
+        .getGroupInfo(item.conversationId)
         ?.groupName.includes(searchValue.value);
     }
   });

@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "easemob-websdk": "^4.11.0",
-    "mobx": "^6.13.4",
+    "pinia": "^2.1.7",
     "pinyin-pro": "^3.26.0"
   }
 }

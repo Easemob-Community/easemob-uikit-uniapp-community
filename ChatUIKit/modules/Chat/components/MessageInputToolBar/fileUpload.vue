@@ -8,9 +8,9 @@
 import ItemContainer from "./itemContainer.vue";
 import { ASSETS_URL } from "../../../../const/index";
 import type { InputToolbarEvent } from "../../../../types/index";
-import { inject } from "vue";
+import { inject, computed } from "vue";
 import { t } from "../../../../locales/index";
-import { ChatUIKit } from "../../../../index";
+import { useConvStore, useMessageStore, useAppUserStore, useConnStore } from "../../../../stores";
 import { chatSDK } from "../../../../sdk";
 
 const fileButton = ASSETS_URL + "icon/folder.png";
@@ -19,9 +19,14 @@ const title = t("file");
 
 const toolbarInject = inject<InputToolbarEvent>("InputToolbarEvent");
 
-const conn = ChatUIKit.getChatConn();
+// Pinia stores
+const convStore = useConvStore();
+const messageStore = useMessageStore();
+const appUserStore = useAppUserStore();
+const connStore = useConnStore();
 
-const convStore = ChatUIKit.convStore;
+const conn = computed(() => connStore.getChatConn);
+const selfUserInfo = computed(() => appUserStore.getSelfUserInfo());
 
 const chooseFile = () => {
   // #ifdef MP-WEIXIN
@@ -50,12 +55,12 @@ const chooseFile = () => {
 
 const sendFileMessage = (res: any) => {
   const tempFile = res?.tempFile;
-  const uploadUrl = `${conn.apiUrl}/${conn.orgName}/${conn.appName}/chatfiles`;
+  const uploadUrl = `${conn.value.apiUrl}/${conn.value.orgName}/${conn.value.appName}/chatfiles`;
   if (!tempFile) {
     return;
   }
 
-  const token = conn.token;
+  const token = conn.value.token;
   const requestParams = {
     url: uploadUrl,
     filePath: tempFile.path,
@@ -78,13 +83,13 @@ const sendFileMessage = (res: any) => {
     },
     ext: {
       ease_chat_uikit_user_info: {
-        avatarURL: ChatUIKit.appUserStore.getSelfUserInfo().avatar,
-        nickname: ChatUIKit.appUserStore.getSelfUserInfo().name
+        avatarURL: selfUserInfo.value.avatar,
+        nickname: selfUserInfo.value.name
       }
     }
   });
   toolbarInject?.closeToolbar();
-  ChatUIKit.messageStore.sendMessage(fileMsg, () => {
+  messageStore.sendMessage(fileMsg, () => {
     return uni.uploadFile(requestParams);
   });
 };

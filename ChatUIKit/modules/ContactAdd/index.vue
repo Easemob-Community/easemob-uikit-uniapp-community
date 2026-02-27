@@ -27,8 +27,11 @@
 import NavBar from "../../components/NavBar/index.vue";
 import UIKITButton from "../../components/Button/index.vue";
 import { t } from "../../locales/index";
-import { ChatUIKit } from "../../index";
+import { useContactStore } from "../../stores";
 import { ref } from "vue";
+
+// Pinia store
+const contactStore = useContactStore();
 
 const userId = ref("");
 
@@ -41,7 +44,7 @@ const addContact = async () => {
     return;
   }
   try {
-    ChatUIKit.contactStore.addContact(userId.value);
+    await contactStore.addContact(userId.value);
     uni.showToast({
       title: t("contactAddSuccess"),
       icon: "none"

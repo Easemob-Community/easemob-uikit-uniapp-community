@@ -31,19 +31,17 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import Avatar from "../../../../components/Avatar/index.vue";
 import NavBar from "../../../../components/NavBar/index.vue";
-import { ref, onUnmounted } from "vue";
-import { ChatUIKit } from "../../../../index";
+import { useAppUserStore } from "../../../../stores";
 import { USER_AVATAR_URL } from "../../../../const";
-import { UserInfoWithPresence } from "../../../../types/index";
-import { autorun } from "mobx";
 
-const userInfo = ref<UserInfoWithPresence>({} as UserInfoWithPresence);
+// Pinia store
+const appUserStore = useAppUserStore();
 
-const unwatchUserInfo = autorun(() => {
-  userInfo.value = ChatUIKit.appUserStore.getSelfUserInfo();
-});
+/** 使用 computed 替代 autorun */
+const userInfo = computed(() => appUserStore.getSelfUserInfo());
 
 const toAddContact = () => {
   uni.navigateTo({
@@ -51,10 +49,9 @@ const toAddContact = () => {
   });
 };
 
-onUnmounted(() => {
-  unwatchUserInfo();
-});
+// 无需手动卸载 computed
 </script>
+
 <style lang="scss" scoped>
 .title {
   width: 98px;

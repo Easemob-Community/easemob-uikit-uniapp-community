@@ -114,6 +114,19 @@
             "treeShaking" : {
                 "enable" : false
             }
+        },
+        "router" : {
+            "mode" : "hash",
+            "base" : "./"
+        },
+        "publicPath" : "./",
+        "devServer" : {
+            "port" : 5173,
+            "https" : false,
+            "disableHostCheck": true
+        },
+        "sdkConfigs" : {
+            "maps" : {}
         }
     },
     "vueVersion" : "3"

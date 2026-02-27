@@ -35,45 +35,56 @@ import ConversationNav from "../ConversationNav/index.vue";
 import ConversationItem from "../ConversationItem/index.vue";
 import SearchButton from "../../../../components/SearchButton/index.vue";
 import Empty from "../../../../components/Empty/index.vue";
-import { ref, onUnmounted } from "vue";
+import { ref, computed } from "vue";
 import type { Chat } from "../../../../types/index";
-import { ChatUIKit } from "../../../../index";
-import { deepClone, isWXProgram } from "../../../../utils/index";
-import { autorun } from "mobx";
+import { useConversationStore, useAppUserStore } from "../../../../stores";
+import { isWXProgram } from "../../../../utils/index";
 
-const selectedConvId = ref<Chat.ConversationItem | null>(null);
-const conversationList = ref<Chat.ConversationItem[]>([]);
+// Pinia stores
+const convStore = useConversationStore();
+const appUserStore = useAppUserStore();
 
-const userInfo = ref({});
+const selectedConvId = ref<string | null>(null);
 
-const uninstallConvListWatch = autorun(() => {
-  conversationList.value = deepClone(ChatUIKit.convStore.conversationList);
-});
+/**
+ * 优化：直接使用 computed 引用 store 状态
+ * 无需 deepClone，Pinia 状态已经是响应式的
+ */
+const conversationList = computed(() => convStore.sortedConversationList);
 
-const unwatchUserInfo = autorun(() => {
-  userInfo.value = ChatUIKit.appUserStore.getSelfUserInfo();
-});
+// 用户信息用于显示
+const userInfo = computed(() => appUserStore.getSelfUserInfo());
 
 const deleteConversation = (conv: Chat.ConversationItem) => {
-  ChatUIKit.convStore.deleteConversation(conv);
+  convStore.deleteConversation({
+    conversationId: conv.conversationId,
+    conversationType: conv.conversationType
+  });
 };
 
 const muteConversation = (conv: Chat.ConversationItem) => {
-  ChatUIKit.convStore.setSilentModeForConversation(conv);
+  convStore.setSilentModeForConversation(
+    { conversationId: conv.conversationId, conversationType: conv.conversationType },
+    true
+  );
 };
 
 const unMuteConversation = (conv: Chat.ConversationItem) => {
-  ChatUIKit.convStore.clearRemindTypeForConversation(conv);
+  convStore.setSilentModeForConversation(
+    { conversationId: conv.conversationId, conversationType: conv.conversationType },
+    false
+  );
 };
 
 const pinConversation = (conv: Chat.ConversationItem) => {
-  ChatUIKit.convStore.pinConversation(conv, !conv.isPinned);
+  convStore.pinConversation(
+    { conversationId: conv.conversationId, conversationType: conv.conversationType },
+    !conv.isPinned
+  );
 };
 
 const onMuteButtonClick = (conv: Chat.ConversationItem) => {
-  const isMute = ChatUIKit.convStore.getConversationMuteStatus(
-    conv.conversationId
-  );
+  const isMute = convStore.getConversationMuteStatus(conv.conversationId);
   if (isMute) {
     unMuteConversation(conv);
   } else {
@@ -91,11 +102,9 @@ const onSearch = () => {
   });
 };
 
-onUnmounted(() => {
-  uninstallConvListWatch();
-  unwatchUserInfo();
-});
+// 无需手动卸载 computed！
 </script>
+
 <style lang="scss" scoped>
 .title {
   width: 50px;

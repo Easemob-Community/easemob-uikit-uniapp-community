@@ -66,9 +66,9 @@ import UIKITButton from "../../ChatUIKit/components/Button/index.vue";
 import { ChatUIKit } from "../../ChatUIKit/index";
 import { PRESENCE_STATUS_LIST } from "../../ChatUIKit/const";
 import { t } from "../../const/locales";
-import { autorun } from "mobx";
+
 import Modal from "../../ChatUIKit/components/Modal/index.vue";
-import { ref, computed, onUnmounted } from "vue";
+import { ref, computed, watch, onUnmounted } from "vue";
 
 const presenceExt = ref("");
 const customPresence = ref(t("presenceCustom"));
@@ -91,9 +91,14 @@ const presenceMenus = PRESENCE_STATUS_LIST.map((status) => ({
   value: status
 }));
 
-const unwatchUserInfo = autorun(() => {
-  presenceExt.value = ChatUIKit.appUserStore.getSelfUserInfo().presenceExt;
-});
+// 使用 watch 替代 autorun
+const stopWatch = watch(
+  () => ChatUIKit.appUserStore.getSelfUserInfo,
+  (userInfo) => {
+    presenceExt.value = userInfo.presenceExt;
+  },
+  { immediate: true }
+);
 
 const checkedStatus = computed(() => {
   if (PRESENCE_STATUS_LIST.includes(presenceExt.value)) {
@@ -142,7 +147,7 @@ const publishPresence = () => {
 };
 
 onUnmounted(() => {
-  unwatchUserInfo();
+  stopWatch();
 });
 </script>
 

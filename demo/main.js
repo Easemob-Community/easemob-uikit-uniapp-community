@@ -15,8 +15,12 @@ app.$mount()
 import {
 	createSSRApp
 } from 'vue'
+import { ChatUIKit } from './ChatUIKit'
 export function createApp() {
 	const app = createSSRApp(App)
+	// 使用 ChatUIKit 创建的 pinia 实例，确保全局一致性
+	const pinia = ChatUIKit.getPinia()
+	app.use(pinia)
 	return {
 		app
 	}

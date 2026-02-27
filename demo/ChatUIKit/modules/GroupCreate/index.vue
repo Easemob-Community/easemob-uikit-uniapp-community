@@ -45,6 +45,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from "vue";
 import SearchButton from "../../components/SearchButton/index.vue";
 import NavBar from "../../components/NavBar/index.vue";
 import UserItem from "../ContactList/components/UserItem/index.vue";
@@ -52,24 +53,24 @@ import Empty from "../../components/Empty/index.vue";
 import IndexedList from "../../components/IndexedList/index.vue";
 import UIKITButton from "../../components/Button/index.vue";
 import SearchList from "./searchList.vue";
-import { ChatUIKit } from "../../index";
+import { useContactStore, useAppUserStore, useGroupStore } from "../../stores";
 import { t } from "../../locales";
-import { Chat } from "../../sdk";
-import { autorun } from "mobx";
-import { ref, onUnmounted } from "vue";
 
-const contactList = ref<Chat.ContactItem[]>([]);
-const isSearch = ref(false);
-
-const selectedUserIds = ref([]);
-
-const unwatchContactList = autorun(() => {
-  contactList.value = ChatUIKit.contactStore.contacts.map((contact) => ({
+const contactList = computed(() => {
+  return contactStore.contacts.map((contact) => ({
     ...contact,
-    ...ChatUIKit.appUserStore.getUserInfoFromStore(contact.userId),
+    ...appUserStore.getUserInfo(contact.userId),
     id: contact.userId
   }));
 });
+
+const isSearch = ref(false);
+const selectedUserIds = ref([]);
+
+// Pinia stores
+const contactStore = useContactStore();
+const appUserStore = useAppUserStore();
+const groupStore = useGroupStore();
 
 const onCheckboxChange = (values) => {
   selectedUserIds.value = values;
@@ -80,10 +81,10 @@ const createGroup = () => {
     return;
   }
   let groupName = selectedUserIds.value
-    .map((userId) => ChatUIKit.appUserStore.getUserInfoFromStore(userId).name)
+    .map((userId) => appUserStore.getUserInfo(userId).name)
     .join("、");
   // 群组名字为当前用户的名字加上选中的用户的名字
-  groupName = ChatUIKit.appUserStore.getSelfUserInfo().name + "、" + groupName;
+  groupName = appUserStore.getSelfUserInfo().name + "、" + groupName;
   const params = {
     groupname: groupName,
     members: selectedUserIds.value,
@@ -98,7 +99,7 @@ const createGroup = () => {
     title: "loading",
     mask: true
   });
-  ChatUIKit.groupStore
+  groupStore
     .createGroup({
       data: params
     })
@@ -113,14 +114,12 @@ const createGroup = () => {
 };
 
 const onBack = () => {
-  uni.switchTab({
+  uni.redirectTo({
     url: "/ChatUIKit/modules/Conversation/index"
   });
 };
 
-onUnmounted(() => {
-  unwatchContactList;
-});
+// 无需手动卸载 computed
 </script>
 
 <style lang="scss" scoped>

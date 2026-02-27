@@ -18,7 +18,7 @@
           <view
             class="index-item-wrap"
             v-for="indexedItem in indexedData[item]"
-            :key="indexedItem.id"
+            :key="indexedItem.id || indexedItem.userId"
           >
             <label class="label">
               <checkbox
@@ -29,8 +29,8 @@
                 activeBorderColor="#009DFF"
                 style="transform:scale(0.8)"
                 iconColor="#fff"
-                :value="indexedItem.id"
-                :checked="props.checkedList.includes(indexedItem.id)"
+                :value="indexedItem.id || indexedItem.userId"
+                :checked="props.checkedList.includes(indexedItem.id || indexedItem.userId)"
               />
               <view class="index-item">
                 <slot name="indexedItem" :item="indexedItem"></slot>
@@ -51,7 +51,7 @@
             <view
               class="index-item-wrap"
               v-for="indexedItem in indexedData[item]"
-              :key="indexedItem.id"
+              :key="indexedItem.id || indexedItem.userId"
             >
               <view class="index-item">
                 <slot name="indexedItem" :item="indexedItem"></slot>
@@ -69,7 +69,7 @@
           'letter-box-item',
           { active: scrollIndexItem === formatInitial(item) }
         ]"
-        v-for="item in Object.keys(indexedData)"
+        v-for="item in Object.keys(indexedData || {})"
         :key="item"
       >
         {{ item }}
@@ -85,8 +85,10 @@ import { groupByName } from "../../utils/index";
 let timerId: any = "";
 
 interface IndexedItem {
-  name: string;
-  id: number;
+  name?: string;
+  id?: number;
+  userId?: string;
+  remark?: string;
   [key: string]: any;
 }
 
@@ -105,7 +107,9 @@ const indexedData = computed(() => {
   const dataObj: Record<string, IndexedItem[]> = {};
 
   for (const item of props.options) {
-    const initial = groupByName(item.name) || "";
+    // 兼容不同数据格式：优先使用 name，其次使用 remark，最后使用 userId
+    const displayName = item.name || item.remark || item.userId || "";
+    const initial = groupByName(displayName) || "";
     if (!dataObj[initial]) {
       dataObj[initial] = [];
     }

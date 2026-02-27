@@ -43,15 +43,13 @@
 </template>
 
 <script lang="ts" setup>
-import { renderTxt } from "../../../../utils/index";
-import { ref, computed, onUnmounted } from "vue";
-import { formatMessage, deepClone } from "../../../../utils/index";
-import { ChatUIKit } from "../../../../index";
+import { renderTxt, formatMessage } from "../../../../utils/index";
+import { computed } from "vue";
+import { useMessageStore, useAppUserStore } from "../../../../stores";
 import { t } from "../../../../locales/index";
 import ImageMessage from "./messageImage.vue";
 import VideoMessage from "./messageVideo.vue";
 import { MessageQuoteExt } from "../../../../types/index";
-import { autorun } from "mobx";
 
 interface Props {
   msgId?: string; // 存在msgId时，根据msgId获取消息, 否则获取quoteMessage
@@ -61,18 +59,30 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-
-const quoteFrom = ref(null);
-
-const msg = ref(null);
-
 const emits = defineEmits(["jumpToMessage"]);
 
-const jumpToMessage = () => {
-  if (msg.value) {
-    emits("jumpToMessage", msg.value.id);
+// Pinia stores
+const messageStore = useMessageStore();
+const appUserStore = useAppUserStore();
+
+/** 使用 computed 替代 autorun */
+const msg = computed(() => {
+  if (props.msgId) {
+    return messageStore.getMessageById(props.msgId) || null;
+  } else {
+    return messageStore.quoteMessage;
   }
-};
+});
+
+const quoteFrom = computed(() => {
+  if (!msg.value) {
+    if (props.messageQuoteExt) {
+      return { nickname: props.messageQuoteExt.msgSender };
+    }
+    return null;
+  }
+  return appUserStore.getUserInfo(msg.value.from);
+});
 
 const data = computed(() => {
   if (!msg.value) {
@@ -81,40 +91,16 @@ const data = computed(() => {
   return renderTxt(formatMessage(msg.value));
 });
 
-const unwatchQuoteMsg = autorun(() => {
-  // 展示引用消息
-  if (props.msgId) {
-    msg.value =
-      deepClone(ChatUIKit.messageStore.messageMap.get(props.msgId)) || null;
-
-    if (!msg.value) {
-      // 保持和 getUserInfoFromStore数据结构一致
-      quoteFrom.value = {
-        nickname: props.messageQuoteExt.msgSender
-      };
-      return;
-    }
-
-    quoteFrom.value = ChatUIKit.appUserStore.getUserInfoFromStore(
-      msg.value.from
-    );
-  } else {
-    msg.value = ChatUIKit.messageStore?.quoteMessage || null;
-    if (!msg.value) {
-      return;
-    }
-    quoteFrom.value = ChatUIKit.appUserStore.getUserInfoFromStore(
-      msg.value.from
-    );
+const jumpToMessage = () => {
+  if (msg.value) {
+    emits("jumpToMessage", msg.value.id);
   }
-});
+};
 
 const you = t("you");
 const reply = t("reply");
 
-onUnmounted(() => {
-  unwatchQuoteMsg();
-});
+// 无需手动卸载 computed
 </script>
 
 <style lang="scss" scoped>

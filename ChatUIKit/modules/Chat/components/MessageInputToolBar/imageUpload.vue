@@ -8,9 +8,9 @@
 import ItemContainer from "./itemContainer.vue";
 import { ASSETS_URL } from "../../../../const/index";
 import type { InputToolbarEvent } from "../../../../types/index";
-import { inject } from "vue";
+import { inject, computed } from "vue";
 import { t } from "../../../../locales/index";
-import { ChatUIKit } from "../../../../index";
+import { useConvStore, useMessageStore, useAppUserStore, useConnStore } from "../../../../stores";
 import { chatSDK } from "../../../../sdk";
 
 const ImageIcon = ASSETS_URL + "icon/imgButton.png";
@@ -19,9 +19,14 @@ const title = t("imageUpload");
 
 const toolbarInject = inject<InputToolbarEvent>("InputToolbarEvent");
 
-const convStore = ChatUIKit.convStore;
+// Pinia stores
+const convStore = useConvStore();
+const messageStore = useMessageStore();
+const appUserStore = useAppUserStore();
+const connStore = useConnStore();
 
-const conn = ChatUIKit.getChatConn();
+const conn = computed(() => connStore.getChatConn);
+const selfUserInfo = computed(() => appUserStore.getSelfUserInfo());
 
 const chooseImage = () => {
   uni.chooseImage({
@@ -36,12 +41,12 @@ const chooseImage = () => {
 const sendImageMessage = (res: any) => {
   const tempFilePath =
     res?.tempFilePaths?.[0] || res?.tempFiles?.[0].tempFilePath;
-  const uploadUrl = `${conn.apiUrl}/${conn.orgName}/${conn.appName}/chatfiles`;
+  const uploadUrl = `${conn.value.apiUrl}/${conn.value.orgName}/${conn.value.appName}/chatfiles`;
 
   if (!tempFilePath) {
     return;
   }
-  const token = conn.token;
+  const token = conn.value.token;
   const requestParams = {
     url: uploadUrl,
     filePath: tempFilePath,
@@ -58,14 +63,14 @@ const sendImageMessage = (res: any) => {
     url: tempFilePath,
     ext: {
       ease_chat_uikit_user_info: {
-        avatarURL: ChatUIKit.appUserStore.getSelfUserInfo().avatar,
-        nickname: ChatUIKit.appUserStore.getSelfUserInfo().name
+        avatarURL: selfUserInfo.value.avatar,
+        nickname: selfUserInfo.value.name
       }
     }
   });
 
   toolbarInject?.closeToolbar();
-  ChatUIKit.messageStore.sendMessage(imgMsg, () => {
+  messageStore.sendMessage(imgMsg, () => {
     return uni.uploadFile(requestParams);
   });
 };
