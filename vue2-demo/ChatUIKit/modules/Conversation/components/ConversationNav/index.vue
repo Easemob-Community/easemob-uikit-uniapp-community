@@ -44,10 +44,12 @@ import Avatar from '../../../../components/Avatar'
 import PopMenu from '../../../../components/PopMenu'
 
 // 图标路径
-const ASSETS_URL = '../../assets/'
+// 静态资源路径（使用远程资源，和 Vue3 版本一致）
+const ASSETS_URL = 'https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/'
 const ChatMenuIcon = ASSETS_URL + 'icon/chat.png'
 const AddContactMenuIcon = ASSETS_URL + 'icon/addContact.png'
 const CreateGroupIcon = ASSETS_URL + 'icon/createGroup.png'
+const USER_AVATAR_URL = ASSETS_URL + 'user.png'
 
 export default {
   name: 'ConversationNav',
@@ -61,7 +63,7 @@ export default {
   data() {
     return {
       isShowPopMenu: false,
-      USER_AVATAR_URL: '../../assets/avatar_default.png',
+      USER_AVATAR_URL,
       options: [
         {
           name: '新建会话',
@@ -134,7 +136,7 @@ export default {
 .title {
   width: 50px;
   height: 22px;
-  background: url("../../../../assets/chat.png") no-repeat;
+  background: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/chat.png") no-repeat;
   background-size: 100% 100%;
 }
 
@@ -147,7 +149,7 @@ export default {
 .action-btn {
   width: 24px;
   height: 24px;
-  background: url("../../../../assets/icon/plus.png") no-repeat;
+  background: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/plus.png") no-repeat;
   background-size: 100% 100%;
 }
 
@@ -169,7 +171,7 @@ export default {
 .wx-btn {
   width: 24px;
   height: 24px;
-  background: url("../../../../assets/icon/wx_plus.png") no-repeat;
+  background: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/wx_plus.png") no-repeat;
   background-size: 100% 100%;
 }
 </style>

@@ -28,7 +28,7 @@ export default {
 .search-icon {
   width: 22px;
   height: 22px;
-  background: url("../../assets/icon/search.png");
+  background: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/search.png");
   background-size: 100% 100%;
   margin-right: 5px;
 }

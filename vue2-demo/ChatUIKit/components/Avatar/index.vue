@@ -7,8 +7,8 @@
       class="image"
       :src="imageSrc"
       :alt="alt"
-      @error="onError"
-      @load="onLoad"
+      @error="handleImageError"
+      @load="handleImageLoad"
     />
     <image
       v-if="isLoading"
@@ -102,11 +102,11 @@ export default {
   },
   
   methods: {
-    onError() {
+    handleImageError() {
       this.isError = true
     },
     
-    onLoad() {
+    handleImageLoad() {
       this.isLoading = false
     }
   }
@@ -167,32 +167,32 @@ export default {
 }
 
 .online {
-  background-image: url("../../assets/presence/online.png");
+  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/presence/online.png");
   background-size: 100% 100%;
 }
 
 .offline {
-  background-image: url("../../assets/presence/offline.png");
+  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/presence/offline.png");
   background-size: 100% 100%;
 }
 
 .busy {
-  background-image: url("../../assets/presence/busy.png");
+  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/presence/busy.png");
   background-size: 100% 100%;
 }
 
 .leave {
-  background-image: url("../../assets/presence/leave.png");
+  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/presence/leave.png");
   background-size: 100% 100%;
 }
 
 .do-not-disturb {
-  background-image: url("../../assets/presence/nodistribute.png");
+  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/presence/nodistribute.png");
   background-size: 100% 100%;
 }
 
 .custom {
-  background-image: url("../../assets/presence/custom.png");
+  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/presence/custom.png");
   background-size: 100% 100%;
 }
 

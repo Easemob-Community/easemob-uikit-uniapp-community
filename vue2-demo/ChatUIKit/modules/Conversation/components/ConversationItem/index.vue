@@ -28,7 +28,7 @@
             <image
               v-if="isMute"
               style="width: 20px; height: 20px"
-              src="../../../../assets/icon/mute.png"
+              src="https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/mute.png"
             />
           </view>
           <view class="msg-wrap">
@@ -170,9 +170,11 @@ export default {
   
   methods: {
     getAvatarPlaceholder() {
+      // 使用远程资源地址（和 Vue3 版本一致）
+      const ASSETS_URL = 'https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/'
       return this.conversation.conversationType === 'groupChat'
-        ? '../../assets/group_avatar_default.png'
-        : '../../assets/avatar_default.png'
+        ? ASSETS_URL + 'group.png'
+        : ASSETS_URL + 'user.png'
     },
     
     getLastMsgFrom(msg) {

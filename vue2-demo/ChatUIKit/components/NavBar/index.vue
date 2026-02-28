@@ -71,7 +71,7 @@ export default {
 .arrow-left {
   width: 24px;
   height: 24px;
-  background: url("../../assets/icon/arrow-left.png") no-repeat;
+  background: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/arrow-left.png") no-repeat;
   background-size: 100% 100%;
 }
 </style>

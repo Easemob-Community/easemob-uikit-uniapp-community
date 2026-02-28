@@ -122,7 +122,7 @@ export default {
 .title {
   width: 50px;
   height: 22px;
-  background: url("../../../../assets/chat.png") no-repeat;
+  background: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/chat.png") no-repeat;
   background-size: 100% 100%;
 }
 
@@ -135,7 +135,7 @@ export default {
 .action-btn {
   width: 24px;
   height: 24px;
-  background: url("../../../../assets/icon/plus.png") no-repeat;
+  background: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/plus.png") no-repeat;
   background-size: 100% 100%;
 }
 
