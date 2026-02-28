@@ -19,8 +19,8 @@ export default {
     // 获取排序后的会话列表（按最后消息时间倒序）
     sortedConversationList: state => {
       return [...state.conversationList].sort((a, b) => {
-        const timeA = a.lastMessage?.time || 0
-        const timeB = b.lastMessage?.time || 0
+        const timeA = (a.lastMessage && a.lastMessage.time) || 0
+        const timeB = (b.lastMessage && b.lastMessage.time) || 0
         return timeB - timeA
       })
     },
@@ -88,7 +88,7 @@ export default {
       
       try {
         const res = await chatConn.getConversationlist()
-        const list = res.data?.channels || []
+        const list = (res.data && res.data.channels) || []
         
         // 处理会话数据
         const formattedList = list.map(item => ({
@@ -99,7 +99,7 @@ export default {
           lastMessage: item.lastMessage ? {
             id: item.lastMessage.id,
             type: item.lastMessage.type,
-            msg: item.lastMessage.msg || item.lastMessage.body?.msg || '',
+            msg: item.lastMessage.msg || (item.lastMessage.body && item.lastMessage.body.msg) || '',
             time: item.lastMessage.time,
             from: item.lastMessage.from
           } : null,

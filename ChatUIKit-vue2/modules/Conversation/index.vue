@@ -46,7 +46,7 @@
         <view class="content">
           <view class="content-header">
             <text class="name">{{ item.name || item.conversationId }}</text>
-            <text class="time">{{ formatTime(item.lastMessage?.time) }}</text>
+            <text class="time">{{ formatTime(item.lastMessage && item.lastMessage.time) }}</text>
           </view>
           <text class="preview" :class="{ 'unread': item.unReadCount > 0 }">
             {{ formatMessagePreview(item.lastMessage) }}
