@@ -1,15 +1,11 @@
 /**
  * 环信 SDK 初始化文件
  * 
- * 方案1：使用相对路径引入 node_modules（推荐，需先执行 npm install）
- * 方案2：使用本地 js_sdk 目录（备用，已复制 SDK 文件到 js_sdk/）
+ * 使用本地 js_sdk 目录下的 SDK 文件
+ * 已复制自 node_modules/easemob-websdk/uniApp/Easemob-chat.js
  */
 
-// 方案1：从 node_modules 引入（需要 npm install）
-import websdk from '../../node_modules/easemob-websdk/uniApp/Easemob-chat'
-
-// 方案2：如果方案1报错，取消下面这行的注释，注释掉方案1
-// import websdk from '../js_sdk/Easemob-chat'
+import websdk from '../js_sdk/Easemob-chat'
 
 // SDK 配置
 const SDK_CONFIG = {
