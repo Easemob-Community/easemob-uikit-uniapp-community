@@ -133,8 +133,6 @@ export const useConversationStore = defineStore('conversation', {
           cursor: cursor || '',
           includeEmptyConversations: true
         })
-                logger.info('[ConversationStore] Got conversation list:', res.data)
-        
         // SDK 返回标准格式：conversations 数组
         const conversations = res.data?.conversations || []
         

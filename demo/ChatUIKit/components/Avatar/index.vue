@@ -27,7 +27,7 @@ import { ref, computed } from "vue";
 import { useConfigStore, useAppUserStore } from "../../stores";
 
 interface Props {
-  src: string;
+  src?: string;
   alt?: string;
   size?: number;
   shape?: "circle" | "square";

@@ -287,8 +287,11 @@ const onNewRequestTap = () => {
 }
 
 .group-icon::before {
-  content: '👥';
-  font-size: 20px;
+  content: '';
+  width: 24px;
+  height: 24px;
+  background: url('../../assets/icon/group.png') no-repeat center;
+  background-size: contain;
 }
 
 .new-request-icon {
