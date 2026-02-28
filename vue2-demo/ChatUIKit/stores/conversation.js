@@ -103,7 +103,9 @@ export default {
       
       try {
         const res = await chatConn.getConversationlist()
-        const list = (res.data && res.data.channels) || []
+        console.log('[ConversationStore] getConversationlist res:', res)
+        // SDK 返回的数据在 data.channel_infos 中
+        const list = (res.data && res.data.channel_infos) || []
         
         // 处理会话数据
         const formattedList = list.map(item => ({
@@ -123,6 +125,7 @@ export default {
           } : null,
           unReadCount: item.unread_num || 0
         }))
+        console.log('[ConversationStore] formattedList:', formattedList)
 
         commit('SET_CONVERSATION_LIST', formattedList)
         
