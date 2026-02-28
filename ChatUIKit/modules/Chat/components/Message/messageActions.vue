@@ -69,9 +69,14 @@ const messageStore = useMessageStore();
 const convStore = useConvStore();
 const configStore = useConfigStore();
 
-const isSelf = computed(() => messageStore.checkMessageFromIsSelf(props.msg));
+const isSelf = computed(() => {
+  const result = messageStore.checkMessageFromIsSelf(props.msg);
+  console.log('[MessageActions] isSelf:', result, 'msg.from:', props.msg.from);
+  return result;
+});
 
 const setMenuItems = () => {
+  console.log('[MessageActions] Setting menu items for msg:', props.msg.id, 'type:', props.msg.type, 'status:', props.msg.status);
   const list: Array<MenuItem> = [];
   const currentTime = Date.now();
   const msgTime = props.msg.time;
@@ -135,6 +140,7 @@ const setMenuItems = () => {
 
   // 更新菜单项
   menuItems.value = list;
+  console.log('[MessageActions] Menu items set:', list.length, 'items:', list.map(i => i.label));
 };
 
 // 获取窗口尺寸
@@ -170,6 +176,7 @@ const popupClassName = computed(() => {
 });
 
 function handleLongPress(e, instance) {
+  console.log('[MessageActions] handleLongPress called');
   let currClientY = e.changedTouches[0].clientY;
   const query = uni.createSelectorQuery().in(instance);
   query
@@ -192,8 +199,10 @@ function handleLongPress(e, instance) {
     })
     .exec();
   setMenuItems();
+  console.log('[MessageActions] Showing actions, menuItems:', menuItems.value.length);
   setTimeout(() => {
     showActions.value = true;
+    console.log('[MessageActions] showActions set to true');
   }, 100);
 }
 

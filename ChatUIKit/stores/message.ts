@@ -93,6 +93,15 @@ export const useMessageStore = defineStore('message', {
      */
     isPlayingAudio: (state) => (msgId: string): boolean => {
       return state.playingAudioMsgId === msgId
+    },
+
+    /**
+     * 检查消息是否来自当前用户
+     */
+    checkMessageFromIsSelf: () => (msg: MixedMessageBody): boolean => {
+      const connStore = useConnStore()
+      const currentUserId = connStore.getChatConn.user
+      return msg.from === currentUserId
     }
   },
 

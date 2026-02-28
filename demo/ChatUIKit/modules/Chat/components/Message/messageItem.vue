@@ -16,7 +16,7 @@
           {{ getUserInfo(msg.from || "").nickname || extUserInfo.nickname }}
         </view>
         <view
-          v-if="msg.ext?.msgQuote && msg.ext.msgQuote.msgID"
+          v-if="msg?.ext?.msgQuote && msg.ext.msgQuote.msgID"
           class="msg-quote-container"
         >
           <MessageQuote
@@ -29,11 +29,10 @@
         <view
           :class="bubbleClass"
           :id="'msg-bubble-' + msg.id"
-          @longpress="
-            (e) => {
-              onMessageBubblePress(e);
-            }
-          "
+          @longpress="onMessageBubblePress"
+          @touchstart="onTouchStart"
+          @touchend="onTouchEnd"
+          @touchmove="onTouchMove"
         >
           <MessageStatus
             v-if="messageStatus && isSelf && msg.status"
@@ -73,7 +72,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, getCurrentInstance, ref } from "vue";
+import { computed, getCurrentInstance, ref, nextTick } from "vue";
 import Avatar from "../../../../components/Avatar/index.vue";
 import TextMessage from "./messageTxt.vue";
 import ImageMessage from "./messageImage.vue";
@@ -134,11 +133,50 @@ const bubbleClass = computed(() => {
   return className;
 });
 
+let longPressTimer = null;
+let isLongPress = false;
+const LONG_PRESS_DURATION = 600; // 长按时间阈值
+
 const onMessageBubblePress = (e) => {
+  console.log('[MessageItem] Long press triggered for msg:', props.msg.id);
+  doLongPress(e);
+};
+
+const doLongPress = (e) => {
+  isLongPress = true;
   emits("onLongPress", props.msg.id);
-  setTimeout(() => {
-    actionRef?.value?.handleLongPress(e, instance);
-  }, 0);
+  nextTick(() => {
+    setTimeout(() => {
+      console.log('[MessageItem] Calling handleLongPress, actionRef:', actionRef.value);
+      actionRef?.value?.handleLongPress(e, instance);
+    }, 50);
+  });
+};
+
+// 手动检测长按（备选方案）
+const onTouchStart = (e) => {
+  console.log('[MessageItem] Touch start for msg:', props.msg.id);
+  isLongPress = false;
+  longPressTimer = setTimeout(() => {
+    console.log('[MessageItem] Long press detected by timer for msg:', props.msg.id);
+    doLongPress(e);
+  }, LONG_PRESS_DURATION);
+};
+
+const onTouchEnd = () => {
+  console.log('[MessageItem] Touch end for msg:', props.msg.id);
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+};
+
+const onTouchMove = () => {
+  // 移动时取消长按
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
 };
 </script>
 
@@ -179,6 +217,9 @@ const onMessageBubblePress = (e) => {
     border-radius: 4px;
     max-width: calc(100vw - 100px);
     min-width: 15px;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 
   .msg-bubble-bg:before {

@@ -29,10 +29,22 @@ const defaultFeatureConfig: FeatureConfig = {
   inputMention: true,
   inputQuote: true,
   inputEdit: true,
+  inputImage: true,
+  inputAudio: true,
+  inputVideo: true,
+  inputFile: true,
   
   // 消息功能
   useUserInfo: true,
   usePresence: true,
+  messageStatus: true,
+  
+  // 消息操作功能
+  copyMessage: true,
+  deleteMessage: true,
+  recallMessage: true,
+  editMessage: true,
+  replyMessage: true,
   
   // 会话功能
   pinConversation: true,
