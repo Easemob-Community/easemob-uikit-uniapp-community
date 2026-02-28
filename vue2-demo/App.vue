@@ -1,6 +1,5 @@
 <script>
-// 引入环信 SDK
-import { EMClient } from '@/utils/IM' // 假设有这个路径，需要确认或创建
+import { EMClient } from '@/utils/IM'
 
 export default {
   onLaunch: function() {
@@ -12,6 +11,8 @@ export default {
   
   onShow: function() {
     console.log('App Show')
+    // 检测连接有效性
+    this.$ChatUIKit.onShow && this.$ChatUIKit.onShow()
   },
   
   onHide: function() {
@@ -20,11 +21,12 @@ export default {
   
   methods: {
     initChatUIKit() {
-      // 检查 SDK 是否已加载
-      if (typeof EMClient === 'undefined') {
-        console.warn('EMClient SDK not found, please check SDK import')
+      if (!EMClient) {
+        console.error('EMClient SDK not found')
         return
       }
+      
+      console.log('Initializing ChatUIKit with EMClient...')
       
       // 初始化 ChatUIKit
       this.$ChatUIKit.init({

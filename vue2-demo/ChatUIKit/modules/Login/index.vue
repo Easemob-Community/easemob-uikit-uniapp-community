@@ -16,7 +16,25 @@
           />
         </view>
         
-        <view class="input-group">
+        <!-- 登录方式切换 -->
+        <view class="login-type-tabs">
+          <view 
+            class="tab" 
+            :class="{ active: loginType === 'token' }"
+            @click="loginType = 'token'"
+          >
+            <text>Token 登录</text>
+          </view>
+          <view 
+            class="tab" 
+            :class="{ active: loginType === 'password' }"
+            @click="loginType = 'password'"
+          >
+            <text>密码登录</text>
+          </view>
+        </view>
+        
+        <view class="input-group" v-if="loginType === 'token'">
           <text class="label">Token</text>
           <input 
             class="input" 
@@ -27,10 +45,21 @@
           />
         </view>
         
+        <view class="input-group" v-else>
+          <text class="label">密码</text>
+          <input 
+            class="input" 
+            v-model="form.password" 
+            placeholder="请输入密码"
+            password
+            @confirm="handleLogin"
+          />
+        </view>
+        
         <button 
           class="login-btn" 
           :loading="loading" 
-          :disabled="loading || !form.userId || !form.token"
+          :disabled="loading || !form.userId || !(form.token || form.password)"
           @click="handleLogin"
         >
           {{ loading ? '登录中...' : '登录' }}
@@ -38,7 +67,14 @@
       </view>
       
       <view class="tips">
-        <text>测试账号可以在环信控制台创建</text>
+        <text class="tip-text">测试账号可以在环信控制台创建</text>
+        <text class="tip-link" @click="openConsole">打开环信控制台</text>
+      </view>
+      
+      <!-- AppKey 配置提示 -->
+      <view class="config-tip" v-if="showConfigTip">
+        <text class="config-title">⚠️ 请先配置 AppKey</text>
+        <text class="config-content">请修改 utils/IM.js 中的 SDK_CONFIG.appKey</text>
       </view>
     </view>
   </view>
@@ -54,28 +90,61 @@ export default {
     return {
       form: {
         userId: '',
-        token: ''
+        token: '',
+        password: ''
       },
-      loading: false
+      loginType: 'token', // 'token' 或 'password'
+      loading: false,
+      showConfigTip: false
     }
+  },
+  
+  mounted() {
+    // 检查是否配置了 AppKey
+    this.checkAppKeyConfig()
   },
   
   methods: {
     ...mapActions('conn', ['login']),
     
+    checkAppKeyConfig() {
+      // 简单的检查，实际应该读取配置文件
+      const isDefaultAppKey = true // 这里可以读取实际的配置
+      if (isDefaultAppKey) {
+        this.showConfigTip = true
+      }
+    },
+    
     async handleLogin() {
-      if (!this.form.userId || !this.form.token) {
-        uni.showToast({ title: '请填写完整信息', icon: 'none' })
+      if (!this.form.userId) {
+        uni.showToast({ title: '请输入用户ID', icon: 'none' })
+        return
+      }
+      
+      if (this.loginType === 'token' && !this.form.token) {
+        uni.showToast({ title: '请输入Token', icon: 'none' })
+        return
+      }
+      
+      if (this.loginType === 'password' && !this.form.password) {
+        uni.showToast({ title: '请输入密码', icon: 'none' })
         return
       }
       
       this.loading = true
       
       try {
-        await this.login({
-          user: this.form.userId,
-          accessToken: this.form.token
-        })
+        const loginParams = {
+          user: this.form.userId
+        }
+        
+        if (this.loginType === 'token') {
+          loginParams.accessToken = this.form.token
+        } else {
+          loginParams.pwd = this.form.password
+        }
+        
+        await this.login(loginParams)
         
         uni.showToast({ title: '登录成功', icon: 'success' })
         
@@ -87,14 +156,38 @@ export default {
         }, 500)
         
       } catch (error) {
+        console.error('登录失败:', error)
+        
+        let errorMsg = '登录失败'
+        if (error.message && error.message.includes('appKey')) {
+          errorMsg = '请先在 utils/IM.js 中配置正确的 AppKey'
+          this.showConfigTip = true
+        } else if (error.message) {
+          errorMsg = error.message
+        }
+        
         uni.showToast({ 
-          title: error.message || '登录失败', 
+          title: errorMsg, 
           icon: 'none',
-          duration: 2000
+          duration: 3000
         })
       } finally {
         this.loading = false
       }
+    },
+    
+    openConsole() {
+      // #ifdef H5
+      window.open('https://console.easemob.com', '_blank')
+      // #endif
+      
+      // #ifndef H5
+      uni.showModal({
+        title: '提示',
+        content: '请访问 https://console.easemob.com 创建应用',
+        showCancel: false
+      })
+      // #endif
     }
   }
 }
@@ -131,6 +224,42 @@ export default {
 }
 
 .form {
+  .login-type-tabs {
+    display: flex;
+    margin-bottom: 30rpx;
+    border-bottom: 2rpx solid #f0f0f0;
+    
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 20rpx 0;
+      position: relative;
+      
+      text {
+        font-size: 28rpx;
+        color: #999;
+      }
+      
+      &.active {
+        text {
+          color: #667eea;
+          font-weight: 500;
+        }
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -2rpx;
+          left: 20%;
+          right: 20%;
+          height: 4rpx;
+          background: #667eea;
+          border-radius: 2rpx;
+        }
+      }
+    }
+  }
+  
   .input-group {
     margin-bottom: 40rpx;
     
@@ -175,9 +304,42 @@ export default {
   text-align: center;
   margin-top: 40rpx;
   
-  text {
+  .tip-text {
+    display: block;
     font-size: 24rpx;
     color: #999;
+    margin-bottom: 10rpx;
+  }
+  
+  .tip-link {
+    font-size: 24rpx;
+    color: #667eea;
+    
+    &:active {
+      opacity: 0.7;
+    }
+  }
+}
+
+.config-tip {
+  margin-top: 40rpx;
+  padding: 30rpx;
+  background: #fff9e6;
+  border-radius: 12rpx;
+  border: 2rpx solid #ffd700;
+  
+  .config-title {
+    display: block;
+    font-size: 28rpx;
+    color: #d4a000;
+    font-weight: 500;
+    margin-bottom: 10rpx;
+  }
+  
+  .config-content {
+    display: block;
+    font-size: 24rpx;
+    color: #b8860b;
   }
 }
 </style>

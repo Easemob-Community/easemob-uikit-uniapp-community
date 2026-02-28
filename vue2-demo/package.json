@@ -1,0 +1,15 @@
+{
+  "name": "vue2-demo",
+  "version": "1.0.0",
+  "description": "Vue2 Demo for Easemob ChatUIKit",
+  "main": "main.js",
+  "scripts": {
+    "copy:uikit": "node ../copy-chat-uikit-vue2.js"
+  },
+  "dependencies": {
+    "easemob-websdk": "^4.11.0",
+    "vuex": "^3.6.2"
+  },
+  "author": "",
+  "license": "ISC"
+}

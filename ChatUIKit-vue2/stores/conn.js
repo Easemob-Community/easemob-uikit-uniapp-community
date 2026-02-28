@@ -41,27 +41,35 @@ export default {
     },
 
     // 登录
-    async login({ commit, state }, { user, accessToken }) {
+    async login({ commit, state }, { user, pwd, accessToken }) {
       if (!state.chatConn) {
         throw new Error('SDK not initialized')
       }
       
       try {
-        const res = await state.chatConn.open({
-          user,
-          accessToken
-        })
+        // 构建登录参数
+        const loginParams = { user }
+        
+        // 支持密码或 Token 登录
+        if (accessToken) {
+          loginParams.accessToken = accessToken
+        } else if (pwd) {
+          loginParams.pwd = pwd
+        } else {
+          throw new Error('Password or accessToken is required')
+        }
+        
+        const res = await state.chatConn.open(loginParams)
+        
+        console.log('[ConnStore] Login success:', res)
         
         commit('SET_USER', { userId: user })
         commit('SET_LOGIN_STATUS', true)
         commit('SET_CONNECTED', true)
         
-        // 登录成功后加载会话列表
-        uni.$emit('chatLoginSuccess')
-        
         return res
       } catch (error) {
-        console.error('登录失败:', error)
+        console.error('[ConnStore] Login failed:', error)
         throw error
       }
     },
@@ -69,7 +77,11 @@ export default {
     // 登出
     async logout({ commit, state }) {
       if (state.chatConn) {
-        await state.chatConn.close()
+        try {
+          await state.chatConn.close()
+        } catch (error) {
+          console.error('[ConnStore] Logout error:', error)
+        }
       }
       commit('SET_LOGIN_STATUS', false)
       commit('SET_CONNECTED', false)
