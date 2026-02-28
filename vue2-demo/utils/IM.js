@@ -10,7 +10,7 @@ import websdk from '../js_sdk/Easemob-chat'
 // SDK 配置
 const SDK_CONFIG = {
   // 请替换为您的 AppKey，格式：appkey@im-appkey
-  appKey: 'your-app-key@im-appkey',
+  appKey: 'easemob-demo#support',
   // 是否开启调试模式
   debug: true,
   // 是否使用 https
