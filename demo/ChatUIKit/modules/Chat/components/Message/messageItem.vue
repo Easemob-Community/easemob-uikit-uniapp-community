@@ -16,7 +16,7 @@
           {{ getUserInfo(msg.from || "").nickname || extUserInfo.nickname }}
         </view>
         <view
-          v-if="msg.ext.msgQuote && msg.ext.msgQuote.msgID"
+          v-if="msg.ext?.msgQuote && msg.ext.msgQuote.msgID"
           class="msg-quote-container"
         >
           <MessageQuote
@@ -73,7 +73,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, getCurrentInstance } from "vue";
+import { computed, getCurrentInstance, ref } from "vue";
 import Avatar from "../../../../components/Avatar/index.vue";
 import TextMessage from "./messageTxt.vue";
 import ImageMessage from "./messageImage.vue";

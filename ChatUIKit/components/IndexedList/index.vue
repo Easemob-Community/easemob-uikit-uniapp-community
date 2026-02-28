@@ -7,6 +7,26 @@
       :scroll-into-view="scrollIndexItem"
     >
       <slot name="header"></slot>
+      <!-- 群组入口 -->
+      <view v-if="props.hasGroupItem" class="index-item-wrap group-item" @tap="onGroupTap">
+        <view class="index-item">
+          <view class="special-item">
+            <view class="group-icon"></view>
+            <text>群组</text>
+            <text v-if="props.groupCount" class="count">({{ props.groupCount }})</text>
+          </view>
+        </view>
+      </view>
+      <!-- 新的朋友入口 -->
+      <view v-if="props.hasNewRequestItem" class="index-item-wrap new-request-item" @tap="onNewRequestTap">
+        <view class="index-item">
+          <view class="special-item">
+            <view class="new-request-icon"></view>
+            <text>新的朋友</text>
+            <view v-if="props.requestCount" class="badge">{{ props.requestCount > 99 ? '99+' : props.requestCount }}</view>
+          </view>
+        </view>
+      </view>
       <checkbox-group v-if="props.withCheckbox" @change="checkboxChange">
         <view
           :id="formatInitial(item)"
@@ -96,9 +116,13 @@ interface Props {
   options: IndexedItem[];
   withCheckbox?: boolean;
   checkedList?: string[];
+  hasGroupItem?: boolean;
+  hasNewRequestItem?: boolean;
+  groupCount?: number;
+  requestCount?: number;
 }
 
-const emits = defineEmits(["checkboxChange"]);
+const emits = defineEmits(["checkboxChange", "onGroupTap", "onNewRequestTap"]);
 const props = defineProps<Props>();
 const scrollIndexItem = ref("");
 
@@ -150,6 +174,14 @@ const scrollInToView = (id: string) => {
   timerId = setTimeout(() => {
     scrollIndexItem.value = ""; // 延迟重置
   }, 600);
+};
+
+const onGroupTap = () => {
+  emits("onGroupTap");
+};
+
+const onNewRequestTap = () => {
+  emits("onNewRequestTap");
 };
 </script>
 
@@ -231,6 +263,72 @@ const scrollInToView = (id: string) => {
 
 .checkbox {
   margin-right: -5px;
+}
+
+.special-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  background: #fff;
+  border-bottom: 0.5px solid #e3e6e8;
+  font-size: 16px;
+  color: #171a1c;
+}
+
+.group-icon {
+  width: 40px;
+  height: 40px;
+  background: #009dff;
+  border-radius: 8px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.group-icon::before {
+  content: '';
+  width: 24px;
+  height: 24px;
+  background: url('../../assets/icon/group.png') no-repeat center;
+  background-size: contain;
+}
+
+.new-request-icon {
+  width: 40px;
+  height: 40px;
+  background: #f59e0b;
+  border-radius: 8px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.new-request-icon::before {
+  content: '👤+';
+  font-size: 18px;
+  color: #fff;
+}
+
+.count {
+  margin-left: 5px;
+  color: #75828a;
+  font-size: 14px;
+}
+
+.badge {
+  margin-left: auto;
+  background: #f35;
+  color: #fff;
+  font-size: 12px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
 }
 
 scroll-view ::-webkit-scrollbar {

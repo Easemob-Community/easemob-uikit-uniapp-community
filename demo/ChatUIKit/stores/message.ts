@@ -219,11 +219,14 @@ export const useMessageStore = defineStore('message', {
       const convStore = useConversationStore()
       const connStore = useConnStore()
       const appUserStore = useAppUserStore()
+      
+      const currentUserId = connStore.getChatConn.user
 
       try {
-        // 准备本地消息
+        // 准备本地消息 - 确保包含 from 字段
         let msgCopy: MixedMessageBody = { 
           ...msg, 
+          from: msg.from || currentUserId,
           status: 'sending' as MessageStatus 
         }
 

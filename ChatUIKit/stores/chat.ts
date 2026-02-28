@@ -75,6 +75,8 @@ export const useChatStore = defineStore('chat', {
       conn.addEventHandler('chatStore', {
         onConnected: () => {
           this.setConnState('connected')
+          // 连接成功后加载会话列表（处理断线重连或刷新后的情况）
+          this.loadInitialData()
         },
 
         onDisconnected: () => {
@@ -301,18 +303,10 @@ export const useChatStore = defineStore('chat', {
         // 初始化 SDK 事件
         this.initSDKEvent()
 
-        // 并行加载数据
-        const featureConfig = configStore.getFeatureConfig
-        
-        if (featureConfig.pinConversation) {
-          convStore.getServerPinnedConversations()
-        } else {
-          convStore.getConversationList()
-        }
-        
-        contactStore.getContacts()
-        groupStore.getJoinedGroupList()
-        
+        // 加载初始数据（会话列表、联系人、群组等）
+        this.loadInitialData()
+
+        // 获取当前用户信息
         appUserStore.getUsersInfoFromServer({ userIdList: [params.user] })
         appUserStore.getUsersPresenceFromServer({ userIdList: [params.user] })
 
@@ -364,6 +358,31 @@ export const useChatStore = defineStore('chat', {
         const connStore = useConnStore()
         connStore.getChatConn.onShow()
       }
+    },
+
+    /**
+     * 加载初始数据（登录后或连接成功后调用）
+     * 优化：始终获取全部会话列表，置顶会话单独获取
+     */
+    loadInitialData() {
+      const convStore = useConversationStore()
+      const configStore = useConfigStore()
+      const contactStore = useContactStore()
+      const groupStore = useGroupStore()
+
+      logger.info('[ChatStore] Loading initial data')
+
+      // 始终获取全部会话列表
+      convStore.getConversationList()
+
+      // 如果支持置顶功能，额外获取置顶会话列表
+      if (configStore.getFeatureConfig.pinConversation) {
+        convStore.getServerPinnedConversations()
+      }
+
+      // 加载联系人和群组
+      contactStore.getContacts()
+      groupStore.getJoinedGroupList()
     }
   }
 })

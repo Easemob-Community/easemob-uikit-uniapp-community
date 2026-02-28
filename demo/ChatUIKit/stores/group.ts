@@ -69,16 +69,29 @@ export const useGroupStore = defineStore('group', {
      * 获取群组头像
      */
     getGroupAvatar: (state) => (groupId: string): string => {
+      // 优先从 groupInfoMap 获取，支持驼峰和下划线字段
       const groupInfo = state.groupInfoMap[groupId]
-      return groupInfo?.avatarUrl || ''
+      if (groupInfo) {
+        return groupInfo.avatarUrl || (groupInfo as any).avatarurl || ''
+      }
+      // 从 groupList 中查找（兼容小写字段名）
+ const groupFromList = state.groupList.find(g => g.groupId === groupId || (g as any).groupid === groupId)
+      return (groupFromList as any)?.avatar || (groupFromList as any)?.avatarurl || ''
     },
 
     /**
      * 获取群组名称
      */
     getGroupName: (state) => (groupId: string): string => {
+      // 优先从 groupInfoMap 获取
       const groupInfo = state.groupInfoMap[groupId]
-      return groupInfo?.groupName || groupId
+      if (groupInfo?.groupName) {
+        return groupInfo.groupName
+      }
+      // 从 groupList 中查找（兼容小写字段名 groupname）
+      const groupFromList = state.groupList.find(g => g.groupId === groupId || (g as any).groupid === groupId)
+      const name = (groupFromList as any)?.groupName || (groupFromList as any)?.groupname
+      return name || groupId
     }
   },
 
@@ -104,8 +117,8 @@ export const useGroupStore = defineStore('group', {
             this.groupList = res.data
           }
           
-          // 异步获取群组详情（过滤无效 groupId）
-          const validGroupIds = res.data.map(g => g.groupId).filter(id => id)
+          // 异步获取群组详情（过滤无效 groupId，兼容小写字段名）
+          const validGroupIds = res.data.map(g => g.groupId || (g as any).groupid).filter(id => id)
           this.fetchGroupDetails(validGroupIds)
           
           logger.info('[GroupStore] Successfully got groups:', res.data.length)
@@ -212,7 +225,7 @@ export const useGroupStore = defineStore('group', {
      * 从列表中移除群组
      */
     removeGroupFromList(groupId: string) {
-      const index = this.groupList.findIndex(g => g.groupId === groupId)
+      const index = this.groupList.findIndex(g => g.groupId === groupId || (g as any).groupid === groupId)
       if (index > -1) {
         this.groupList.splice(index, 1)
       }

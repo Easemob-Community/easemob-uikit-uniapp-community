@@ -128,24 +128,31 @@ export const useConversationStore = defineStore('conversation', {
       
       try {
         const connStore = useConnStore()
-        const res = await connStore.getChatConn.getConversationlist({
+        const res = await connStore.getChatConn.getServerConversations({
           pageSize: this.pageParams.pageSize,
-          cursor: cursor || ''
+          cursor: cursor || '',
+          includeEmptyConversations: true
         })
-
-        if (res.data?.conversations) {
-          // 合并服务器返回的会话属性
-          this.mergeConversations(res.data.conversations)
-          this.pageParams.cursor = res.data.cursor || ''
+                logger.info('[ConversationStore] Got conversation list:', res.data)
+        
+        // SDK 返回标准格式：conversations 数组
+        const conversations = res.data?.conversations || []
+        
+        if (conversations.length > 0) {
+          // 直接使用 SDK 返回的标准格式（已包含 conversationId, conversationType, unReadCount 等）
+          this.mergeConversations(conversations as UIKITConversationItem[])
+          this.pageParams.cursor = res.data?.cursor || ''
           
           // 异步获取用户信息
           const appUserStore = useAppUserStore()
-          const userIds = res.data.conversations
-            .filter(c => c.conversationType === 'singleChat')
-            .map(c => c.conversationId)
-          appUserStore.getUsersInfoFromServer({ userIdList: userIds })
+          const userIds = conversations
+            .filter((c: any) => c.conversationType === 'singleChat')
+            .map((c: any) => c.conversationId)
+          if (userIds.length > 0) {
+            appUserStore.getUsersInfoFromServer({ userIdList: userIds })
+          }
           
-          logger.info('[ConversationStore] Got conversations:', res.data.conversations.length)
+          logger.info('[ConversationStore] Got conversations:', conversations.length)
         }
         return res
       } catch (error) {
@@ -312,12 +319,11 @@ export const useConversationStore = defineStore('conversation', {
         const connStore = useConnStore()
         const conn = connStore.getChatConn
         
-        // 创建已读回执消息
-        const readMsg = chatSDK.message.Read.create({
-          type: 'read',
+        // 创建已读回执消息 (使用 channel 类型)
+        const readMsg = chatSDK.message.create({
+          type: 'channel',
           chatType: conversation.conversationType,
-          to: conversation.conversationId,
-          id: '' // 已读回执不需要特定消息ID
+          to: conversation.conversationId
         })
         
         // 发送已读回执

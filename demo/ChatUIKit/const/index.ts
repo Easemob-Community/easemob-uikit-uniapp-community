@@ -1,6 +1,6 @@
 const GET_GROUP_MEMBERS_PAGESIZE = 100; // 获取群组成员列表的每页数量
 
-const GroupEventFromIds: Array<string> = [];
+const GroupEventFromIds: Set<string> = new Set();
 
 const AT_ALL = "ALL";
 

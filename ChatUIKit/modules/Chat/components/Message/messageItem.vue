@@ -16,7 +16,7 @@
           {{ getUserInfo(msg.from || "").nickname || extUserInfo.nickname }}
         </view>
         <view
-          v-if="msg.ext.msgQuote && msg.ext.msgQuote.msgID"
+          v-if="msg?.ext?.msgQuote && msg.ext.msgQuote.msgID"
           class="msg-quote-container"
         >
           <MessageQuote

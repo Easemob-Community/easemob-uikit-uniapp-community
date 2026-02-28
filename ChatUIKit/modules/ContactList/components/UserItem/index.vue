@@ -31,7 +31,7 @@ const configStore = useConfigStore();
 
 const userInfo = computed(() => ({
   name: props.user.name || props.user.userId,
-  avatar: props.user.avatar,
+  avatar: props.user.avatar || '',
   presenceExt: props.user.presenceExt
 }));
 const showPresence = computed(() => configStore.getFeatureConfig.usePresence);

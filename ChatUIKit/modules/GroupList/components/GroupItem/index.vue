@@ -8,24 +8,45 @@
 <script setup lang="ts">
 import Avatar from "../../../../components/Avatar/index.vue";
 import { computed } from "vue";
-import { useGroupStore } from "../../../../../stores";
+import { useGroupStore } from "../../../../stores";
 import { GROUP_AVATAR_URL } from "../../../../const/index";
 
 interface Props {
-  groupId: string;
+  group: {
+    groupId?: string;
+    groupid?: string;
+    groupName?: string;
+    groupname?: string;
+    avatar?: string;
+    avatarurl?: string;
+  };
 }
 
 const props = defineProps<Props>();
 
 const groupStore = useGroupStore();
 
-const groupName = computed(() => groupStore.getGroupName(props.groupId));
-const groupAvatar = computed(() => groupStore.getGroupAvatar(props.groupId));
+const groupId = computed(() => props.group.groupId || props.group.groupid || '');
+
+const groupName = computed(() => {
+  // 优先使用 group 对象的 name（兼容驼峰和小写）
+  const name = props.group.groupName || props.group.groupname;
+  if (name) return name;
+  // 否则从 store 获取
+  return groupStore.getGroupName(groupId.value);
+});
+const groupAvatar = computed(() => {
+  // 优先使用 group 对象的 avatar（兼容驼峰和小写）
+  const avatar = props.group.avatar || props.group.avatarurl;
+  if (avatar) return avatar;
+  // 否则从 store 获取
+  return groupStore.getGroupAvatar(groupId.value);
+});
 
 const emits = defineEmits(["onTap"]);
 
 const onTap = () => {
-  emits("onTap", props.groupId);
+  emits("onTap", groupId.value);
 };
 </script>
 <style lang="scss" scoped>

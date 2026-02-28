@@ -67,7 +67,7 @@
           <view class="time">{{
             getConversationTime(conversation.lastMessage)
           }}</view>
-          <view :class="conversation.unReadCount ? '' : 'hidden'">
+          <view v-if="conversation.unReadCount">
             <view v-if="isMute" class="unread-mute"></view>
             <view v-else class="unread-count">
               {{

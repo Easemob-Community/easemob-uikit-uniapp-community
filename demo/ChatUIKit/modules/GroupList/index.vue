@@ -8,8 +8,8 @@
     <view class="list" v-if="groupList.length">
       <view
         v-for="group in groupList"
-        :key="group.groupId"
-        @click="toChatPage(group.groupId)"
+        :key="group.groupId || group.groupid"
+        @click="toChatPage(group.groupId || group.groupid)"
       >
         <GroupItem :group="group" />
       </view>
@@ -37,6 +37,10 @@ const onBack = () => {
 };
 
 const toChatPage = (id: string) => {
+  if (!id) {
+    console.error('Group ID is undefined');
+    return;
+  }
   uni.navigateTo({
     url: `/ChatUIKit/modules/Chat/index?type=groupChat&id=${id}`
   });
