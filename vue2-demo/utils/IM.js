@@ -1,11 +1,13 @@
 /**
  * 环信 SDK 初始化文件
- * 使用 easemob-websdk/uniApp/Easemob-chat 适配 uni-app
+ * 
+ * 引入方式：由于 uni-app Vue2 的 npm 引入有坑
+ * 需要先在 manifest.json 中开启 nodeModules: true
+ * 然后使用相对路径引入 node_modules 下的文件
  */
 
-// 引入环信 SDK（uni-app 版本）
-// 注意：uni-app Vue2 需要使用 /@/node_modules/ 前缀
-import websdk from '/@/node_modules/easemob-websdk/uniApp/Easemob-chat'
+// 使用相对路径引入 SDK（从 utils/ 到 node_modules/）
+import websdk from '../../node_modules/easemob-websdk/uniApp/Easemob-chat'
 
 // SDK 配置
 const SDK_CONFIG = {
