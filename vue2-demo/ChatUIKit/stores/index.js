@@ -2,15 +2,19 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import conn from './conn'
 import conversation from './conversation'
+import group from './group'
+import appUser from './appUser'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   modules: {
     conn,
-    conversation
+    conversation,
+    group,
+    appUser
   }
 })
 
 // 导出模块方便单独引用
-export { conn, conversation }
+export { conn, conversation, group, appUser }

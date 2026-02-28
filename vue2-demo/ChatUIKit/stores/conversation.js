@@ -12,7 +12,9 @@ export default {
     // 是否正在加载
     loading: false,
     // 未读消息总数
-    totalUnreadCount: 0
+    totalUnreadCount: 0,
+    // 静音会话映射
+    muteConvsMap: {}
   },
 
   getters: {
@@ -28,6 +30,11 @@ export default {
     // 获取指定会话
     getConversationById: state => id => {
       return state.conversationList.find(item => item.conversationId === id)
+    },
+    
+    // 获取会话静音状态
+    getConversationMuteStatus: state => id => {
+      return !!state.muteConvsMap[id]
     }
   },
 
@@ -75,6 +82,14 @@ export default {
     
     SET_TOTAL_UNREAD_COUNT(state, count) {
       state.totalUnreadCount = count
+    },
+    
+    SET_CONVERSATION_MUTE(state, { conversationId, isMute }) {
+      if (isMute) {
+        Vue.set(state.muteConvsMap, conversationId, true)
+      } else {
+        Vue.delete(state.muteConvsMap, conversationId)
+      }
     }
   },
 
@@ -96,6 +111,9 @@ export default {
           conversationType: item.channel_type === 'chat' ? 'singleChat' : 'groupChat',
           name: item.name || item.channel_id,
           avatar: item.avatar || '',
+          isPinned: item.isPinned || false,
+          pinnedTime: item.pinnedTime,
+          atType: item.atType || 'NONE',
           lastMessage: item.lastMessage ? {
             id: item.lastMessage.id,
             type: item.lastMessage.type,
@@ -114,26 +132,24 @@ export default {
         
       } catch (error) {
         console.error('获取会话列表失败:', error)
-        uni.showToast({ title: '获取会话列表失败', icon: 'none' })
       } finally {
         commit('SET_LOADING', false)
       }
     },
 
     // 删除会话
-    async deleteConversation({ commit, rootState }, conversation) {
+    async deleteConversation({ commit, rootState }, { conversationId, conversationType }) {
       const chatConn = rootState.conn.chatConn
       if (!chatConn) return
 
       try {
         await chatConn.deleteConversation({
-          channel: conversation.conversationId,
-          chatType: conversation.conversationType,
+          channel: conversationId,
+          chatType: conversationType,
           deleteRoam: true
         })
         
-        commit('REMOVE_CONVERSATION', conversation.conversationId)
-        uni.showToast({ title: '删除成功', icon: 'success' })
+        commit('REMOVE_CONVERSATION', conversationId)
       } catch (error) {
         console.error('删除会话失败:', error)
         uni.showToast({ title: '删除失败', icon: 'none' })
@@ -166,6 +182,57 @@ export default {
       // 标记已读
       if (conversation.unReadCount > 0) {
         dispatch('markConversationAsRead', conversation)
+      }
+    },
+    
+    // 设置会话静音状态
+    async setSilentModeForConversation({ commit, rootState }, { conversationId, conversationType }, isMute) {
+      const chatConn = rootState.conn.chatConn
+      if (!chatConn) return
+
+      try {
+        if (isMute) {
+          await chatConn.setSilentModeForConversation({
+            conversationId,
+            type: conversationType
+          })
+        } else {
+          await chatConn.clearRemindTypeForConversation({
+            conversationId,
+            type: conversationType
+          })
+        }
+        
+        commit('SET_CONVERSATION_MUTE', { conversationId, isMute })
+      } catch (error) {
+        console.error('设置静音状态失败:', error)
+      }
+    },
+    
+    // 置顶/取消置顶会话
+    async pinConversation({ commit, rootState }, { conversationId, conversationType }, isPinned) {
+      const chatConn = rootState.conn.chatConn
+      if (!chatConn) return
+
+      try {
+        if (isPinned) {
+          await chatConn.pinConversation({
+            conversationId,
+            conversationType
+          })
+        } else {
+          await chatConn.unpinConversation({
+            conversationId,
+            conversationType
+          })
+        }
+        
+        commit('UPDATE_CONVERSATION', {
+          conversationId,
+          updates: { isPinned, pinnedTime: isPinned ? Date.now() : undefined }
+        })
+      } catch (error) {
+        console.error('设置置顶状态失败:', error)
       }
     }
   }
