@@ -121,7 +121,7 @@ class ChatUIKit {
       onChannelMessage: (msg) => {
         console.log('[ChatUIKit] Channel message:', msg)
         // 刷新会话列表以更新未读数
-        this.store.dispatch('conversation/getConversationList')
+        this.store.dispatch('conversation/getServerConversations')
         uni.$emit('chatChannelMessage', msg)
       },
 
@@ -206,7 +206,7 @@ class ChatUIKit {
     uni.$emit('chatOnNewMessage', msg)
     
     // 刷新会话列表
-    this.store.dispatch('conversation/getConversationList')
+    this.store.dispatch('conversation/getServerConversations')
   }
 
   /**
@@ -215,8 +215,8 @@ class ChatUIKit {
   _loadInitialData() {
     console.log('[ChatUIKit] Loading initial data...')
     
-    // 加载会话列表
-    this.store.dispatch('conversation/getConversationList')
+    // 加载会话列表（首次从服务器获取）
+    this.store.dispatch('conversation/getServerConversations')
     
     // 后续可添加：加载联系人列表、群组列表等
     // this.store.dispatch('contact/getContacts')

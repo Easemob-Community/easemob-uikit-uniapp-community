@@ -60,19 +60,12 @@ export default {
     },
     
     conversationList() {
+      // 从 store 获取会话列表（首次由 SDK 连接成功后加载，后续直接从 store 读取）
       return this.$store.getters['conversation/sortedConversationList']
     }
   },
   
-  mounted() {
-    // 加载会话列表
-    this.loadConversationList()
-  },
-  
   methods: {
-    loadConversationList() {
-      this.$store.dispatch('conversation/getConversationList')
-    },
     
     deleteConversation(conv) {
       this.$store.dispatch('conversation/deleteConversation', {

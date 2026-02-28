@@ -9,13 +9,8 @@ import ConversationList from '../../ChatUIKit/modules/Conversation'
 export default {
   components: {
     ConversationList
-  },
-  
-  onShow() {
-    // 页面显示时刷新会话列表
-    if (this.$store) {
-      this.$store.dispatch('conversation/getConversationList')
-    }
   }
+  // 会话列表数据在 SDK 连接成功后自动加载（ChatUIKit._loadInitialData）
+  // 页面切换时直接从 store 读取，不再重复请求远端数据
 }
 </script>

@@ -94,36 +94,41 @@ export default {
   },
 
   actions: {
-    // 获取会话列表
-    async getConversationList({ commit, rootState }) {
+    // 从服务器获取会话列表
+    async getServerConversations({ commit, rootState }) {
       const chatConn = rootState.conn.chatConn
       if (!chatConn) return
 
       commit('SET_LOADING', true)
       
       try {
-        const res = await chatConn.getConversationlist()
-        console.log('[ConversationStore] getConversationlist res:', res)
-        // SDK 返回的数据在 data.channel_infos 中
-        const list = (res.data && res.data.channel_infos) || []
+        const res = await chatConn.getServerConversations({
+          pageSize: 50,
+          cursor: '',
+          includeEmptyConversations: true
+        })
+        console.log('[ConversationStore] getServerConversations res:', res)
         
-        // 处理会话数据
-        const formattedList = list.map(item => ({
-          conversationId: item.channel_id,
-          conversationType: item.channel_type === 'chat' ? 'singleChat' : 'groupChat',
-          name: item.name || item.channel_id,
-          avatar: item.avatar || '',
+        // SDK 返回标准格式：conversations 数组
+        const conversations = (res.data && res.data.conversations) || []
+        
+        // 处理会话数据，适配 UI 格式
+        const formattedList = conversations.map(item => ({
+          conversationId: item.conversationId,
+          conversationType: item.conversationType,
+          name: item.conversationName || item.conversationId,
+          avatar: item.conversationAvatar || '',
           isPinned: item.isPinned || false,
           pinnedTime: item.pinnedTime,
           atType: item.atType || 'NONE',
           lastMessage: item.lastMessage ? {
             id: item.lastMessage.id,
             type: item.lastMessage.type,
-            msg: item.lastMessage.msg || (item.lastMessage.body && item.lastMessage.body.msg) || '',
+            msg: item.lastMessage.body?.msg || item.lastMessage.msg || '',
             time: item.lastMessage.time,
             from: item.lastMessage.from
           } : null,
-          unReadCount: item.unread_num || 0
+          unReadCount: item.unReadCount || 0
         }))
         console.log('[ConversationStore] formattedList:', formattedList)
 
