@@ -17,8 +17,34 @@
 			"style": {
 				"navigationBarTitleText": "聊天"
 			}
+		},
+		{
+			"path": "pages/me/index",
+			"style": {
+				"navigationStyle": "custom"
+			}
 		}
 	],
+	"tabBar": {
+		"backgroundColor": "#F6F8FA",
+		"color": "#999999",
+		"selectedColor": "#00a4fd",
+		"height": "60px",
+		"list": [
+			{
+				"text": "消息",
+				"iconPath": "static/icon/conversation.png",
+				"selectedIconPath": "static/icon/conversation_active.png",
+				"pagePath": "pages/conversation/index"
+			},
+			{
+				"text": "个人中心",
+				"iconPath": "static/icon/mine.png",
+				"selectedIconPath": "static/icon/mine_active.png",
+				"pagePath": "pages/me/index"
+			}
+		]
+	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "环信 Chat",

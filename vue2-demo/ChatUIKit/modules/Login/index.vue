@@ -148,9 +148,9 @@ export default {
         
         uni.showToast({ title: '登录成功', icon: 'success' })
         
-        // 跳转会话列表
+        // 跳转会话列表（使用 switchTab 跳转到 tabbar 页面）
         setTimeout(() => {
-          uni.redirectTo({
+          uni.switchTab({
             url: '/pages/conversation/index'
           })
         }, 500)
