@@ -4,11 +4,12 @@
  */
 
 // 引入环信 SDK（uni-app 版本）
-import websdk from 'easemob-websdk/uniApp/Easemob-chat'
+// 注意：uni-app Vue2 需要使用 /@/node_modules/ 前缀
+import websdk from '/@/node_modules/easemob-websdk/uniApp/Easemob-chat'
 
 // SDK 配置
 const SDK_CONFIG = {
-  // 请替换为您的 AppKey
+  // 请替换为您的 AppKey，格式：appkey@im-appkey
   appKey: 'your-app-key@im-appkey',
   // 是否开启调试模式
   debug: true,
