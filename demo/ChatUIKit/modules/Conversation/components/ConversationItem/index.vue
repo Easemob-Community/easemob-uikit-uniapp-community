@@ -83,7 +83,7 @@
         :class="['menu', menu.class]"
         v-for="menu in currentMenuList"
         :key="menu.action"
-        @click="handleMenuClick(menu.action)"
+        @click.stop="handleMenuClick(menu.action)"
       >
         {{ menu.name }}
       </view>

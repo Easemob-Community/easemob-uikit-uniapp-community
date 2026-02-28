@@ -14,7 +14,13 @@
         :groupCount="joinedGroupCount"
       >
         <template v-slot:indexedItem="slotProps">
-          <UserItem @tap="onContactTap(slotProps.item.userId)" :user="slotProps.item" />
+          <UserItem 
+            :user="slotProps.item" 
+            :showMenu="selectedUserId === slotProps.item.userId"
+            @onTap="onContactTap"
+            @onDelete="onDeleteContact"
+            @onSwipe="handleSwipe"
+          />
         </template>
       </IndexedList>
     </view>
@@ -22,9 +28,9 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from "vue";
 import ContactNav from "./components/ContactNav/index.vue";
 import IndexedList from "../../components/IndexedList/index.vue";
-import { computed } from "vue";
 import { useContactStore, useGroupStore, useAppUserStore } from "../../stores";
 import UserItem from "./components/UserItem/index.vue";
 import { isWXProgram } from "../../utils/index";
@@ -46,6 +52,8 @@ const contactList = computed(() => {
 const contactRequestCount = computed(() => contactStore.contactsNoticeInfo.unReadCount);
 const joinedGroupCount = computed(() => groupStore.groupList.length);
 
+const selectedUserId = ref<string | null>(null);
+
 const onGroupTap = () => {
   uni.navigateTo({
     url: "/ChatUIKit/modules/GroupList/index"
@@ -62,6 +70,26 @@ const onNewRequestTap = () => {
   uni.navigateTo({
     url: "/ChatUIKit/modules/ContactRequestList/index"
   });
+};
+
+const handleSwipe = (userId: string | null) => {
+  selectedUserId.value = userId;
+};
+
+const onDeleteContact = async (userId: string) => {
+  try {
+    await contactStore.deleteContact(userId);
+    uni.showToast({
+      title: '删除成功',
+      icon: 'success'
+    });
+  } catch (error) {
+    uni.showToast({
+      title: '删除失败',
+      icon: 'none'
+    });
+  }
+  selectedUserId.value = null;
 };
 </script>
 <style lang="scss" scoped>

@@ -19,15 +19,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import NavBar from "../../components/NavBar/index.vue";
 import Empty from "../../components/Empty/index.vue";
 import RequestItem from "./components/RequestItem/index.vue";
 import { t } from "../../locales/index";
-import { useContactStore } from "../../stores";
+import { useContactStore, useAppUserStore } from "../../stores";
 
-// Pinia store
+// Pinia stores
 const contactStore = useContactStore();
+const appUserStore = useAppUserStore();
 
 /** 使用 computed 替代 autorun */
 const contactApplyRequestList = computed(() => {
@@ -35,6 +36,20 @@ const contactApplyRequestList = computed(() => {
     return info.ext === "invited";
   });
 });
+
+// 自动获取申请者用户信息
+watch(
+  contactApplyRequestList,
+  (list) => {
+    if (list.length > 0) {
+      const userIds = list.map((item) => item.from).filter(Boolean);
+      if (userIds.length > 0) {
+        appUserStore.getUsersInfoFromServer({ userIdList: userIds });
+      }
+    }
+  },
+  { immediate: true }
+);
 
 const onBack = () => {
   uni.navigateBack();

@@ -49,9 +49,16 @@ export const useContactStore = defineStore('contact', {
     getContactsNoticeList: (state) => state.contactsNoticeInfo.list,
 
     /**
-     * 获取好友申请未读数
+     * 获取好友申请未读数（基于实际的 invited 类型通知数量）
      */
-    getContactsNoticeUnreadCount: (state) => state.contactsNoticeInfo.unReadCount,
+    getContactsNoticeUnreadCount: (state) => {
+      // 计算实际未处理的申请数量
+      const actualUnreadCount = state.contactsNoticeInfo.list.filter(
+        item => item.ext === 'invited'
+      ).length
+      // 如果缓存的未读数与实际不符，以实际为准
+      return actualUnreadCount
+    },
 
     /**
      * 根据ID查找联系人
@@ -170,12 +177,16 @@ export const useContactStore = defineStore('contact', {
     /**
      * 接受好友申请
      */
-    async acceptContact(userId: string) {
+    async acceptContactInvite(userId: string) {
       logger.info('[ContactStore] Accepting contact:', userId)
       
       try {
         const connStore = useConnStore()
         const res = await connStore.getChatConn.acceptContactInvite(userId)
+        // 移除通知
+        this.removeContactNotice(userId)
+        // 刷新联系人列表
+        this.getContacts()
         logger.info('[ContactStore] Successfully accepted contact:', userId)
         return res
       } catch (error) {
@@ -187,7 +198,7 @@ export const useContactStore = defineStore('contact', {
     /**
      * 拒绝好友申请
      */
-    async declineContact(userId: string) {
+    async declineContactInvite(userId: string) {
       logger.info('[ContactStore] Declining contact:', userId)
       
       try {
@@ -206,8 +217,23 @@ export const useContactStore = defineStore('contact', {
      * 添加好友申请通知
      */
     addContactNotice(notice: ContactNotice) {
+      // 检查是否已存在相同 from 的通知
+      const exists = this.contactsNoticeInfo.list.some(
+        item => item.from === notice.from
+      )
+      if (exists) {
+        // 如果已存在，先移除旧的
+        this.contactsNoticeInfo.list = this.contactsNoticeInfo.list.filter(
+          item => item.from !== notice.from
+        )
+      }
+      
       this.contactsNoticeInfo.list.unshift(notice)
-      this.contactsNoticeInfo.unReadCount++
+      
+      // 只有 invited 类型的通知才增加未读数（新的申请）
+      if (notice.ext === 'invited') {
+        this.contactsNoticeInfo.unReadCount++
+      }
     },
 
     /**
@@ -218,7 +244,10 @@ export const useContactStore = defineStore('contact', {
         item => item.from === userId
       )
       if (index > -1) {
-        this.contactsNoticeInfo.list.splice(index, 1)
+        // 使用 filter 创建新数组确保响应式更新
+        this.contactsNoticeInfo.list = this.contactsNoticeInfo.list.filter(
+          item => item.from !== userId
+        )
         this.contactsNoticeInfo.unReadCount = Math.max(
           0, 
           this.contactsNoticeInfo.unReadCount - 1

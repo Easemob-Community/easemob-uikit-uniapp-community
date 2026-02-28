@@ -12,8 +12,9 @@
         <view class="tip ellipsis" v-text="t('contactRequestListTip')"></view>
       </view>
 
-      <view class="action" @tap="acceptContactInvite">
-        <view class="btn">{{ t("contactRequestAgreeButton") }}</view>
+      <view class="action">
+        <view class="btn btn-decline" @tap="declineContactInvite">{{ t("refuseFriend") }}</view>
+        <view class="btn btn-accept" @tap="acceptContactInvite">{{ t("contactRequestAgreeButton") }}</view>
       </view>
     </view>
   </view>
@@ -44,7 +45,26 @@ const userInfo = computed(() => {
 });
 
 const acceptContactInvite = () => {
+  // 检查是否已经是好友
+  const isAlreadyContact = contactStore.contacts.some(
+    contact => contact.userId === props.user.userId
+  );
+  
+  if (isAlreadyContact) {
+    uni.showToast({
+      title: '已经是好友',
+      icon: 'none'
+    });
+    // 移除该通知
+    contactStore.removeContactNotice(props.user.userId);
+    return;
+  }
+  
   contactStore.acceptContactInvite(props.user.userId);
+};
+
+const declineContactInvite = () => {
+  contactStore.declineContactInvite(props.user.userId);
 };
 
 // 无需手动卸载 computed
@@ -102,14 +122,26 @@ const acceptContactInvite = () => {
 
 .action {
   margin-right: 16px;
+  display: flex;
+  gap: 8px;
 }
 
 .btn {
-  min-width: 80px;
+  min-width: 60px;
   text-align: center;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 4px 12px;
+  font-size: 14px;
+}
+
+.btn-accept {
   background-color: #009dff;
   color: #f9fafa;
+}
+
+.btn-decline {
+  background-color: #f5f5f5;
+  color: #75828a;
+  border: 0.5px solid #e3e6e8;
 }
 </style>

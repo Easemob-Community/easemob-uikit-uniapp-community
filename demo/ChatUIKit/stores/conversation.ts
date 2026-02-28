@@ -286,8 +286,9 @@ export const useConversationStore = defineStore('conversation', {
       try {
         const connStore = useConnStore()
         await connStore.getChatConn.deleteConversation({
-          channel: conversation.conversationType,
-          conversationId: conversation.conversationId
+          channel: conversation.conversationId,
+          chatType: conversation.conversationType,
+          deleteRoam: true
         })
         
         // 从列表移除
