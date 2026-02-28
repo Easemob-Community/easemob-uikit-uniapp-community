@@ -103,10 +103,20 @@ const createGroup = () => {
     .createGroup({
       data: params
     })
-    .then((res) => {
-      uni.redirectTo({
-        url: `/ChatUIKit/modules/Chat/index?type=groupChat&id=${res.data?.groupid}`
-      });
+    .then(async (res) => {
+      const groupId = res.data?.groupid || res.data?.groupId;
+      if (groupId) {
+        // 添加新群组到列表并获取详情
+        await groupStore.addNewGroup({
+          groupid: groupId,
+          groupname: params.groupname,
+          groupId: groupId,
+          groupName: params.groupname
+        });
+        uni.redirectTo({
+          url: `/ChatUIKit/modules/Chat/index?type=groupChat&id=${groupId}`
+        });
+      }
     })
     .finally(() => {
       uni.hideLoading();

@@ -260,6 +260,16 @@ export const useChatStore = defineStore('chat', {
           groupStore.fetchGroupDetails([event.gid])
           break
 
+        case 'addMember':
+          // 被邀请加入群组，添加到列表
+          if (event.to === useConnStore().getChatConn.user) {
+            groupStore.addNewGroup({
+              groupid: event.gid,
+              groupId: event.gid
+            })
+          }
+          break
+
         case 'destroy':
           // 群解散
           groupStore.removeGroupFromList(event.gid)

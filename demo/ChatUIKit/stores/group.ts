@@ -232,6 +232,40 @@ export const useGroupStore = defineStore('group', {
     },
 
     /**
+     * 添加新群组到列表并获取详情
+     */
+    async addNewGroup(group: { groupid?: string; groupId?: string; groupname?: string; groupName?: string }) {
+      const groupId = group.groupId || group.groupid
+      const groupName = group.groupName || group.groupname
+      
+      if (!groupId) return
+      
+      logger.info('[GroupStore] Adding new group to list:', groupId)
+      
+      // 检查是否已存在
+      const exists = this.groupList.some(g => 
+        g.groupId === groupId || (g as any).groupid === groupId
+      )
+      
+      if (!exists) {
+        // 添加到列表（兼容两种字段名格式）
+        this.groupList.push({
+          groupId,
+          groupid: groupId,
+          groupName: groupName || groupId,
+          groupname: groupName || groupId
+        } as any)
+      }
+      
+      // 获取群组详情
+      try {
+        await this.fetchGroupDetails([groupId])
+      } catch (error) {
+        logger.error('[GroupStore] Failed to fetch new group details:', error)
+      }
+    },
+
+    /**
      * 申请加入群组
      */
     async joinGroup(groupId: string, message?: string) {
