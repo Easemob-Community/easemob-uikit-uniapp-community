@@ -110,7 +110,8 @@ watch(
         isOpacity.value = false;
       }, 200);
     });
-  }
+  },
+  { immediate: true } // 修复：立即执行以处理离线消息场景
 );
 
 onMounted(() => {
