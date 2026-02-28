@@ -3,7 +3,8 @@
 </template>
 
 <script>
-import Login from '@/ChatUIKit/modules/Login'
+// 使用相对路径
+import Login from '../../ChatUIKit/modules/Login'
 
 export default {
   components: {

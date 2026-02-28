@@ -3,7 +3,8 @@
 </template>
 
 <script>
-import ConversationList from '@/ChatUIKit/modules/Conversation'
+// 使用相对路径
+import ConversationList from '../../ChatUIKit/modules/Conversation'
 
 export default {
   components: {
@@ -12,7 +13,9 @@ export default {
   
   onShow() {
     // 页面显示时刷新会话列表
-    this.$store.dispatch('conversation/getConversationList')
+    if (this.$store) {
+      this.$store.dispatch('conversation/getConversationList')
+    }
   }
 }
 </script>

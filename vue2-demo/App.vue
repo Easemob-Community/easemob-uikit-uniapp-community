@@ -1,5 +1,6 @@
 <script>
-import { EMClient } from '@/utils/IM'
+// 使用相对路径引入（避免 @ 别名问题）
+import { EMClient } from './utils/IM'
 
 export default {
   onLaunch: function() {
@@ -12,7 +13,9 @@ export default {
   onShow: function() {
     console.log('App Show')
     // 检测连接有效性
-    this.$ChatUIKit.onShow && this.$ChatUIKit.onShow()
+    if (this.$ChatUIKit && this.$ChatUIKit.onShow) {
+      this.$ChatUIKit.onShow()
+    }
   },
   
   onHide: function() {
@@ -21,20 +24,29 @@ export default {
   
   methods: {
     initChatUIKit() {
-      if (!EMClient) {
-        console.error('EMClient SDK not found')
-        return
-      }
-      
-      console.log('Initializing ChatUIKit with EMClient...')
-      
-      // 初始化 ChatUIKit
-      this.$ChatUIKit.init({
-        chat: EMClient,
-        config: {
-          isDebug: true
+      try {
+        if (!EMClient) {
+          console.error('EMClient SDK not found')
+          return
         }
-      })
+        
+        console.log('Initializing ChatUIKit with EMClient...')
+        
+        // 初始化 ChatUIKit
+        if (this.$ChatUIKit && this.$ChatUIKit.init) {
+          this.$ChatUIKit.init({
+            chat: EMClient,
+            config: {
+              isDebug: true
+            }
+          })
+          console.log('ChatUIKit initialized successfully')
+        } else {
+          console.error('ChatUIKit not found on Vue prototype')
+        }
+      } catch (error) {
+        console.error('Failed to initialize ChatUIKit:', error)
+      }
     }
   }
 }
