@@ -6,8 +6,8 @@ export const GET_GROUP_MEMBERS_PAGESIZE = 100
 // @所有人
 export const AT_ALL = 'ALL'
 
-// 资源 URL - 使用本地资源
-export const ASSETS_URL = '../../assets/'
+// 资源 URL - 使用 static 目录绝对路径
+export const ASSETS_URL = '/static/'
 
 // 默认用户头像
 export const USER_AVATAR_URL = ASSETS_URL + 'user.png'

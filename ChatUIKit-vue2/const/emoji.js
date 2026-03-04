@@ -1,5 +1,5 @@
-// 表情列表 - 使用本地资源
-const emojiBaseUrl = '../../assets/emojis/'
+// 表情列表 - 使用 static 目录绝对路径
+const emojiBaseUrl = '/static/emojis/'
 
 // 表情列表
 export const emojiList = [
