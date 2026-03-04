@@ -1,0 +1,111 @@
+// 表情列表
+const ASSETS_URL = 'https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/'
+
+// 表情列表
+export const emojiList = [
+  { alt: '[微笑]', url: ASSETS_URL + 'emoji/0.png' },
+  { alt: '[撇嘴]', url: ASSETS_URL + 'emoji/1.png' },
+  { alt: '[色]', url: ASSETS_URL + 'emoji/2.png' },
+  { alt: '[发呆]', url: ASSETS_URL + 'emoji/3.png' },
+  { alt: '[得意]', url: ASSETS_URL + 'emoji/4.png' },
+  { alt: '[流泪]', url: ASSETS_URL + 'emoji/5.png' },
+  { alt: '[害羞]', url: ASSETS_URL + 'emoji/6.png' },
+  { alt: '[闭嘴]', url: ASSETS_URL + 'emoji/7.png' },
+  { alt: '[睡]', url: ASSETS_URL + 'emoji/8.png' },
+  { alt: '[大哭]', url: ASSETS_URL + 'emoji/9.png' },
+  { alt: '[尴尬]', url: ASSETS_URL + 'emoji/10.png' },
+  { alt: '[发怒]', url: ASSETS_URL + 'emoji/11.png' },
+  { alt: '[调皮]', url: ASSETS_URL + 'emoji/12.png' },
+  { alt: '[呲牙]', url: ASSETS_URL + 'emoji/13.png' },
+  { alt: '[惊讶]', url: ASSETS_URL + 'emoji/14.png' },
+  { alt: '[难过]', url: ASSETS_URL + 'emoji/15.png' },
+  { alt: '[酷]', url: ASSETS_URL + 'emoji/16.png' },
+  { alt: '[冷汗]', url: ASSETS_URL + 'emoji/17.png' },
+  { alt: '[抓狂]', url: ASSETS_URL + 'emoji/18.png' },
+  { alt: '[吐]', url: ASSETS_URL + 'emoji/19.png' },
+  { alt: '[偷笑]', url: ASSETS_URL + 'emoji/20.png' },
+  { alt: '[可爱]', url: ASSETS_URL + 'emoji/21.png' },
+  { alt: '[白眼]', url: ASSETS_URL + 'emoji/22.png' },
+  { alt: '[傲慢]', url: ASSETS_URL + 'emoji/23.png' },
+  { alt: '[饥饿]', url: ASSETS_URL + 'emoji/24.png' },
+  { alt: '[困]', url: ASSETS_URL + 'emoji/25.png' },
+  { alt: '[惊恐]', url: ASSETS_URL + 'emoji/26.png' },
+  { alt: '[流汗]', url: ASSETS_URL + 'emoji/27.png' },
+  { alt: '[憨笑]', url: ASSETS_URL + 'emoji/28.png' },
+  { alt: '[大兵]', url: ASSETS_URL + 'emoji/29.png' },
+  { alt: '[奋斗]', url: ASSETS_URL + 'emoji/30.png' },
+  { alt: '[咒骂]', url: ASSETS_URL + 'emoji/31.png' },
+  { alt: '[疑问]', url: ASSETS_URL + 'emoji/32.png' },
+  { alt: '[嘘]', url: ASSETS_URL + 'emoji/33.png' },
+  { alt: '[晕]', url: ASSETS_URL + 'emoji/34.png' },
+  { alt: '[折磨]', url: ASSETS_URL + 'emoji/35.png' },
+  { alt: '[衰]', url: ASSETS_URL + 'emoji/36.png' },
+  { alt: '[骷髅]', url: ASSETS_URL + 'emoji/37.png' },
+  { alt: '[敲打]', url: ASSETS_URL + 'emoji/38.png' },
+  { alt: '[再见]', url: ASSETS_URL + 'emoji/39.png' },
+  { alt: '[擦汗]', url: ASSETS_URL + 'emoji/40.png' },
+  { alt: '[抠鼻]', url: ASSETS_URL + 'emoji/41.png' },
+  { alt: '[鼓掌]', url: ASSETS_URL + 'emoji/42.png' },
+  { alt: '[糗大了]', url: ASSETS_URL + 'emoji/43.png' },
+  { alt: '[坏笑]', url: ASSETS_URL + 'emoji/44.png' },
+  { alt: '[左哼哼]', url: ASSETS_URL + 'emoji/45.png' },
+  { alt: '[右哼哼]', url: ASSETS_URL + 'emoji/46.png' },
+  { alt: '[哈欠]', url: ASSETS_URL + 'emoji/47.png' },
+  { alt: '[鄙视]', url: ASSETS_URL + 'emoji/48.png' },
+  { alt: '[委屈]', url: ASSETS_URL + 'emoji/49.png' },
+  { alt: '[快哭了]', url: ASSETS_URL + 'emoji/50.png' },
+  { alt: '[阴险]', url: ASSETS_URL + 'emoji/51.png' },
+  { alt: '[亲亲]', url: ASSETS_URL + 'emoji/52.png' },
+  { alt: '[吓]', url: ASSETS_URL + 'emoji/53.png' },
+  { alt: '[可怜]', url: ASSETS_URL + 'emoji/54.png' },
+  { alt: '[菜刀]', url: ASSETS_URL + 'emoji/55.png' },
+  { alt: '[西瓜]', url: ASSETS_URL + 'emoji/56.png' },
+  { alt: '[啤酒]', url: ASSETS_URL + 'emoji/57.png' },
+  { alt: '[篮球]', url: ASSETS_URL + 'emoji/58.png' },
+  { alt: '[乒乓]', url: ASSETS_URL + 'emoji/59.png' },
+  { alt: '[咖啡]', url: ASSETS_URL + 'emoji/60.png' },
+  { alt: '[饭]', url: ASSETS_URL + 'emoji/61.png' },
+  { alt: '[猪头]', url: ASSETS_URL + 'emoji/62.png' },
+  { alt: '[玫瑰]', url: ASSETS_URL + 'emoji/63.png' },
+  { alt: '[凋谢]', url: ASSETS_URL + 'emoji/64.png' },
+  { alt: '[嘴唇]', url: ASSETS_URL + 'emoji/65.png' },
+  { alt: '[爱心]', url: ASSETS_URL + 'emoji/66.png' },
+  { alt: '[心碎]', url: ASSETS_URL + 'emoji/67.png' },
+  { alt: '[蛋糕]', url: ASSETS_URL + 'emoji/68.png' },
+  { alt: '[闪电]', url: ASSETS_URL + 'emoji/69.png' },
+  { alt: '[炸弹]', url: ASSETS_URL + 'emoji/70.png' },
+  { alt: '[刀]', url: ASSETS_URL + 'emoji/71.png' },
+  { alt: '[足球]', url: ASSETS_URL + 'emoji/72.png' },
+  { alt: '[瓢虫]', url: ASSETS_URL + 'emoji/73.png' },
+  { alt: '[便便]', url: ASSETS_URL + 'emoji/74.png' },
+  { alt: '[月亮]', url: ASSETS_URL + 'emoji/75.png' },
+  { alt: '[太阳]', url: ASSETS_URL + 'emoji/76.png' },
+  { alt: '[礼物]', url: ASSETS_URL + 'emoji/77.png' },
+  { alt: '[拥抱]', url: ASSETS_URL + 'emoji/78.png' },
+  { alt: '[强]', url: ASSETS_URL + 'emoji/79.png' },
+  { alt: '[弱]', url: ASSETS_URL + 'emoji/80.png' },
+  { alt: '[握手]', url: ASSETS_URL + 'emoji/81.png' },
+  { alt: '[胜利]', url: ASSETS_URL + 'emoji/82.png' },
+  { alt: '[抱拳]', url: ASSETS_URL + 'emoji/83.png' },
+  { alt: '[勾引]', url: ASSETS_URL + 'emoji/84.png' },
+  { alt: '[拳头]', url: ASSETS_URL + 'emoji/85.png' },
+  { alt: '[差劲]', url: ASSETS_URL + 'emoji/86.png' },
+  { alt: '[爱你]', url: ASSETS_URL + 'emoji/87.png' },
+  { alt: '[NO]', url: ASSETS_URL + 'emoji/88.png' },
+  { alt: '[OK]', url: ASSETS_URL + 'emoji/89.png' }
+]
+
+// 表情映射
+export const emojiAltMap = emojiList.reduce((map, item) => {
+  map[item.alt] = item.url
+  return map
+}, {})
+
+// 表情映射（反向）
+export const emoji = {
+  map: emojiList.reduce((map, item) => {
+    map[item.alt] = item
+    return map
+  }, {}),
+  urlMap: emojiAltMap
+}

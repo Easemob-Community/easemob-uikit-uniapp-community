@@ -54,6 +54,16 @@ export default {
       }
     },
     
+    MOVE_CONVERSATION_TO_TOP(state, conversationId) {
+      const index = state.conversationList.findIndex(
+        item => item.conversationId === conversationId
+      )
+      if (index > -1) {
+        const [conv] = state.conversationList.splice(index, 1)
+        state.conversationList.unshift(conv)
+      }
+    },
+    
     REMOVE_CONVERSATION(state, conversationId) {
       const index = state.conversationList.findIndex(
         item => item.conversationId === conversationId
