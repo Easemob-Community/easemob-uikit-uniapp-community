@@ -105,16 +105,22 @@ export default {
     sendAudioMessage(res) {
       const tempFilePath = res.tempFilePath
       const duration = Math.floor((Date.now() - this.recordStartTime) / 1000)
-      const chatSDK = this.chatConn
+      const chatSDK = this.$store.state.conn.chatSDK
+      const chatConn = this.$store.state.conn.chatConn
 
       if (!chatSDK || !chatSDK.message) {
         console.error('SDK not initialized')
         return
       }
 
-      const uploadUrl = chatSDK.apiUrl + '/' + chatSDK.orgName + '/' + chatSDK.appName + '/chatfiles'
+      if (!chatConn) {
+        console.error('Connection not initialized')
+        return
+      }
 
-      const token = chatSDK.token
+      const uploadUrl = chatConn.apiUrl + '/' + chatConn.orgName + '/' + chatConn.appName + '/chatfiles'
+
+      const token = chatConn.token
       const requestParams = {
         url: uploadUrl,
         filePath: tempFilePath,

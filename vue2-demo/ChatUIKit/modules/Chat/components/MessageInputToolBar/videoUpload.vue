@@ -51,20 +51,26 @@ export default {
 
     sendVideoMessage(res) {
       const tempFilePath = res.tempFilePath
-      const chatSDK = this.chatConn
+      const chatSDK = this.$store.state.conn.chatSDK
+      const chatConn = this.$store.state.conn.chatConn
 
       if (!chatSDK || !chatSDK.message) {
         console.error('SDK not initialized')
         return
       }
 
-      const uploadUrl = chatSDK.apiUrl + '/' + chatSDK.orgName + '/' + chatSDK.appName + '/chatfiles'
+      if (!chatConn) {
+        console.error('Connection not initialized')
+        return
+      }
+
+      const uploadUrl = chatConn.apiUrl + '/' + chatConn.orgName + '/' + chatConn.appName + '/chatfiles'
 
       if (!tempFilePath) {
         return
       }
 
-      const token = chatSDK.token
+      const token = chatConn.token
       const requestParams = {
         url: uploadUrl,
         filePath: tempFilePath,
