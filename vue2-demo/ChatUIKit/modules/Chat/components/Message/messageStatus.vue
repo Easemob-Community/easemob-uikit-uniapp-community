@@ -1,9 +1,10 @@
 <template>
-  <view class="msg-status">
-    <view v-if="msg.status === 'sending'" class="status-icon loading"></view>
-    <view v-else-if="msg.status === 'failed'" class="status-icon failed" @tap="resend"></view>
-    <view v-else-if="msg.status === 'sent'" class="status-text">已发送</view>
-    <view v-else-if="msg.status === 'read'" class="status-text read">已读</view>
+  <view class="msg-status-wrap">
+    <view v-if="msg.status === 'sending'" class="msg-status sending"></view>
+    <view v-else-if="msg.status === 'sent'" class="msg-status sent"></view>
+    <view v-else-if="msg.status === 'failed'" class="msg-status failed" @tap="resend"></view>
+    <view v-else-if="msg.status === 'received'" class="msg-status received"></view>
+    <view v-else-if="msg.status === 'read'" class="msg-status read"></view>
   </view>
 </template>
 
@@ -20,7 +21,6 @@ export default {
 
   methods: {
     resend() {
-      // 重新发送消息
       this.$emit('resend', this.msg)
     }
   }
@@ -28,39 +28,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.msg-status {
-  position: absolute;
-  left: -24px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.status-icon {
-  width: 18px;
-  height: 18px;
-}
-
-.loading {
-  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/spinner.png");
-  background-size: 100%;
-  animation: spin 1s linear infinite;
-}
-
-.failed {
-  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/warning.png");
-  background-size: 100%;
-}
-
-.status-text {
-  font-size: 11px;
-  color: #999;
-  white-space: nowrap;
-}
-
-.read {
-  color: #009dff;
-}
-
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -68,5 +35,53 @@ export default {
   to {
     transform: rotate(360deg);
   }
+}
+
+.msg-status-wrap {
+  position: absolute;
+  display: inline-block;
+  left: -24px;
+  bottom: 0px;
+}
+
+.msg-status {
+  width: 20px;
+  height: 20px;
+}
+
+.sending {
+  background-position: center center;
+  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/spinner.png");
+  background-size: 100%;
+  animation: spin 1s linear infinite;
+  background-repeat: no-repeat;
+}
+
+.sent {
+  background-position: center center;
+  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/check.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+.failed {
+  background-position: center center;
+  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/failed.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+.received {
+  background-position: center center;
+  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/received.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+.read {
+  background-position: center center;
+  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/read.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
 }
 </style>
