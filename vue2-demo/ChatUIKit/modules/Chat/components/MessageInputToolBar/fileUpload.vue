@@ -8,7 +8,7 @@
 import ItemContainer from './itemContainer.vue'
 import { ASSETS_URL } from '../../../../const/index.js'
 
-const FileIcon = ASSETS_URL + 'icon/fileButton.png'
+const FileIcon = ASSETS_URL + 'icon/file.png'
 
 export default {
   name: 'FileUpload',

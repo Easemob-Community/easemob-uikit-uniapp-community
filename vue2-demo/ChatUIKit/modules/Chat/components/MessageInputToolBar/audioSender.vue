@@ -17,7 +17,7 @@
 <script>
 import { ASSETS_URL } from '../../../../const/index.js'
 
-const MicIcon = ASSETS_URL + 'icon/mic.png'
+const MicIcon = ASSETS_URL + 'icon/mic_on.png'
 const recorderManager = uni.getRecorderManager()
 
 export default {

@@ -8,7 +8,7 @@
 import ItemContainer from './itemContainer.vue'
 import { ASSETS_URL } from '../../../../const/index.js'
 
-const UserCardIcon = ASSETS_URL + 'icon/userCard.png'
+const UserCardIcon = ASSETS_URL + 'icon/usercard.png'
 
 export default {
   name: 'UserCard',
