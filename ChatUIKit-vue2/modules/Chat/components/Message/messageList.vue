@@ -7,7 +7,7 @@
       scroll-y
       :scroll-top="scrollTop"
       class="message-scroll-list"
-      :scroll-into-view="`msg-${currentViewMsgId}`"
+      :scroll-into-view="scrollIntoViewId"
       :scroll-anchoring="true"
     >
       <view
@@ -25,11 +25,11 @@
           { blink: blinkMsgId === (msg.serverMsgId || msg.id) }
         ]"
         v-for="(msg, idx) in msgs"
-        :id="`msg-${msg.serverMsgId || msg.id}`"
+        :id="'msg-' + (msg.serverMsgId || msg.id)"
         :key="msg.id"
       >
         <NoticeMessageItem
-          v-if="msg?.noticeInfo?.type === 'notice'"
+          v-if="msg.noticeInfo && msg.noticeInfo.type === 'notice'"
           :msg="msg"
         />
         <MessageItem
@@ -88,7 +88,12 @@ export default {
     },
 
     cursor() {
-      return this.$store.state.message.conversationMessagesMap[this.conversationId]?.cursor || ''
+      const info = this.$store.state.message.conversationMessagesMap[this.conversationId]
+      return info && info.cursor || ''
+    },
+
+    scrollIntoViewId() {
+      return this.currentViewMsgId ? 'msg-' + this.currentViewMsgId : ''
     }
   },
 
@@ -144,7 +149,8 @@ export default {
         return
       }
       this.isLoading = true
-      const firstMessageId = this.msgs[0]?.id || ''
+      const firstMessage = this.msgs[0]
+      const firstMessageId = firstMessage ? firstMessage.id : ''
       
       // #ifdef MP-WEIXIN
       this.currentViewMsgId = firstMessageId

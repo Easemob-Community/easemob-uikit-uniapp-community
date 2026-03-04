@@ -106,7 +106,7 @@ export default {
       const tempFilePath = res.tempFilePath
       const duration = Math.floor((Date.now() - this.recordStartTime) / 1000)
       const conn = this.chatConn
-      const uploadUrl = `${conn.apiUrl}/${conn.orgName}/${conn.appName}/chatfiles`
+      const uploadUrl = conn.apiUrl + '/' + conn.orgName + '/' + conn.appName + '/chatfiles'
 
       const token = conn.token
       const requestParams = {

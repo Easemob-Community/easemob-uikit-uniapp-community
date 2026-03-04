@@ -43,7 +43,7 @@ export default {
 
   computed: {
     userInfo() {
-      const customExts = this.msg.customExts || this.msg.ext?.customExts || {}
+      const customExts = this.msg.customExts || (this.msg.ext && this.msg.ext.customExts) || {}
       return {
         avatar: customExts.avatar || '',
         nickname: customExts.nickname || '未知用户',

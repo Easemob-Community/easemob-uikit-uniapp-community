@@ -50,7 +50,7 @@ export default {
     },
 
     sendImageMessage(res) {
-      const tempFilePath = res?.tempFilePaths?.[0] || res?.tempFiles?.[0]?.tempFilePath
+      const tempFilePath = (res.tempFilePaths && res.tempFilePaths[0]) || (res.tempFiles && res.tempFiles[0] && res.tempFiles[0].tempFilePath)
       const conn = this.chatConn
       const uploadUrl = `${conn.apiUrl}/${conn.orgName}/${conn.appName}/chatfiles`
 

@@ -134,7 +134,7 @@ export default {
           lastMessage: item.lastMessage ? {
             id: item.lastMessage.id,
             type: item.lastMessage.type,
-            msg: item.lastMessage.body?.msg || item.lastMessage.msg || '',
+            msg: (item.lastMessage.body && item.lastMessage.body.msg) || item.lastMessage.msg || '',
             time: item.lastMessage.time,
             from: item.lastMessage.from
           } : null,

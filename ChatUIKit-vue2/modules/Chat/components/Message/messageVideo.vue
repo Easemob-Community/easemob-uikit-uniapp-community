@@ -37,7 +37,7 @@ export default {
 
   computed: {
     videoUrl() {
-      return this.msg.url || this.msg.body?.url
+      return this.msg.url || (this.msg.body && this.msg.body.url)
     },
 
     videoStyle() {

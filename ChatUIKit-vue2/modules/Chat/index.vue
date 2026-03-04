@@ -4,7 +4,7 @@
       'chat-wrap',
       { 'chat-wrap-keyboard-close': keyboardHeight === '0px' }
     ]"
-    :style="{ height: `calc(100% - ${keyboardHeight})` }"
+    :style="{ height: 'calc(100% - ' + keyboardHeight + ')' }"
   >
     <ChatNav />
     <!-- 消息列表 -->
@@ -24,7 +24,7 @@
       :style="{
         position: 'fixed',
         width: '100%',
-        height: `calc(100% - ${keyboardHeight})`,
+        height: 'calc(100% - ' + keyboardHeight + ')',
         overflow: 'hidden',
         'z-index': 9
       }"

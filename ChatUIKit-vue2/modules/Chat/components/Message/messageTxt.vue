@@ -38,7 +38,8 @@ export default {
     },
 
     isSelf() {
-      const currentUserId = this.$store.state.conn.chatConn?.user
+      const conn = this.$store.state.conn.chatConn
+      const currentUserId = conn && conn.user
       return this.msg.from === currentUserId || this.msg.from === ''
     }
   }

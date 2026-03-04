@@ -33,11 +33,11 @@ export default {
 
   computed: {
     fileName() {
-      return this.msg.filename || this.msg.body?.filename || '未知文件'
+      return this.msg.filename || (this.msg.body && this.msg.body.filename) || '未知文件'
     },
 
     fileSize() {
-      const size = this.msg.file_length || this.msg.body?.file_length || 0
+      const size = this.msg.file_length || (this.msg.body && this.msg.body.file_length) || 0
       if (size < 1024) {
         return size + ' B'
       } else if (size < 1024 * 1024) {
@@ -48,7 +48,7 @@ export default {
     },
 
     fileUrl() {
-      return this.msg.url || this.msg.body?.url
+      return this.msg.url || (this.msg.body && this.msg.body.url)
     }
   },
 

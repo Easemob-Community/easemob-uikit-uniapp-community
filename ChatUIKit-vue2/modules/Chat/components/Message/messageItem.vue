@@ -6,17 +6,17 @@
     <view class="avatar-wrap">
       <Avatar
         :size="28"
-        :src="getUserInfo(msg.from || '').avatar || extUserInfo.avatarURL || ''"
+        :src="userAvatar"
         :placeholder="USER_AVATAR_URL"
       />
     </view>
     <view class="msg-content" :style="{ textAlign: isSelf ? 'right' : 'left' }">
       <view>
         <view class="user-nickname" v-if="!isSelf">
-          {{ getUserInfo(msg.from || '').nickname || extUserInfo.nickname }}
+          {{ userNickname }}
         </view>
         <view
-          v-if="msg?.ext?.msgQuote && msg.ext.msgQuote.msgID"
+          v-if="hasQuote"
           class="msg-quote-container"
         >
           <MessageQuote
@@ -120,12 +120,27 @@ export default {
 
   computed: {
     isSelf() {
-      const currentUserId = this.$store.state.conn.chatConn?.user
+      const conn = this.$store.state.conn.chatConn
+      const currentUserId = conn && conn.user
       return currentUserId === this.msg.from || this.msg.from === ''
     },
 
     extUserInfo() {
-      return this.msg.ext?.ease_chat_uikit_user_info || {}
+      return (this.msg.ext && this.msg.ext.ease_chat_uikit_user_info) || {}
+    },
+
+    userAvatar() {
+      const userInfo = this.getUserInfo(this.msg.from || '')
+      return userInfo.avatar || this.extUserInfo.avatarURL || ''
+    },
+
+    userNickname() {
+      const userInfo = this.getUserInfo(this.msg.from || '')
+      return userInfo.nickname || this.extUserInfo.nickname
+    },
+
+    hasQuote() {
+      return this.msg.ext && this.msg.ext.msgQuote && this.msg.ext.msgQuote.msgID
     },
 
     bubbleClass() {

@@ -142,10 +142,12 @@ export function sortByPinned(a, b) {
   } else if (!a.isPinned && b.isPinned) {
     return 1
   } else if ((!a.isPinned && !b.isPinned) || (a.isPinned && b.isPinned)) {
-    if (!a.lastMessage?.time) {
+    if (!(a.lastMessage && a.lastMessage.time)) {
       return 0
     }
-    return a.lastMessage?.time > b.lastMessage?.time ? -1 : 1
+    const timeA = a.lastMessage && a.lastMessage.time
+      const timeB = b.lastMessage && b.lastMessage.time
+      return timeA > timeB ? -1 : 1
   } else {
     return 0
   }
@@ -343,9 +345,9 @@ export function splitArrayIntoChunks(arr, chunkSize) {
 // 格式化消息预览
 export const formatMessage = (message) => {
   let lastMsg = ''
-  switch (message?.type) {
+  switch (message && message.type) {
     case 'txt':
-      lastMsg = message?.msg || ''
+      lastMsg = (message && message.msg) || ''
       break
     case 'img':
       lastMsg = '[图片]'

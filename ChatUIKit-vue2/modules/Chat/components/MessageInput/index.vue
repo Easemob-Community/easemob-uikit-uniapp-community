@@ -106,10 +106,10 @@ export default {
 
     onInput(e) {
       // uni-app recognizes mention messages
-      const inputText = e?.detail?.value
+      const inputText = e && e.detail && e.detail.value
       if (
         this.featureConfig.inputMention &&
-        this.currentConversation?.conversationType === 'groupChat'
+        this.currentConversation && this.currentConversation.conversationType === 'groupChat'
       ) {
         if (inputText.endsWith('@') || inputText.endsWith('@\n')) {
           this.isFocus = false
@@ -168,7 +168,7 @@ export default {
         })
       } catch (error) {
         uni.showToast({
-          title: `发送失败: ${error.message || ''}`,
+          title: '发送失败: ' + (error.message || ''),
           icon: 'none'
         })
       }
@@ -176,9 +176,9 @@ export default {
 
     formatMessage(message) {
       let lastMsg = ''
-      switch (message?.type) {
+      switch (message && message.type) {
         case 'txt':
-          lastMsg = message?.msg || ''
+          lastMsg = (message && message.msg) || ''
           break
         case 'img':
           lastMsg = '[图片]'

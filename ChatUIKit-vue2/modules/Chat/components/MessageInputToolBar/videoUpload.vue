@@ -52,7 +52,7 @@ export default {
     sendVideoMessage(res) {
       const tempFilePath = res.tempFilePath
       const conn = this.chatConn
-      const uploadUrl = `${conn.apiUrl}/${conn.orgName}/${conn.appName}/chatfiles`
+      const uploadUrl = conn.apiUrl + '/' + conn.orgName + '/' + conn.appName + '/chatfiles'
 
       if (!tempFilePath) {
         return

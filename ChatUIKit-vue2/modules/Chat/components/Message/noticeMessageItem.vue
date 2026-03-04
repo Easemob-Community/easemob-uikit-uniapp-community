@@ -23,8 +23,9 @@ export default {
       if (!noticeInfo) return ''
 
       if (noticeInfo.noticeType === 'recall') {
-        const from = noticeInfo.ext?.from
-        const currentUserId = this.$store.state.conn.chatConn?.user
+        const from = noticeInfo.ext && noticeInfo.ext.from
+        const conn = this.$store.state.conn.chatConn
+        const currentUserId = conn && conn.user
         if (from === currentUserId) {
           return '你撤回了一条消息'
         } else {
@@ -32,7 +33,7 @@ export default {
         }
       }
 
-      return noticeInfo.ext?.text || ''
+      return (noticeInfo.ext && noticeInfo.ext.text) || ''
     }
   }
 }

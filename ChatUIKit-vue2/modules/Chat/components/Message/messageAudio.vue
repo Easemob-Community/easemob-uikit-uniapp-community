@@ -44,7 +44,7 @@ export default {
     },
 
     duration() {
-      return this.msg.length || this.msg.body?.length || 0
+      return this.msg.length || (this.msg.body && this.msg.body.length) || 0
     },
 
     audioWidth() {
@@ -61,7 +61,7 @@ export default {
 
   methods: {
     playAudio() {
-      const audioUrl = this.msg.url || this.msg.body?.url
+      const audioUrl = this.msg.url || (this.msg.body && this.msg.body.url)
       if (!audioUrl) return
 
       // 如果正在播放，则停止
