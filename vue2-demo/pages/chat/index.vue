@@ -1,5 +1,7 @@
 <template>
-  <Chat :conversation-id="conversationId" :conversation-type="conversationType" />
+  <view class="chat-page">
+    <Chat :conversation-id="conversationId" :conversation-type="conversationType" />
+  </view>
 </template>
 
 <script>
@@ -13,7 +15,7 @@ export default {
   },
 
   data() {
-    return {
+  return {
       conversationId: '',
       conversationType: ''
     }
@@ -49,3 +51,11 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.chat-page {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+</style>

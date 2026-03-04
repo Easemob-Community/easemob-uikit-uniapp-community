@@ -242,6 +242,7 @@ export default {
   display: flex;
   align-items: center;
   padding: 0 8px;
+  height: 100%;
 }
 
 .icon-wrap {

@@ -243,8 +243,10 @@ export default {
 
     // 插入新消息
     insertMessage({ commit, rootState }, msg) {
+      const chatConn = rootState.conn.chatConn
+      const currentUserId = chatConn && chatConn.user
       const convId = msg.chatType === 'groupChat' ? msg.to : 
-        (msg.from === rootState.conn.chatConn && chatConn.user ? msg.to : msg.from)
+        (msg.from === currentUserId ? msg.to : msg.from)
       
       commit('ADD_MESSAGE_ID_TO_CONVERSATION', { convId, msgId: msg.id })
     },
