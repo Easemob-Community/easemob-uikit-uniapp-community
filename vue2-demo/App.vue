@@ -55,6 +55,8 @@ export default {
 
 <style>
 /* 每个页面公共css */
+@import url("./common.scss");
+
 page {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
