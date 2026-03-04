@@ -6,8 +6,8 @@ export const GET_GROUP_MEMBERS_PAGESIZE = 100
 // @所有人
 export const AT_ALL = 'ALL'
 
-// 资源 URL
-export const ASSETS_URL = 'https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/'
+// 资源 URL - 使用本地资源
+export const ASSETS_URL = '../../assets/'
 
 // 默认用户头像
 export const USER_AVATAR_URL = ASSETS_URL + 'user.png'
