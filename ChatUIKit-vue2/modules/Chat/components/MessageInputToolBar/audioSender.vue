@@ -39,7 +39,7 @@ export default {
     },
 
     chatConn() {
-      return this.$store.state.conn.chatConn
+      return this.$store.state.conn.chatSDK
     },
 
     selfUserInfo() {
@@ -105,10 +105,16 @@ export default {
     sendAudioMessage(res) {
       const tempFilePath = res.tempFilePath
       const duration = Math.floor((Date.now() - this.recordStartTime) / 1000)
-      const conn = this.chatConn
-      const uploadUrl = conn.apiUrl + '/' + conn.orgName + '/' + conn.appName + '/chatfiles'
+      const chatSDK = this.chatConn
 
-      const token = conn.token
+      if (!chatSDK || !chatSDK.message) {
+        console.error('SDK not initialized')
+        return
+      }
+
+      const uploadUrl = chatSDK.apiUrl + '/' + chatSDK.orgName + '/' + chatSDK.appName + '/chatfiles'
+
+      const token = chatSDK.token
       const requestParams = {
         url: uploadUrl,
         filePath: tempFilePath,
@@ -118,7 +124,7 @@ export default {
         }
       }
 
-      const audioMsg = conn.message.create({
+      const audioMsg = chatSDK.message.create({
         type: 'audio',
         to: this.currentConversation.conversationId,
         chatType: this.currentConversation.conversationType,

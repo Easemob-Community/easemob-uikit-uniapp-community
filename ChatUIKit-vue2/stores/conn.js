@@ -3,8 +3,10 @@ export default {
   namespaced: true,
 
   state: {
-    // SDK 实例
+    // SDK 实例 (connection)
     chatConn: null,
+    // SDK 本身 (包含 message 等方法)
+    chatSDK: null,
     // 登录状态
     isLogin: false,
     // 当前用户信息
@@ -16,12 +18,16 @@ export default {
   getters: {
     isLoggedIn: state => state.isLogin && state.connected,
     currentUser: state => state.user,
-    getChatConn: state => state.chatConn
+    getChatConn: state => state.chatConn,
+    getChatSDK: state => state.chatSDK
   },
 
   mutations: {
     SET_CHAT_CONN(state, conn) {
       state.chatConn = conn
+    },
+    SET_CHAT_SDK(state, sdk) {
+      state.chatSDK = sdk
     },
     SET_LOGIN_STATUS(state, status) {
       state.isLogin = status
@@ -36,8 +42,9 @@ export default {
 
   actions: {
     // 初始化 SDK 连接
-    initConn({ commit }, conn) {
+    initConn({ commit }, { conn, sdk }) {
       commit('SET_CHAT_CONN', conn)
+      commit('SET_CHAT_SDK', sdk)
     },
 
     // 登录

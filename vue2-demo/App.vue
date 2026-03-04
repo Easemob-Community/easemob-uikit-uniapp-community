@@ -1,6 +1,6 @@
 <script>
 // 使用相对路径引入（避免 @ 别名问题）
-import { EMClient } from './utils/IM'
+import { EMClient, EMSDK } from './utils/IM'
 
 export default {
   onLaunch: function() {
@@ -36,6 +36,7 @@ export default {
         if (this.$ChatUIKit && this.$ChatUIKit.init) {
           this.$ChatUIKit.init({
             chat: EMClient,
+            sdk: EMSDK,
             config: {
               isDebug: true
             }

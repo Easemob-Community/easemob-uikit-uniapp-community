@@ -64,11 +64,17 @@ export default {
       const msg = this.editingMessage
       if (!msg) return
 
-      const chatConn = this.$store.state.conn.chatConn
+      const chatSDK = this.$store.state.conn.chatSDK
       const selfUserInfo = this.$store.getters['appUser/getSelfUserInfo']
 
+      if (!chatSDK || !chatSDK.message) {
+        console.error('SDK not initialized')
+        uni.showToast({ title: 'SDK 未初始化', icon: 'none' })
+        return
+      }
+
       // 创建修改后的消息
-      const modifiedMsg = chatConn.message.create({
+      const modifiedMsg = chatSDK.message.create({
         type: 'txt',
         to: msg.to,
         chatType: msg.chatType,

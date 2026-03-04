@@ -131,7 +131,13 @@ export default {
 
       const quoteMessage = this.$store.state.message.quoteMessage
       const selfUserInfo = this.$store.getters['appUser/getSelfUserInfo']
-      const chatConn = this.$store.state.conn.chatConn
+      const chatSDK = this.$store.state.conn.chatSDK
+
+      if (!chatSDK || !chatSDK.message) {
+        console.error('SDK not initialized')
+        uni.showToast({ title: 'SDK 未初始化', icon: 'none' })
+        return
+      }
 
       if (quoteMessage) {
         msgQuoteExt = {
@@ -143,7 +149,7 @@ export default {
         this.$store.dispatch('message/setQuoteMessage', null)
       }
 
-      const msg = chatConn.message.create({
+      const msg = chatSDK.message.create({
         to: this.currentConversation.conversationId,
         chatType: this.currentConversation.conversationType,
         type: 'txt',

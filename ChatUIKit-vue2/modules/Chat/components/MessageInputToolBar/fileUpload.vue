@@ -30,7 +30,7 @@ export default {
     },
 
     chatConn() {
-      return this.$store.state.conn.chatConn
+      return this.$store.state.conn.chatSDK
     },
 
     selfUserInfo() {
@@ -65,10 +65,16 @@ export default {
     },
 
     sendFileMessage(file) {
-      const conn = this.chatConn
-      const uploadUrl = conn.apiUrl + '/' + conn.orgName + '/' + conn.appName + '/chatfiles'
+      const chatSDK = this.chatConn
 
-      const token = conn.token
+      if (!chatSDK || !chatSDK.message) {
+        console.error('SDK not initialized')
+        return
+      }
+
+      const uploadUrl = chatSDK.apiUrl + '/' + chatSDK.orgName + '/' + chatSDK.appName + '/chatfiles'
+
+      const token = chatSDK.token
       const requestParams = {
         url: uploadUrl,
         filePath: file.path || file,
@@ -78,7 +84,7 @@ export default {
         }
       }
 
-      const fileMsg = conn.message.create({
+      const fileMsg = chatSDK.message.create({
         type: 'file',
         to: this.currentConversation.conversationId,
         chatType: this.currentConversation.conversationType,

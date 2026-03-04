@@ -12,7 +12,8 @@ class ChatUIKit {
   /**
    * 初始化 ChatUIKit
    * @param {object} params - 初始化参数
-   * @param {object} params.chat - 环信 SDK 实例 (EMClient)
+   * @param {object} params.chat - 环信 SDK 实例 (EMClient/connection)
+   * @param {object} params.sdk - 环信 SDK 本身 (包含 message 方法)
    * @param {object} params.config - 配置项
    */
   init(params) {
@@ -22,13 +23,16 @@ class ChatUIKit {
     }
 
     if (!params.chat) {
-      throw new Error('SDK instance is required')
+      throw new Error('SDK connection instance is required')
     }
 
     this._chatConn = params.chat
     
-    // 初始化 store
+    // 初始化 store - 存储 connection 和 SDK
     this.store.commit('conn/SET_CHAT_CONN', params.chat)
+    if (params.sdk) {
+      this.store.commit('conn/SET_CHAT_SDK', params.sdk)
+    }
     
     // 设置 SDK 监听
     this._setupSDKListeners()

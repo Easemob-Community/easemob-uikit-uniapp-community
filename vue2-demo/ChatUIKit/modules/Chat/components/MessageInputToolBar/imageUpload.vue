@@ -30,7 +30,7 @@ export default {
     },
 
     chatConn() {
-      return this.$store.state.conn.chatConn
+      return this.$store.state.conn.chatSDK
     },
 
     selfUserInfo() {
@@ -51,14 +51,20 @@ export default {
 
     sendImageMessage(res) {
       const tempFilePath = (res.tempFilePaths && res.tempFilePaths[0]) || (res.tempFiles && res.tempFiles[0] && res.tempFiles[0].tempFilePath)
-      const conn = this.chatConn
-      const uploadUrl = `${conn.apiUrl}/${conn.orgName}/${conn.appName}/chatfiles`
+      const chatSDK = this.chatConn
+
+      if (!chatSDK || !chatSDK.message) {
+        console.error('SDK not initialized')
+        return
+      }
+
+      const uploadUrl = `${chatSDK.apiUrl}/${chatSDK.orgName}/${chatSDK.appName}/chatfiles`
 
       if (!tempFilePath) {
         return
       }
 
-      const token = conn.token
+      const token = chatSDK.token
       const requestParams = {
         url: uploadUrl,
         filePath: tempFilePath,
@@ -68,7 +74,7 @@ export default {
         }
       }
 
-      const imgMsg = conn.message.create({
+      const imgMsg = chatSDK.message.create({
         type: 'img',
         to: this.currentConversation.conversationId,
         chatType: this.currentConversation.conversationType,

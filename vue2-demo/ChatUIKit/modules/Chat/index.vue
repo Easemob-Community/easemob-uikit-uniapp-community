@@ -208,10 +208,15 @@ export default {
       const userId = userIds[0]
       const userInfo = this.$store.getters['appUser/getUserInfo'](userId)
       const selfUserInfo = this.$store.getters['appUser/getSelfUserInfo']
-      const chatConn = this.$store.state.conn.chatConn
+      const chatSDK = this.$store.state.conn.chatSDK
+      
+      if (!chatSDK || !chatSDK.message) {
+        console.error('SDK not initialized')
+        return
+      }
       
       // 创建名片消息
-      const userCardMsg = chatConn.message.create({
+      const userCardMsg = chatSDK.message.create({
         type: 'custom',
         to: this.conversationId,
         chatType: this.conversationType,
@@ -252,17 +257,25 @@ export default {
 
 <style lang="scss" scoped>
 .chat-wrap {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  width: 100%;
   height: 100%;
   background-color: #f9fafa;
   position: relative;
 }
 
+.chat-wrap-keyboard-close {
+  padding-bottom: 0;
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 .msgs-wrap {
   flex: 1;
-  overflow: hidden;
   position: relative;
+  overflow: hidden;
 }
 
 .mask {
@@ -275,9 +288,11 @@ export default {
 }
 
 .chat-input-wrap {
-  background: #f9fafa;
-  border-top: 0.5px solid #e0e0e0;
-  padding: 8px 0;
+  width: 100%;
+  height: 52px;
+  background-color: #F9FAFA;
+  border-top: 1px solid #E3E6E8;
+  flex-shrink: 0;
 }
 
 .chat-input-toolbar-wrap {
