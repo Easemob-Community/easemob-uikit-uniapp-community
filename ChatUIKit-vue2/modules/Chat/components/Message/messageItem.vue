@@ -20,9 +20,9 @@
           class="msg-quote-container"
         >
           <MessageQuote
-            :msgId="msg.ext.msgQuote.msgID"
-            :messageQuoteExt="msg.ext.msgQuote"
-            :titleStyle="{ justifyContent: isSelf ? 'flex-end' : 'flex-start' }"
+            :msg-id="msg.ext.msgQuote.msgID"
+            :message-quote-ext="msg.ext.msgQuote"
+            :title-style="{ justifyContent: isSelf ? 'flex-end' : 'flex-start' }"
             @jumpToMessage="jumpToMessage"
           />
         </view>
@@ -63,7 +63,7 @@
         v-if="isSelected"
         ref="actionRef"
         :msg="msg"
-        :isSelected="isSelected"
+        :is-selected="isSelected"
       />
     </view>
   </view>

@@ -168,8 +168,6 @@ export default {
       const chatConn = rootState.conn.chatConn
       if (!chatConn) return
 
-      console.log('[MessageStore] Getting history messages for:', conversation.conversationId)
-
       try {
         const res = await chatConn.getHistoryMessages({
           targetId: conversation.conversationId,
@@ -177,8 +175,6 @@ export default {
           pageSize: PAGE_SIZE,
           cursor: cursor || ''
         })
-
-        console.log('[MessageStore] Got history messages:', res.messages && res.messages.length)
 
         // 收集新消息ID
         const newMessageIds = []
@@ -237,7 +233,6 @@ export default {
 
         return res
       } catch (error) {
-        console.error('[MessageStore] Failed to get history messages:', error)
         const info = state.conversationMessagesMap[conversation.conversationId]
         if (info) {
           info.isLast = true

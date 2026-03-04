@@ -77,6 +77,29 @@ export default {
       } catch (error) {
         console.error('获取群组列表失败:', error)
       }
+    },
+    
+    // 从服务器获取群组详情
+    async getGroupInfoFromServer({ commit, rootState }, { groupId }) {
+      const chatConn = rootState.conn.chatConn
+      if (!chatConn) return
+
+      try {
+        const res = await chatConn.getGroupInfo({ groupId })
+        const groupInfo = res.data && res.data[0]
+        if (groupInfo) {
+          commit('UPDATE_GROUP', { 
+            groupId, 
+            updates: {
+              groupId: groupInfo.id,
+              groupName: groupInfo.name,
+              avatar: groupInfo.icon
+            }
+          })
+        }
+      } catch (error) {
+        console.error('获取群组信息失败:', error)
+      }
     }
   }
 }

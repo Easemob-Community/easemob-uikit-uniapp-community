@@ -11,11 +11,7 @@
     <view class="msgs-wrap">
       <!-- 遮照层,点击关闭Toolbar -->
       <view v-if="isShowMask" class="mask" @tap="closeToolbar"></view>
-      <MessageList
-        ref="msgListRef"
-        :conversationId="conversationId"
-        :conversationType="conversationType"
-      />
+      <MessageList ref="msgListRef" />
     </view>
     <MessageQuotePanel />
     <!-- 消息编辑 -->
@@ -33,7 +29,7 @@
     <view class="chat-input-wrap">
       <MessageInput
         ref="msgInputRef"
-        :preventEvent="isShowToolbar || isShowEmojiPicker"
+        :prevent-event="isShowToolbar || isShowEmojiPicker"
         @onInputTap="onInputTap"
         @onMention="onMention"
         @onRecordAudio="onRecordAudio"
@@ -89,10 +85,19 @@ export default {
     MessageContactList
   },
 
+  props: {
+    conversationId: {
+      type: String,
+      default: ''
+    },
+    conversationType: {
+      type: String,
+      default: ''
+    }
+  },
+
   data() {
     return {
-      conversationId: '',
-      conversationType: '',
       isShowToolbar: false,
       isShowEmojiPicker: false,
       keyboardHeight: '0px',
@@ -124,25 +129,22 @@ export default {
     }
   },
 
-  onLoad(options) {
-    // 兼容两种参数名：type/id 或 conversationType/conversationId
-    this.conversationType = options.type || options.conversationType
-    this.conversationId = options.id || options.conversationId
-    
-    if (this.conversationId) {
-      this.$store.commit('conversation/SET_CURRENT_CONVERSATION', {
-        conversationId: this.conversationId,
-        conversationType: this.conversationType
-      })
-    }
-
+  mounted() {
     // 监听键盘高度变化
     if (uni.onKeyboardHeightChange) {
       uni.onKeyboardHeightChange(this.onKeyboardHeightChange)
     }
+    
+    // 标记会话已读
+    if (this.conversationId) {
+      this.$store.dispatch('conversation/markConversationAsRead', {
+        conversationId: this.conversationId,
+        conversationType: this.conversationType
+      })
+    }
   },
 
-  onUnload() {
+  beforeDestroy() {
     this.$store.dispatch('message/setQuoteMessage', null)
     this.$store.dispatch('message/setEditingMessage', null)
     this.$store.commit('conversation/SET_CURRENT_CONVERSATION', null)
@@ -150,17 +152,6 @@ export default {
     if (uni.offKeyboardHeightChange) {
       uni.offKeyboardHeightChange(this.onKeyboardHeightChange)
     }
-  },
-
-  mounted() {
-    if (!this.conversationId && !this.conversationType) {
-      return
-    }
-    // 标记会话已读
-    this.$store.dispatch('conversation/markConversationAsRead', {
-      conversationId: this.conversationId,
-      conversationType: this.conversationType
-    })
   },
 
   methods: {

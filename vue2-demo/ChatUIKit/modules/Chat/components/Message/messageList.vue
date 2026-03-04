@@ -37,7 +37,7 @@
           :msg="msg"
           @onLongPress="onMessageLongPress"
           @jumpToMessage="setViewMsgId"
-          :isSelected="msg.id === selectedMsgId"
+          :is-selected="msg.id === selectedMsgId"
         />
       </view>
     </scroll-view>
@@ -56,17 +56,6 @@ export default {
     NoticeMessageItem
   },
 
-  props: {
-    conversationId: {
-      type: String,
-      required: true
-    },
-    conversationType: {
-      type: String,
-      required: true
-    }
-  },
-
   data() {
     return {
       scrollTop: 0,
@@ -79,15 +68,32 @@ export default {
   },
 
   computed: {
+    currentConversation() {
+      return this.$store.state.conversation.currentConversation
+    },
+
+    conversationId() {
+      const conv = this.currentConversation
+      return conv ? conv.conversationId : ''
+    },
+
+    conversationType() {
+      const conv = this.currentConversation
+      return conv ? conv.conversationType : ''
+    },
+
     msgs() {
+      if (!this.conversationId) return []
       return this.$store.getters['message/getConversationMessages'](this.conversationId)
     },
 
     isLast() {
+      if (!this.conversationId) return true
       return !this.$store.getters['message/hasMoreHistory'](this.conversationId)
     },
 
     cursor() {
+      if (!this.conversationId) return ''
       const info = this.$store.state.message.conversationMessagesMap[this.conversationId]
       return info && info.cursor || ''
     },
@@ -111,27 +117,15 @@ export default {
         })
       },
       immediate: true
-    }
-  },
-
-  mounted() {
-    // 如果没拉取过历史消息，拉取历史消息
-    const convMsgInfo = this.$store.state.message.conversationMessagesMap[this.conversationId]
-    if (!convMsgInfo || convMsgInfo.isGetHistoryMessage !== true) {
-      this.$store.dispatch('message/getHistoryMessages', {
-        conversation: {
-          conversationId: this.conversationId,
-          conversationType: this.conversationType
+    },
+    currentConversation: {
+      handler(newVal, oldVal) {
+        if (newVal && newVal.conversationId) {
+          this.isOpacity = true
+          this.loadHistoryMessages()
         }
-      })
-    } else {
-      // 已有消息，滚动到底部
-      this.$nextTick(() => {
-        this.scrollToBottom()
-        setTimeout(() => {
-          this.isOpacity = false
-        }, 200)
-      })
+      },
+      immediate: true
     }
   },
 
@@ -144,8 +138,31 @@ export default {
       this.selectedMsgId = ''
     },
 
+    // 加载历史消息（首次加载）
+    loadHistoryMessages() {
+      if (!this.conversationId || !this.conversationType) return
+      
+      const convMsgInfo = this.$store.state.message.conversationMessagesMap[this.conversationId]
+      if (!convMsgInfo || convMsgInfo.isGetHistoryMessage !== true) {
+        this.$store.dispatch('message/getHistoryMessages', {
+          conversation: {
+            conversationId: this.conversationId,
+            conversationType: this.conversationType
+          }
+        })
+      } else {
+        // 已有消息，滚动到底部
+        this.$nextTick(() => {
+          this.scrollToBottom()
+          setTimeout(() => {
+            this.isOpacity = false
+          }, 200)
+        })
+      }
+    },
+
     async getHistoryMessage() {
-      if (this.isLast || this.isLoading) {
+      if (this.isLast || this.isLoading || !this.conversationId) {
         return
       }
       this.isLoading = true
