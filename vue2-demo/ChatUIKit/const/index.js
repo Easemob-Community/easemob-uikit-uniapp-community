@@ -1,28 +1,32 @@
 // 常量定义
 
-// 消息类型
-export const MESSAGE_TYPE = {
-  TEXT: 'txt',
-  IMAGE: 'img',
-  AUDIO: 'audio',
-  VIDEO: 'video',
-  FILE: 'file',
-  LOCATION: 'loc',
-  CUSTOM: 'custom'
-}
+// 获取群组成员列表的每页数量
+export const GET_GROUP_MEMBERS_PAGESIZE = 100
 
-// 会话类型
-export const CONVERSATION_TYPE = {
-  SINGLE: 'singleChat',
-  GROUP: 'groupChat',
-  CHAT_ROOM: 'chatRoom'
-}
+// @所有人
+export const AT_ALL = 'ALL'
 
-// 消息状态
-export const MESSAGE_STATUS = {
-  SENDING: 'sending',
-  SENT: 'sent',
-  DELIVERED: 'delivered',
-  READ: 'read',
-  FAILED: 'failed'
-}
+// 资源 URL
+export const ASSETS_URL = 'https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/'
+
+// 默认用户头像
+export const USER_AVATAR_URL = ASSETS_URL + 'user.png'
+
+// 默认群组头像
+export const GROUP_AVATAR_URL = ASSETS_URL + 'group.png'
+
+// 会话中消息的最大数量
+export const MAX_MESSAGES_PER_CONVERSATION = 100
+
+// UIKIT 中支持的用户状态
+export const PRESENCE_STATUS_LIST = [
+  'Online',
+  'Offline',
+  'Away',
+  'Busy',
+  'Do Not Disturb',
+  'Custom'
+]
+
+// 群组事件来源ID集合
+export const GroupEventFromIds = new Set()

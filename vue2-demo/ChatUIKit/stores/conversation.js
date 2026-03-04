@@ -54,6 +54,16 @@ export default {
       }
     },
     
+    MOVE_CONVERSATION_TO_TOP(state, conversationId) {
+      const index = state.conversationList.findIndex(
+        item => item.conversationId === conversationId
+      )
+      if (index > -1) {
+        const [conv] = state.conversationList.splice(index, 1)
+        state.conversationList.unshift(conv)
+      }
+    },
+    
     REMOVE_CONVERSATION(state, conversationId) {
       const index = state.conversationList.findIndex(
         item => item.conversationId === conversationId
@@ -124,7 +134,7 @@ export default {
           lastMessage: item.lastMessage ? {
             id: item.lastMessage.id,
             type: item.lastMessage.type,
-            msg: item.lastMessage.body?.msg || item.lastMessage.msg || '',
+            msg: (item.lastMessage.body && item.lastMessage.body.msg) || item.lastMessage.msg || '',
             time: item.lastMessage.time,
             from: item.lastMessage.from
           } : null,

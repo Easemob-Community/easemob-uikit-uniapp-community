@@ -108,12 +108,22 @@ class ChatUIKit {
       // 撤回消息
       onRecallMessage: (msg) => {
         console.log('[ChatUIKit] Message recalled:', msg)
+        // 处理消息撤回
+        this.store.dispatch('message/onRecallMessage', {
+          mid: msg.mid,
+          from: msg.from
+        })
         uni.$emit('chatRecallMessage', msg)
       },
 
       // 消息已读回执
       onReadMessage: (msg) => {
         console.log('[ChatUIKit] Message read:', msg)
+        // 更新消息状态为已读
+        this.store.dispatch('message/updateMessageStatus', {
+          msgId: msg.mid,
+          status: 'read'
+        })
         uni.$emit('chatReadMessage', msg)
       },
 
@@ -202,11 +212,11 @@ class ChatUIKit {
   _handleReceivedMessage(msg) {
     console.log('[ChatUIKit] Received message:', msg)
     
+    // 处理消息 - 添加到消息列表并更新会话
+    this.store.dispatch('message/onMessage', msg)
+    
     // 通知新消息
     uni.$emit('chatOnNewMessage', msg)
-    
-    // 刷新会话列表
-    this.store.dispatch('conversation/getServerConversations')
   }
 
   /**

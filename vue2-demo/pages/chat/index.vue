@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import Chat from '../../../ChatUIKit-vue2/modules/Chat/index.vue'
+import Chat from '../../ChatUIKit/modules/Chat/index.vue'
 
 export default {
   name: 'ChatPage',
