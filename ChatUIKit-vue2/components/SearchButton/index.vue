@@ -18,7 +18,7 @@ export default {
   
   methods: {
     onTap() {
-      this.$emit('tap')
+      this.$emit('onTap')
     }
   }
 }

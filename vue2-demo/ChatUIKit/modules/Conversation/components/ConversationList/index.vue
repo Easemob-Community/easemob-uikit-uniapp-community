@@ -3,7 +3,7 @@
     <view class="conversation-list-content">
       <view class="header-wrap">
         <ConversationNav />
-        <SearchButton class="convs-search-btn" @tap="onSearch" />
+        <SearchButton class="convs-search-btn" @onTap="onSearch" />
       </view>
       <!-- nav占位 -->
       <view :class="isWXProgram ? 'wx-block' : 'block'"></view>
