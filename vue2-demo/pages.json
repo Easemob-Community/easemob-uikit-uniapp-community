@@ -25,6 +25,12 @@
 			}
 		},
 		{
+			"path": "ChatUIKit/modules/ConversationSearchList/index",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
 			"path": "pages/me/index",
 			"style": {
 				"navigationStyle": "custom"

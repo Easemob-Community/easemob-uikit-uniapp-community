@@ -105,7 +105,9 @@ export default {
     },
     
     onSearch() {
-      uni.showToast({ title: '搜索功能开发中', icon: 'none' })
+      uni.navigateTo({
+        url: '/ChatUIKit/modules/ConversationSearchList/index'
+      })
     }
   }
 }
