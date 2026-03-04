@@ -177,13 +177,18 @@ export default {
     // 标记会话已读
     async markConversationAsRead({ commit, rootState }, conversation) {
       const chatConn = rootState.conn.chatConn
-      if (!chatConn) return
+      const chatSDK = rootState.conn.chatSDK
+      if (!chatConn || !chatSDK) return
 
       try {
-        await chatConn.sendChannelAck({
-          to: conversation.conversationId,
-          chatType: conversation.conversationType
-        })
+        // 使用 channel 类型消息发送已读回执
+        const option = {
+          type: 'channel',
+          chatType: conversation.conversationType, // singleChat 或 groupChat
+          to: conversation.conversationId
+        }
+        const msg = chatSDK.message.create(option)
+        await chatConn.send(msg)
         
         commit('UPDATE_CONVERSATION', {
           conversationId: conversation.conversationId,
