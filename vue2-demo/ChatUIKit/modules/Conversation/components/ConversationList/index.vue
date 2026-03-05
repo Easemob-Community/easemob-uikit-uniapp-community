@@ -75,18 +75,27 @@ export default {
     },
     
     muteConversation(conv) {
-      // 静音功能，暂时简化处理
-      uni.showToast({ title: '静音功能开发中', icon: 'none' })
+      this.$store.dispatch('conversation/setSilentModeForConversation', {
+        conversationId: conv.conversationId,
+        conversationType: conv.conversationType,
+        isMute: true
+      })
     },
     
     unMuteConversation(conv) {
-      // 取消静音功能，暂时简化处理
-      uni.showToast({ title: '取消静音功能开发中', icon: 'none' })
+      this.$store.dispatch('conversation/setSilentModeForConversation', {
+        conversationId: conv.conversationId,
+        conversationType: conv.conversationType,
+        isMute: false
+      })
     },
     
     pinConversation(conv) {
-      // 置顶功能，暂时简化处理
-      uni.showToast({ title: '置顶功能开发中', icon: 'none' })
+      this.$store.dispatch('conversation/pinConversation', {
+        conversationId: conv.conversationId,
+        conversationType: conv.conversationType,
+        isPinned: !conv.isPinned
+      })
     },
     
     onMuteButtonClick(conv) {

@@ -209,7 +209,7 @@ export default {
     },
     
     // 设置会话静音状态
-    async setSilentModeForConversation({ commit, rootState }, { conversationId, conversationType }, isMute) {
+    async setSilentModeForConversation({ commit, rootState }, { conversationId, conversationType, isMute }) {
       const chatConn = rootState.conn.chatConn
       if (!chatConn) return
 
@@ -233,7 +233,7 @@ export default {
     },
     
     // 置顶/取消置顶会话
-    async pinConversation({ commit, rootState }, { conversationId, conversationType }, isPinned) {
+    async pinConversation({ commit, rootState }, { conversationId, conversationType, isPinned }) {
       const chatConn = rootState.conn.chatConn
       if (!chatConn) return
 

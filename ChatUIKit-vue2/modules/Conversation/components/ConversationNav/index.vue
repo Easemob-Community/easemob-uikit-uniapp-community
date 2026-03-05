@@ -116,13 +116,19 @@ export default {
     handleMenuTap(params) {
       switch (params.type) {
         case 'newConversation':
-          uni.showToast({ title: '新建会话功能开发中', icon: 'none' })
+          uni.navigateTo({
+            url: '/ChatUIKit/modules/ChatNew/index'
+          })
           break
         case 'createGroup':
-          uni.showToast({ title: '创建群组功能开发中', icon: 'none' })
+          uni.navigateTo({
+            url: '/ChatUIKit/modules/GroupCreate/index'
+          })
           break
         case 'addContact':
-          uni.showToast({ title: '添加联系人功能开发中', icon: 'none' })
+          uni.navigateTo({
+            url: '/ChatUIKit/modules/ContactAdd/index'
+          })
           break
         default:
           break

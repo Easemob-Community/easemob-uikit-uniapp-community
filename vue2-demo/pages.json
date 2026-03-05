@@ -31,6 +31,24 @@
 			}
 		},
 		{
+			"path": "ChatUIKit/modules/ChatNew/index",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "ChatUIKit/modules/ContactAdd/index",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "ChatUIKit/modules/GroupCreate/index",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
 			"path": "pages/me/index",
 			"style": {
 				"navigationStyle": "custom"

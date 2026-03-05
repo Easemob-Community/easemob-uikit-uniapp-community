@@ -100,6 +100,29 @@ export default {
       } catch (error) {
         console.error('获取群组信息失败:', error)
       }
+    },
+    
+    // 创建群组
+    async createGroup({ rootState }, params) {
+      const chatConn = rootState.conn.chatConn
+      if (!chatConn) throw new Error('未连接')
+
+      try {
+        const res = await chatConn.createGroup(params)
+        return res
+      } catch (error) {
+        console.error('创建群组失败:', error)
+        throw error
+      }
+    },
+    
+    // 添加新群组到列表
+    async addNewGroup({ commit, dispatch }, group) {
+      commit('ADD_GROUP', group)
+      // 获取群组详情
+      if (group.groupId) {
+        await dispatch('getGroupInfoFromServer', { groupId: group.groupId })
+      }
     }
   }
 }

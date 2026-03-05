@@ -48,7 +48,16 @@
                   !conversation.lastMessage.noticeInfo
                 "
               >{{ getLastMsgFrom(conversation.lastMessage) }}:</span>
-              <span>{{ conversation.lastMessage.msg }}</span>
+              <span class="msg-content">
+                <text
+                  v-for="(item, idx) in renderMessageContent(conversation.lastMessage.msg)"
+                  :key="idx"
+                  :class="[{ 'emoji-wrap': item.type !== 'text' }]"
+                >
+                  <text v-if="item.type === 'text'">{{ item.value }}</text>
+                  <image v-else class="msg-emoji" :src="item.value" mode="aspectFit" />
+                </text>
+              </span>
             </view>
             <view v-else class="last-msg ellipsis">
               {{ formatLastMessage(conversation) }}
@@ -81,6 +90,7 @@
 
 <script>
 import Avatar from '../../../../components/Avatar'
+import { renderTxt } from '../../../../utils/index.js'
 
 export default {
   name: 'ConversationItem',
@@ -225,6 +235,11 @@ export default {
         default:
           return message.msg || ''
       }
+    },
+    
+    renderMessageContent(msg) {
+      if (!msg) return []
+      return renderTxt(msg)
     },
     
     toChatPage() {
@@ -383,6 +398,17 @@ export default {
 }
 
 .emoji-wrap {
+  vertical-align: middle;
+}
+
+.msg-content {
+  display: inline;
+}
+
+.msg-emoji {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
   vertical-align: middle;
 }
 
