@@ -11,20 +11,9 @@
       />
     </view>
     <view class="msg-content" :style="{ textAlign: isSelf ? 'right' : 'left' }">
-      <view>
+      <view class="msg-body">
         <view class="user-nickname" v-if="!isSelf">
           {{ userNickname }}
-        </view>
-        <view
-          v-if="hasQuote"
-          class="msg-quote-container"
-        >
-          <MessageQuote
-            :msg-id="msg.ext.msgQuote.msgID"
-            :message-quote-ext="msg.ext.msgQuote"
-            :title-style="{ justifyContent: isSelf ? 'flex-end' : 'flex-start' }"
-            @jumpToMessage="jumpToMessage"
-          />
         </view>
         <view
           :class="bubbleClass"
@@ -56,6 +45,17 @@
           <view v-else-if="msg.type === 'file'">
             <FileMessage :msg="msg" />
           </view>
+        </view>
+        <view
+          v-if="hasQuote"
+          class="msg-quote-container"
+        >
+          <MessageQuote
+            :msg-id="msg.ext.msgQuote.msgID"
+            :message-quote-ext="msg.ext.msgQuote"
+            :title-style="{ justifyContent: isSelf ? 'flex-end' : 'flex-start' }"
+            @jumpToMessage="jumpToMessage"
+          />
         </view>
       </view>
       <view class="msg-time">{{ formatTime(msg.time) }}</view>
@@ -294,7 +294,14 @@ export default {
   }
 
   .msg-quote-container {
-    margin-bottom: 2px;
+    margin-top: 4px;
+    max-width: calc(100vw - 100px);
+  }
+  
+  .msg-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 </style>
