@@ -110,14 +110,17 @@ export default {
 
   methods: {
     setMenuItems() {
-      console.log('[MessageActions] Setting menu items for msg:', this.msg.id, 'type:', this.msg.type, 'status:', this.msg.status)
+      console.log('[MessageActions] Setting menu items for msg:', this.msg.id, 'type:', this.msg.type, 'status:', this.msg.status, 'from:', this.msg.from)
+      console.log('[MessageActions] isSelf:', this.isSelf, 'time:', this.msg.time, 'currentTime:', Date.now())
       const list = []
       const currentTime = Date.now()
       const msgTime = this.msg.time
       const recallLimit = 1000 * 60 * 2 // 撤回时间限制
-      const isRecallAllowed =
-        (this.msg.status === 'sent' || this.msg.status === 'read') &&
-        currentTime - msgTime < recallLimit
+      const timeDiff = currentTime - msgTime
+      const statusValid = this.msg.status === 'sent' || this.msg.status === 'read'
+      console.log('[MessageActions] recall check - timeDiff:', timeDiff, 'statusValid:', statusValid, 'status:', this.msg.status)
+      const isRecallAllowed = statusValid && timeDiff < recallLimit
+      console.log('[MessageActions] isRecallAllowed:', isRecallAllowed)
       const isMsgEditable =
         this.isSelf &&
         this.msg.type === 'txt' &&
