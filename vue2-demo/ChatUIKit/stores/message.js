@@ -434,7 +434,7 @@ export default {
     },
 
     // 撤回消息
-    async recallMessage({ commit, state, rootState }, msg) {
+    async recallMessage({ commit, state, rootState, dispatch }, msg) {
       console.log('[MessageStore] Recalling message:', msg.id)
       
       try {
