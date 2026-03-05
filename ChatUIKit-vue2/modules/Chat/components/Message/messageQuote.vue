@@ -107,11 +107,15 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+  height: 18px;
+  line-height: 18px;
 }
 
 .quote-emoji-item {
   display: inline-flex;
   align-items: center;
+  height: 18px;
+  line-height: 18px;
 }
 
 .quote-emoji-img {
@@ -119,5 +123,6 @@ export default {
   height: 16px;
   display: inline-block;
   vertical-align: middle;
+  margin: 0 1px;
 }
 </style>

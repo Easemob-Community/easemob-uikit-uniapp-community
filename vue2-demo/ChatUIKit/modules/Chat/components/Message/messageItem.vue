@@ -11,7 +11,7 @@
       />
     </view>
     <view class="msg-content" :style="{ textAlign: isSelf ? 'right' : 'left' }">
-      <view class="msg-body">
+      <view :class="['msg-body', { 'msg-body-self': isSelf }]">
         <view class="user-nickname" v-if="!isSelf">
           {{ userNickname }}
         </view>
@@ -302,6 +302,10 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+  }
+  
+  .msg-body-self {
+    align-items: flex-end;
   }
 }
 </style>
