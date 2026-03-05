@@ -289,14 +289,13 @@ export function formatTextMessage(txt) {
   return rnTxt
 }
 
+import { emojiAltMap } from '../const/emoji.js'
+
 // 渲染文本（解析表情）
 export const renderTxt = (txt) => {
   if (txt === undefined || txt === null) {
     return []
   }
-  
-  // 简化版表情处理
-  const emojiMap = {}
   
   let rnTxt = []
   let match
@@ -311,12 +310,24 @@ export const renderTxt = (txt) => {
         value: txt.substring(start, index)
       })
     }
-    if (match[1] in emojiMap) {
-      rnTxt.push({
-        type: 'emoji',
-        value: emojiMap[match[1]],
-        alt: match[1]
-      })
+    // 检查是否匹配到表情
+    if (match[1] in emojiAltMap) {
+      const emojiChar = emojiAltMap[match[1]]
+      // 获取表情图片 URL
+      const { emoji } = require('../const/emoji.js')
+      const emojiUrl = emoji.map[emojiChar]?.url
+      if (emojiUrl) {
+        rnTxt.push({
+          type: 'emoji',
+          value: emojiUrl,
+          alt: match[1]
+        })
+      } else {
+        rnTxt.push({
+          type: 'text',
+          value: match[1]
+        })
+      }
     } else {
       rnTxt.push({
         type: 'text',

@@ -1,15 +1,15 @@
 <template>
   <view class="msg-text">
-    <span class="msg">
-      <span
-        :class="[{ 'emoji-wrap': item.type !== 'text' }]"
+    <view class="msg">
+      <text
+        class="msg-content"
         v-for="(item, idx) in data"
         :key="idx"
       >
-        <span v-if="item.type === 'text'">{{ item.value }}</span>
-        <image v-else class="msg-emoji" :src="item.value" />
-      </span>
-    </span>
+        <text v-if="item.type === 'text'" class="text-part">{{ item.value }}</text>
+        <image v-else class="msg-emoji" :src="item.value" mode="aspectFit" />
+      </text>
+    </view>
     <view
       v-if="msg.modifiedInfo"
       :class="['msg-edited-tag', { self: isSelf }]"
@@ -47,23 +47,35 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.emoji-wrap {
-  vertical-align: middle;
-}
-
 .msg-text {
   text-align: left;
-  overflow-y: auto;
   word-break: break-all;
   word-wrap: break-word;
-  white-space: break-spaces;
-  min-height: 18.5px;
+  line-height: 22px;
+  font-size: 16px;
+}
+
+.msg {
+  display: inline;
+}
+
+.msg-content {
+  display: inline;
+}
+
+.text-part {
+  display: inline;
+  font-size: 16px;
+  line-height: 22px;
+  vertical-align: top;
 }
 
 .msg-emoji {
-  width: 20px;
-  height: 20px;
-  vertical-align: middle;
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 1px;
 }
 
 .msg-edited-tag {
