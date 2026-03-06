@@ -243,8 +243,7 @@ export default {
 
     // 插入新消息
     insertMessage({ commit, rootState }, msg) {
-      const chatConn = rootState.conn.chatConn
-      const currentUserId = chatConn && chatConn.user
+      const currentUserId = rootState.conn.chatConn && rootState.conn.chatConn.user
       const convId = msg.chatType === 'groupChat' ? msg.to : 
         (msg.from === currentUserId ? msg.to : msg.from)
       
@@ -258,7 +257,7 @@ export default {
       }
 
       const chatConn = rootState.conn.chatConn
-      const currentUserId = chatConn && chatConn.user
+      const currentUserId = rootState.conn.chatConn && rootState.conn.chatConn.user
 
       try {
         // 准备本地消息
@@ -389,14 +388,14 @@ export default {
 
       // 获取会话ID
       const convId = msg.chatType === 'groupChat' ? msg.to : 
-        (msg.from === rootState.conn.chatConn && chatConn.user ? msg.to : msg.from)
+        (msg.from === (rootState.conn.chatConn && rootState.conn.chatConn.user) ? msg.to : msg.from)
 
       if (msg.chatType === 'chatRoom') return
 
       const conv = rootState.conversation.conversationList.find(
         c => c.conversationId === convId
       )
-      const isSelf = msg.from === rootState.conn.chatConn && chatConn.user
+      const isSelf = msg.from === (rootState.conn.chatConn && rootState.conn.chatConn.user)
 
       if (conv) {
         commit('conversation/UPDATE_CONVERSATION', {
@@ -441,7 +440,7 @@ export default {
         const chatConn = rootState.conn.chatConn
         const mid = msg.serverMsgId || msg.id
         const convId = msg.chatType === 'groupChat' ? msg.to : 
-          (msg.from === chatConn && chatConn.user ? msg.to : msg.from)
+          (msg.from === chatConn.user ? msg.to : msg.from)
         
         await chatConn.recallMessage({
           mid,
@@ -449,7 +448,7 @@ export default {
           chatType: msg.chatType
         })
 
-        dispatch('onRecallMessage', { mid: msg.id, from: chatConn.user })
+        dispatch('onRecallMessage', { mid: msg.id, from: rootState.conn.chatConn.user })
         console.log('[MessageStore] Message recalled:', msg.id)
       } catch (error) {
         console.error('[MessageStore] Failed to recall message:', error)
@@ -459,11 +458,15 @@ export default {
 
     // 处理消息撤回事件
     onRecallMessage({ commit, state, rootState }, { mid, from }) {
+      // SDK 撤回事件使用 mid，但消息存储使用 id（两者相同）
       const recalledMessage = state.messageMap[mid]
-      if (!recalledMessage) return
+      if (!recalledMessage) {
+        console.warn('[MessageStore] 找不到被撤回的消息:', mid)
+        return
+      }
 
       const convId = recalledMessage.chatType === 'groupChat' ? recalledMessage.to : 
-        (recalledMessage.from === rootState.conn.chatConn && chatConn.user ? recalledMessage.to : recalledMessage.from)
+        (recalledMessage.from === (rootState.conn.chatConn && rootState.conn.chatConn.user) ? recalledMessage.to : recalledMessage.from)
 
       // 标记消息为已撤回
       commit('UPDATE_MESSAGE_IN_MAP', {
@@ -482,9 +485,11 @@ export default {
         const conv = rootState.conversation.conversationList.find(
           c => c.conversationId === convId
         )
-        if (conv && conv.lastMessage && conv.lastMessage.id === mid) {
-          const isSelf = from === rootState.conn.chatConn && chatConn.user
+        // 如果撤回的是会话的最后一条消息，则更新会话预览
+        if (conv && conv.lastMessage && (conv.lastMessage.id === mid || conv.lastMessage.mid === mid)) {
+          const isSelf = from === (rootState.conn.chatConn && rootState.conn.chatConn.user)
           const recallMsg = {
+            id: mid,
             type: 'txt',
             msg: isSelf ? '你撤回了一条消息' : '对方撤回了一条消息',
             from,
