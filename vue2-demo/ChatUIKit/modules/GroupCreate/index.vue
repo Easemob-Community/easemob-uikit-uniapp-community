@@ -1,92 +1,94 @@
 <template>
   <view class="group-create-wrap">
-    <NavBar @onLeftTap="onBack">
-      <template v-slot:left>
-        <view class="title">创建群组</view>
-      </template>
-    </NavBar>
-    <view class="search-wrap">
-      <SearchButton placeholder="搜索联系人" />
-    </view>
-    <scroll-view scroll-y class="contact-list">
-      <view
-        v-for="contact in contactList"
-        :key="contact.userId"
-        class="contact-item"
-        @tap="toggleSelect(contact.userId)"
-      >
-        <view class="checkbox" :class="{ checked: selectedUserIds.includes(contact.userId) }">
-          <view v-if="selectedUserIds.includes(contact.userId)" class="check-icon">✓</view>
-        </view>
-        <UserItem :user="contact" />
+    <view class="group-create-content" v-if="!isSearch">
+      <NavBar class="nav-bar" @onLeftTap="onBack">
+        <template v-slot:left>
+          <view class="title">创建群组</view>
+        </template>
+      </NavBar>
+      <view class="search-wrap" @tap="isSearch = true">
+        <SearchButton placeholder="搜索联系人" />
       </view>
-      <Empty v-if="!contactList.length" />
-    </scroll-view>
-    <view class="create-btn-wrap">
-      <UIKITButton
-        :disabled="!selectedUserIds.length"
-        @tap="createGroup"
+      <IndexedList
+        v-if="contactList.length"
+        class="contact-indexed-list"
+        :checkedList="selectedUserIds"
+        :options="contactList"
+        :withCheckbox="true"
+        @checkboxChange="onCheckboxChange"
       >
-        创建({{ selectedUserIds.length }})
-      </UIKITButton>
+        <template v-slot:indexedItem="slotProps">
+          <UserItem class="contact-item" :user="slotProps.item" />
+        </template>
+      </IndexedList>
+      <view class="empty-wrap" v-else>
+        <Empty text="暂无联系人" />
+      </view>
+      <view class="create-btn-wrap">
+        <button
+          class="create-btn uikit-button"
+          :disabled="!selectedUserIds.length"
+          :class="{ disabled: !selectedUserIds.length }"
+          @click="createGroup"
+        >
+          创建({{ selectedUserIds.length }})
+        </button>
+      </view>
     </view>
+    <SearchList
+      v-else
+      class="search-list-comp"
+      :checkedList="selectedUserIds"
+      :contactList="contactList"
+      @checkboxChange="onCheckboxChange"
+      @cancel="isSearch = false"
+    />
   </view>
 </template>
 
 <script>
-import NavBar from '../../components/NavBar'
-import SearchButton from '../../components/SearchButton'
-import UserItem from '../ContactList/components/UserItem'
-import Empty from '../../components/Empty'
-import UIKITButton from '../../components/Button'
+import SearchButton from '../../components/SearchButton/index.vue'
+import NavBar from '../../components/NavBar/index.vue'
+import UserItem from './components/UserItem/index.vue'
+import Empty from '../../components/Empty/index.vue'
+import IndexedList from '../../components/IndexedList/index.vue'
+import SearchList from './searchList.vue'
 
 export default {
-  name: 'GroupCreate',
-  
   components: {
-    NavBar,
     SearchButton,
+    NavBar,
     UserItem,
     Empty,
-    UIKITButton
+    IndexedList,
+    SearchList
   },
   
   data() {
     return {
+      isSearch: false,
       selectedUserIds: []
     }
   },
   
   computed: {
     contactList() {
-      const contacts = this.$store.state.contact.contacts || []
+      const contacts = this.$store.state.contact?.contacts || []
       return contacts.map(contact => {
-        const userInfo = this.$store.getters['appUser/getUserInfo'](contact.userId)
+        const userInfo = this.$store.getters['appUser/getUserInfo'](contact.userId) || {}
         return {
           ...contact,
-          name: userInfo.name || userInfo.nickname || contact.userId,
-          avatar: userInfo.avatar || userInfo.avatarURL || ''
+          ...userInfo,
+          id: contact.userId,
+          name: userInfo.nickname || userInfo.name || contact.name || contact.userId
         }
       })
-    },
-    
-    selfUserInfo() {
-      return this.$store.state.appUser.selfUserInfo || {}
     }
   },
   
-  mounted() {
-    this.$store.dispatch('contact/getContactsFromServer')
-  },
-  
   methods: {
-    toggleSelect(userId) {
-      const index = this.selectedUserIds.indexOf(userId)
-      if (index > -1) {
-        this.selectedUserIds.splice(index, 1)
-      } else {
-        this.selectedUserIds.push(userId)
-      }
+    onCheckboxChange(values) {
+      this.selectedUserIds = values
     },
     
     async createGroup() {
@@ -94,37 +96,56 @@ export default {
         return
       }
       
-      const userNames = this.selectedUserIds.map(userId => {
-        const userInfo = this.$store.getters['appUser/getUserInfo'](userId)
-        return userInfo.name || userInfo.nickname || userId
+      const selfUserInfo = this.$store.getters['appUser/getSelfUserInfo']
+      const memberNames = this.selectedUserIds.map(userId => {
+        const info = this.$store.getters['appUser/getUserInfo'](userId)
+        return info.nickname || info.name || userId
       })
       
-      const groupName = (this.selfUserInfo.nickname || this.selfUserInfo.name) + '、' + userNames.join('、')
+      // 群组名字为当前用户的名字加上选中的用户的名字
+      let groupName = selfUserInfo.nickname || selfUserInfo.name || '我'
+      groupName = groupName + '、' + memberNames.join('、')
+      
+      // 限制群组名称长度
+      if (groupName.length > 50) {
+        groupName = groupName.substring(0, 50) + '...'
+      }
+      
+      const params = {
+        groupname: groupName,
+        members: this.selectedUserIds,
+        desc: groupName,
+        public: true,
+        allowinvites: true,
+        inviteNeedConfirm: false,
+        approval: false, // 无需审批即可加入群组
+        maxusers: 1000
+      }
       
       uni.showLoading({
-        title: '创建中',
+        title: '创建中...',
         mask: true
       })
       
       try {
-        const result = await this.$store.dispatch('group/createGroup', {
-          groupname: groupName,
-          members: this.selectedUserIds,
-          desc: groupName,
-          public: true,
-          allowinvites: true,
-          inviteNeedConfirm: false,
-          approval: false,
-          maxusers: 1000
-        })
+        const res = await this.$store.dispatch('group/createGroup', { data: params })
+        const groupId = res.data?.groupid || res.data?.groupId
         
-        const groupId = result.data?.groupid || result.data?.groupId
         if (groupId) {
+          // 添加新群组到列表并获取详情
+          await this.$store.dispatch('group/addNewGroup', {
+            groupid: groupId,
+            groupname: params.groupname,
+            groupId: groupId,
+            groupName: params.groupname
+          })
+          
           uni.redirectTo({
             url: `/pages/chat/index?type=groupChat&id=${groupId}`
           })
         }
       } catch (error) {
+        console.error('创建群组失败:', error)
         uni.showToast({
           title: '创建失败',
           icon: 'none'
@@ -145,6 +166,7 @@ export default {
 .title {
   color: #171a1c;
   font-size: 16px;
+  font-style: normal;
   font-weight: 500;
   line-height: 22px;
 }
@@ -154,51 +176,80 @@ export default {
   padding: 7px 8px;
 }
 
-.group-create-wrap {
-  height: 100%;
+.nav-bar {
+  flex-shrink: 0;
+}
+
+.group-create-content {
   display: flex;
   flex-direction: column;
+  height: 100%;
   overflow: hidden;
 }
 
-.contact-list {
+.group-create-wrap {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+}
+
+.contact-indexed-list {
   flex: 1;
   overflow-y: scroll;
 }
 
-.contact-item {
-  display: flex;
-  align-items: center;
-  padding: 8px 16px;
-  border-bottom: 0.5px solid #e3e6e8;
-  background: #fff;
-}
-
-.checkbox {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid #ccc;
-  margin-right: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  &.checked {
-    background: #009dff;
-    border-color: #009dff;
-  }
-}
-
-.check-icon {
-  color: #fff;
-  font-size: 12px;
+.empty-wrap {
+  flex: 1;
 }
 
 .create-btn-wrap {
   flex-shrink: 0;
+  display: flex;
   padding: 14px;
+  align-items: center;
   border-top: 0.5px solid #e3e6e8;
   background: #f9fafa;
+  backdrop-filter: blur(10px);
+  margin-bottom: 0;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom));
 }
+
+.search-list-comp {
+  height: 100%;
+}
+
+.create-btn {
+  width: 100%;
+}
+
+.uikit-button {
+  width: 100%;
+  height: 48px;
+  background: #009dff;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &.disabled {
+    background: #ccc;
+    opacity: 0.6;
+  }
+  
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+/* #ifdef MP-WEIXIN */
+.uikit-button::after {
+  border: none;
+}
+/* #endif */
 </style>

@@ -32,8 +32,8 @@
       v-if="isShowPopMenu"
       :options="options"
       :popStyle="popMenuStyle"
-      @onMenuTap="handleMenuTap"
-      @onMenuClose="isShowPopMenu = false"
+      @menu-tap="handleMenuTap"
+      @menu-close="isShowPopMenu = false"
     />
   </view>
 </template>
@@ -114,23 +114,54 @@ export default {
   
   methods: {
     handleMenuTap(params) {
+      console.log('handleMenuTap called with type:', params.type)
+      
       switch (params.type) {
         case 'newConversation':
-          uni.navigateTo({
-            url: '/ChatUIKit/modules/ChatNew/index'
+          // 先关闭菜单再跳转
+          this.isShowPopMenu = false
+          this.$nextTick(() => {
+            uni.navigateTo({
+              url: '/ChatUIKit/modules/ChatNew/index',
+              fail: (err) => {
+                console.error('跳转到新建会话失败:', err)
+                uni.showToast({ title: '页面跳转失败', icon: 'none' })
+              }
+            })
           })
           break
         case 'createGroup':
-          uni.navigateTo({
-            url: '/ChatUIKit/modules/GroupCreate/index'
+          console.log('开始跳转到创建群组页面')
+          // 先关闭菜单再跳转
+          this.isShowPopMenu = false
+          this.$nextTick(() => {
+            uni.navigateTo({
+              url: '/ChatUIKit/modules/GroupCreate/index',
+              success: () => {
+                console.log('跳转到创建群组页面成功')
+              },
+              fail: (err) => {
+                console.error('跳转到创建群组失败:', err)
+                uni.showToast({ title: '页面跳转失败:' + err.errMsg, icon: 'none' })
+              }
+            })
           })
           break
         case 'addContact':
-          uni.navigateTo({
-            url: '/ChatUIKit/modules/ContactAdd/index'
+          // 先关闭菜单再跳转
+          this.isShowPopMenu = false
+          this.$nextTick(() => {
+            uni.navigateTo({
+              url: '/ChatUIKit/modules/ContactAdd/index',
+              fail: (err) => {
+                console.error('跳转到添加联系人失败:', err)
+                uni.showToast({ title: '页面跳转失败', icon: 'none' })
+              }
+            })
           })
           break
         default:
+          console.log('未知的菜单类型:', params.type)
           break
       }
     }

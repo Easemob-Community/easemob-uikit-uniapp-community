@@ -40,15 +40,11 @@
             v-for="indexedItem in indexedData[item]"
             :key="indexedItem.id || indexedItem.userId"
           >
-            <label class="label">
+            <label class="label" @click.prevent="">
               <checkbox
                 class="checkbox"
-                backgroundColor="#f9fafa"
-                borderColor="#ACB4B9"
-                activeBackgroundColor="#009DFF"
-                activeBorderColor="#009DFF"
+                color="#009DFF"
                 style="transform:scale(0.8)"
-                iconColor="#fff"
                 :value="indexedItem.id || indexedItem.userId"
                 :checked="checkedList.includes(indexedItem.id || indexedItem.userId)"
               />
@@ -193,7 +189,7 @@ export default {
     },
     
     checkboxChange(e) {
-      const values = e.detail.value
+      const values = e.detail.value || []
       this.$emit('checkboxChange', values)
     },
     

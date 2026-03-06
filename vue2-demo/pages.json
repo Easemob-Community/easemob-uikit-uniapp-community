@@ -49,6 +49,12 @@
 			}
 		},
 		{
+			"path": "ChatUIKit/modules/GroupList/index",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
 			"path": "pages/me/index",
 			"style": {
 				"navigationStyle": "custom"

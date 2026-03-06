@@ -2,30 +2,29 @@
   <view class="group-list-wrap">
     <NavBar @onLeftTap="onBack">
       <template v-slot:left>
-        <view>群组</view>
+        <view class="nav-title">群聊</view>
       </template>
     </NavBar>
     <view class="list" v-if="groupList.length">
       <view
         v-for="group in groupList"
         :key="group.groupId || group.groupid"
-        @click="toChatPage(group.groupId || group.groupid)"
+        class="group-item-container"
+        @tap="toChatPage(group.groupId || group.groupid)"
       >
         <GroupItem :group="group" />
       </view>
     </view>
-    <Empty v-else />
+    <Empty v-else text="暂无群组" />
   </view>
 </template>
 
 <script>
-import GroupItem from './components/GroupItem'
-import Empty from '../../components/Empty'
-import NavBar from '../../components/NavBar'
+import GroupItem from './components/GroupItem/index.vue'
+import Empty from '../../components/Empty/index.vue'
+import NavBar from '../../components/NavBar/index.vue'
 
 export default {
-  name: 'GroupList',
-  
   components: {
     GroupItem,
     Empty,
@@ -34,30 +33,27 @@ export default {
   
   computed: {
     groupList() {
-      return this.$store.state.group.groupList
+      return this.$store.state.group?.groupList || []
     }
   },
   
   onShow() {
-    this.getGroupList()
+    // 刷新群组列表
+    this.$store.dispatch('group/getJoinedGroupList')
   },
   
   methods: {
-    getGroupList() {
-      this.$store.dispatch('group/getJoinedGroupList')
-    },
-    
     onBack() {
       uni.navigateBack()
     },
     
-    toChatPage(id) {
-      if (!id) {
+    toChatPage(groupId) {
+      if (!groupId) {
         console.error('Group ID is undefined')
         return
       }
       uni.navigateTo({
-        url: `/ChatUIKit/modules/Chat/index?type=groupChat&id=${id}`
+        url: `/pages/chat/index?type=groupChat&id=${groupId}`
       })
     }
   }
@@ -68,13 +64,27 @@ export default {
 .group-list-wrap {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100vh;
+  background-color: #f5f5f5;
   overflow: hidden;
+}
+
+.nav-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
 }
 
 .list {
   flex: 1;
-  padding-right: 16px;
-  overflow-y: scroll;
+  overflow-y: auto;
+  padding: 0 16px;
+  background: #fff;
+}
+
+.group-item-container {
+  &:active {
+    background: #f5f5f5;
+  }
 }
 </style>
