@@ -2,7 +2,7 @@
   <view>
     <NavBar @onLeftTap="onBack">
       <template v-slot:left>
-        <view class="left-content">
+        <view class="left-content" @tap="onBack">
           <Avatar
             class="nav-avatar"
             :size="32"
