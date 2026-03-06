@@ -1,39 +1,107 @@
 <template>
-  <view class="indexed-list">
-    <scroll-view scroll-y class="indexed-list-scroll" :scroll-into-view="scrollIntoView">
-      <view
-        v-for="(group, index) in indexedData"
-        :key="index"
-        :id="'group-' + group.letter"
-        class="indexed-group"
-      >
-        <view class="indexed-title">{{ group.letter }}</view>
+  <view class="index-list">
+    <scroll-view
+      style="height: 100%"
+      class="index-scroll-list"
+      scroll-y
+      :scroll-into-view="scrollIndexItem"
+    >
+      <slot name="header"></slot>
+      <!-- 群组入口 -->
+      <view v-if="hasGroupItem" class="index-item-wrap group-item" @tap="onGroupTap">
+        <view class="index-item">
+          <view class="special-item">
+            <view class="group-icon"></view>
+            <text>群组</text>
+            <text v-if="groupCount" class="count">({{ groupCount }})</text>
+          </view>
+        </view>
+      </view>
+      <!-- 新的朋友入口 -->
+      <view v-if="hasNewRequestItem" class="index-item-wrap new-request-item" @tap="onNewRequestTap">
+        <view class="index-item">
+          <view class="special-item">
+            <view class="new-request-icon"></view>
+            <text>新的朋友</text>
+            <view v-if="requestCount" class="badge">{{ requestCount > 99 ? '99+' : requestCount }}</view>
+          </view>
+        </view>
+      </view>
+      <checkbox-group v-if="withCheckbox" @change="checkboxChange">
         <view
-          v-for="(item, idx) in group.data"
-          :key="idx"
-          class="indexed-item"
-          @tap="onItemTap(item)"
+          :id="formatInitial(item)"
+          class="initial"
+          v-for="item in initialData"
+          :key="item"
         >
-          <slot name="indexedItem" :item="item" :index="idx">
-            <view class="default-item">{{ item.name || item.userId }}</view>
-          </slot>
+          <view class="letter">{{ item }}</view>
+          <view
+            class="index-item-wrap"
+            v-for="indexedItem in indexedData[item]"
+            :key="indexedItem.id || indexedItem.userId"
+          >
+            <label class="label">
+              <checkbox
+                class="checkbox"
+                backgroundColor="#f9fafa"
+                borderColor="#ACB4B9"
+                activeBackgroundColor="#009DFF"
+                activeBorderColor="#009DFF"
+                style="transform:scale(0.8)"
+                iconColor="#fff"
+                :value="indexedItem.id || indexedItem.userId"
+                :checked="checkedList.includes(indexedItem.id || indexedItem.userId)"
+              />
+              <view class="index-item">
+                <slot name="indexedItem" :item="indexedItem"></slot>
+              </view>
+            </label>
+          </view>
+        </view>
+      </checkbox-group>
+      <view v-else>
+        <view
+          :id="formatInitial(item)"
+          class="initial"
+          v-for="item in initialData"
+          :key="item"
+        >
+          <view class="letter">{{ item }}</view>
+          <view>
+            <view
+              class="index-item-wrap"
+              v-for="indexedItem in indexedData[item]"
+              :key="indexedItem.id || indexedItem.userId"
+              @tap="onItemTap(indexedItem)"
+            >
+              <view class="index-item">
+                <slot name="indexedItem" :item="indexedItem"></slot>
+              </view>
+            </view>
+          </view>
         </view>
       </view>
     </scroll-view>
-    <view class="indexed-sidebar">
+
+    <view class="letter-box">
       <view
-        v-for="letter in indexLetters"
-        :key="letter"
-        class="indexed-letter"
-        @tap="scrollToLetter(letter)"
+        @tap="scrollInToView(item)"
+        :class="[
+          'letter-box-item',
+          { active: scrollIndexItem === formatInitial(item) }
+        ]"
+        v-for="item in Object.keys(indexedData || {})"
+        :key="item"
       >
-        {{ letter }}
+        {{ item }}
       </view>
     </view>
   </view>
 </template>
 
 <script>
+import { groupByName } from '../../utils/index'
+
 export default {
   name: 'IndexedList',
   
@@ -41,110 +109,260 @@ export default {
     options: {
       type: Array,
       default: () => []
+    },
+    withCheckbox: {
+      type: Boolean,
+      default: false
+    },
+    checkedList: {
+      type: Array,
+      default: () => []
+    },
+    hasGroupItem: {
+      type: Boolean,
+      default: false
+    },
+    hasNewRequestItem: {
+      type: Boolean,
+      default: false
+    },
+    groupCount: {
+      type: Number,
+      default: 0
+    },
+    requestCount: {
+      type: Number,
+      default: 0
     }
   },
   
   data() {
     return {
-      scrollIntoView: ''
+      scrollIndexItem: '',
+      timerId: null
     }
   },
   
   computed: {
     indexedData() {
-      const groups = {}
-      this.options.forEach(item => {
-        const firstLetter = this.getFirstLetter(item.name || item.userId || '#')
-        if (!groups[firstLetter]) {
-          groups[firstLetter] = []
+      const dataObj = {}
+      
+      for (const item of this.options) {
+        const displayName = item.name || item.remark || item.userId || ''
+        const initial = groupByName(displayName) || ''
+        if (!dataObj[initial]) {
+          dataObj[initial] = []
         }
-        groups[firstLetter].push(item)
+        dataObj[initial].push(item)
+      }
+      
+      const sortedKeys = Object.keys(dataObj).sort((key1, key2) => {
+        return key1.charCodeAt(0) - key2.charCodeAt(0)
       })
       
-      const sortedLetters = Object.keys(groups).sort()
-      return sortedLetters.map(letter => ({
-        letter,
-        data: groups[letter]
-      }))
+      const sortedData = {}
+      sortedKeys.forEach(key => {
+        sortedData[key] = dataObj[key]
+      })
+      
+      // 将 # 放到最后
+      if (sortedData['#']) {
+        const hashData = sortedData['#']
+        delete sortedData['#']
+        sortedData['#'] = hashData
+      }
+      
+      return sortedData
     },
     
-    indexLetters() {
-      return this.indexedData.map(g => g.letter)
+    initialData() {
+      return Object.keys(this.indexedData)
     }
   },
   
   methods: {
-    getFirstLetter(str) {
-      if (!str) return '#'
-      const first = str.charAt(0).toUpperCase()
-      if (/[A-Z]/.test(first)) {
-        return first
-      }
-      return '#'
+    formatInitial(id) {
+      return id === '#' ? 'hash' : id
     },
     
-    scrollToLetter(letter) {
-      this.scrollIntoView = 'group-' + letter
+    scrollInToView(id) {
+      this.scrollIndexItem = this.formatInitial(id)
+      clearTimeout(this.timerId)
+      this.timerId = setTimeout(() => {
+        this.scrollIndexItem = ''
+      }, 600)
+    },
+    
+    checkboxChange(e) {
+      const values = e.detail.value
+      this.$emit('checkboxChange', values)
+    },
+    
+    onGroupTap() {
+      this.$emit('onGroupTap')
+    },
+    
+    onNewRequestTap() {
+      this.$emit('onNewRequestTap')
     },
     
     onItemTap(item) {
-      this.$emit('itemTap', item)
+      this.$emit('onContactTap', item.userId)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.indexed-list {
-  display: flex;
+.index-list {
+  width: 100%;
   height: 100%;
   position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.indexed-list-scroll {
-  flex: 1;
+.index-scroll-list {
+  width: calc(100% - 16px);
   height: 100%;
+
+  .initial {
+    width: 100%;
+    .letter {
+      padding-left: 16px;
+      width: 100%;
+      height: 32px;
+      color: #797d82;
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 500;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+    .index-item-wrap {
+      width: 100%;
+      background: #f9fafa;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      box-sizing: border-box;
+      &:active {
+        background: #f5f5f5;
+      }
+    }
+  }
 }
 
-.indexed-group {
-  margin-bottom: 10px;
+.letter-box {
+  width: 16px;
+  text-align: center;
+  .letter-box-item {
+    height: 16px;
+    width: 100%;
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: 500;
+    color: #75828a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .active {
+    background: #009dff;
+    color: #fff;
+    border-radius: 50%;
+  }
 }
 
-.indexed-title {
-  padding: 8px 16px;
-  background: #f5f5f5;
-  font-size: 14px;
-  color: #666;
+.label {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  margin-left: 16px;
 }
 
-.indexed-item {
-  padding: 12px 16px;
-  border-bottom: 0.5px solid #e3e6e8;
+.index-item {
+  flex: 1;
+}
+
+.checkbox {
+  margin-right: -5px;
+}
+
+.special-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
   background: #fff;
-}
-
-.default-item {
+  border-bottom: 0.5px solid #e3e6e8;
   font-size: 16px;
   color: #171a1c;
 }
 
-.indexed-sidebar {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
+.group-icon {
+  width: 40px;
+  height: 40px;
+  background: #009dff;
+  border-radius: 8px;
+  margin-right: 12px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 8px 4px;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 12px;
+  justify-content: center;
 }
 
-.indexed-letter {
-  padding: 2px 4px;
+.group-icon::before {
+  content: '';
+  width: 24px;
+  height: 24px;
+  background: url('../../assets/icon/group.png') no-repeat center;
+  background-size: contain;
+}
+
+.new-request-icon {
+  width: 40px;
+  height: 40px;
+  background: #f59e0b;
+  border-radius: 8px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.new-request-icon::before {
+  content: '👤+';
+  font-size: 18px;
+  color: #fff;
+}
+
+.count {
+  margin-left: 5px;
+  color: #75828a;
+  font-size: 14px;
+}
+
+.badge {
+  margin-left: auto;
+  background: #f35;
+  color: #fff;
   font-size: 12px;
-  color: #5270ad;
-  line-height: 16px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+scroll-view ::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
 }
 </style>
