@@ -15,7 +15,7 @@
         :groupCount="groupList.length"
       >
         <template v-slot:indexedItem="slotProps">
-          <view class="contact-item" @tap="goToChat(slotProps.item.userId)">
+          <view class="contact-item" @tap.stop="goToChat(slotProps.item.userId)">
             <Avatar 
               :src="slotProps.item.avatar" 
               :size="40" 

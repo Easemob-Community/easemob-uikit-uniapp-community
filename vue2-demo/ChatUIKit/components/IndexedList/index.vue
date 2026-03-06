@@ -72,7 +72,6 @@
               class="index-item-wrap"
               v-for="indexedItem in indexedData[item]"
               :key="indexedItem.id || indexedItem.userId"
-              @tap="onItemTap(indexedItem)"
             >
               <view class="index-item">
                 <slot name="indexedItem" :item="indexedItem"></slot>
