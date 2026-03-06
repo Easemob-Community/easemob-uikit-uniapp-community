@@ -119,18 +119,24 @@ export default {
     // 从服务器获取联系人列表
     async getContactsFromServer({ commit, rootState }) {
       const chatConn = rootState.conn.chatConn
-      if (!chatConn) return
+      if (!chatConn) {
+        console.warn('[ContactStore] chatConn is null, cannot get contacts')
+        return
+      }
 
       try {
+        console.log('[ContactStore] Fetching contacts from server...')
         const res = await chatConn.getContacts()
+        console.log('[ContactStore] getContacts response:', res)
         const contacts = (res.data || []).map(userId => ({
           userId,
           name: userId
         }))
+        console.log('[ContactStore] Parsed contacts:', contacts)
         commit('SET_CONTACTS', contacts)
         return contacts
       } catch (error) {
-        console.error('获取联系人列表失败:', error)
+        console.error('[ContactStore] 获取联系人列表失败:', error)
         throw error
       }
     },

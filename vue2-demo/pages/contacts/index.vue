@@ -74,19 +74,20 @@ export default {
       const store = this.$store.state
       
       // 获取联系人列表
-      if (store.contacts && store.contacts.contacts) {
-        this.contactList = store.contacts.contacts.map(contact => {
-          const userInfo = store.data && state.data.userInfos ? state.data.userInfos[contact.userId] : {}
+      if (store.contact && store.contact.contacts) {
+        this.contactList = store.contact.contacts.map(contact => {
+          const userInfo = this.$store.getters['appUser/getUserInfo'](contact.userId) || {}
           return {
             ...contact,
-            ...userInfo
+            name: userInfo.nickname || userInfo.name || contact.name || contact.userId,
+            avatar: userInfo.avatarURL || userInfo.avatar || contact.avatar || ''
           }
         })
       }
       
       // 获取好友请求
-      if (store.contacts && store.contacts.contactsNoticeInfo) {
-        this.contactRequests = store.contacts.contactsNoticeInfo.list || []
+      if (store.contact && store.contact.contactsNoticeInfo) {
+        this.contactRequests = store.contact.contactsNoticeInfo.list || []
       }
       
       // 获取群组列表
@@ -102,11 +103,15 @@ export default {
     },
     
     goToRequests() {
-      uni.showToast({ title: '好友请求功能开发中', icon: 'none' })
+      uni.navigateTo({
+        url: '/ChatUIKit/modules/ContactRequestList/index'
+      })
     },
     
     goToGroups() {
-      uni.showToast({ title: '群组功能开发中', icon: 'none' })
+      uni.navigateTo({
+        url: '/ChatUIKit/modules/GroupList/index'
+      })
     }
   }
 }

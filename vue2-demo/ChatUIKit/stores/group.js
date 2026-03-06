@@ -71,7 +71,12 @@ export default {
       if (!chatConn) return
 
       try {
-        const res = await chatConn.getJoinedGroups()
+        const res = await chatConn.getJoinedGroups({
+          pageNum: 1,
+          pageSize: 500,
+          needAffiliations: false,
+          needRole: false
+        })
         const list = res.data || []
         commit('SET_GROUP_LIST', list)
       } catch (error) {
