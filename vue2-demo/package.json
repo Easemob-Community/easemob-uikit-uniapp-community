@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "easemob-websdk": "^4.11.0",
+    "pinyin-pro": "^3.28.0",
     "vuex": "^3.6.2"
   },
   "author": "",

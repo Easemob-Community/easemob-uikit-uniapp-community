@@ -404,7 +404,9 @@ export function checkCharacter(character) {
   }
 }
 
-// 按名称分组
+// 按名称分组（支持拼音排序）
+import { pinyin } from 'pinyin-pro'
+
 export function groupByName(name) {
   let initial = '#'
   if (!name || typeof name !== 'string') {
@@ -413,8 +415,10 @@ export function groupByName(name) {
   if (checkCharacter(name.substring(0, 1)) === 'en') {
     initial = name.substring(0, 1).toUpperCase()
   } else if (checkCharacter(name.substring(0, 1)) === 'zh') {
-    // 简化为返回第一个字符
-    initial = name.substring(0, 1)
+    // 使用 pinyin-pro 获取拼音首字母
+    initial = pinyin(name.substring(0, 1), {
+      toneType: 'none'
+    })[0][0].toUpperCase()
   } else {
     initial = '#'
   }

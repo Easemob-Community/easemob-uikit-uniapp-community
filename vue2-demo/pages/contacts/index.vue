@@ -4,49 +4,39 @@
       <text class="title">联系人</text>
     </view>
     <view class="content">
-      <!-- 好友请求 -->
-      <view class="section-item" @tap="goToRequests" v-if="contactRequests.length > 0">
-        <view class="icon request"></view>
-        <text class="label">新的朋友</text>
-        <view class="badge" v-if="unreadCount > 0">{{ unreadCount }}</view>
-        <text class="arrow">></text>
-      </view>
-      
-      <!-- 群组 -->
-      <view class="section-item" @tap="goToGroups">
-        <view class="icon group"></view>
-        <text class="label">我的群组</text>
-        <text class="count" v-if="groupList.length > 0">{{ groupList.length }}个</text>
-        <text class="arrow">></text>
-      </view>
-      
-      <!-- 联系人列表 -->
-      <view class="contact-section">
-        <view class="section-title">{{ contactList.length }}位联系人</view>
-        <view 
-          class="contact-item" 
-          v-for="contact in contactList" 
-          :key="contact.userId"
-          @tap="goToChat(contact.userId)"
-        >
-          <Avatar 
-            :src="contact.avatar" 
-            :size="40" 
-            :placeholder="USER_AVATAR_URL"
-          />
-          <text class="name">{{ contact.name || contact.userId }}</text>
-        </view>
-      </view>
+      <IndexedList
+        :options="contactList"
+        :hasGroupItem="true"
+        :hasNewRequestItem="true"
+        @onGroupTap="goToGroups"
+        @onContactTap="goToChat"
+        @onNewRequestTap="goToRequests"
+        :requestCount="unreadCount"
+        :groupCount="groupList.length"
+      >
+        <template v-slot:indexedItem="slotProps">
+          <view class="contact-item" @tap="goToChat(slotProps.item.userId)">
+            <Avatar 
+              :src="slotProps.item.avatar" 
+              :size="40" 
+              :placeholder="USER_AVATAR_URL"
+            />
+            <text class="name">{{ slotProps.item.name || slotProps.item.userId }}</text>
+          </view>
+        </template>
+      </IndexedList>
     </view>
   </view>
 </template>
 
 <script>
+import IndexedList from '../../ChatUIKit/components/IndexedList/index.vue'
 import Avatar from '../../ChatUIKit/components/Avatar/index.vue'
 import { USER_AVATAR_URL } from '../../ChatUIKit/const/index'
 
 export default {
   components: {
+    IndexedList,
     Avatar
   },
   
@@ -79,6 +69,7 @@ export default {
           const userInfo = this.$store.getters['appUser/getUserInfo'](contact.userId) || {}
           return {
             ...contact,
+            userId: contact.userId,
             name: userInfo.nickname || userInfo.name || contact.name || contact.userId,
             avatar: userInfo.avatarURL || userInfo.avatar || contact.avatar || ''
           }
@@ -121,6 +112,8 @@ export default {
 .contacts-wrap {
   min-height: 100vh;
   background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
 }
 
 .nav-bar {
@@ -130,6 +123,7 @@ export default {
   justify-content: center;
   background: #fff;
   border-bottom: 1px solid #eee;
+  flex-shrink: 0;
   
   .title {
     font-size: 18px;
@@ -139,100 +133,25 @@ export default {
 }
 
 .content {
-  padding-top: 8px;
-}
-
-.section-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: #fff;
-  margin-bottom: 1px;
-  
-  &:active {
-    background: #f5f5f5;
-  }
-  
-  .icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    margin-right: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    &.request {
-      background: #ff9500;
-    }
-    
-    &.group {
-      background: #34c759;
-    }
-  }
-  
-  .label {
-    flex: 1;
-    font-size: 16px;
-    color: #333;
-  }
-  
-  .count {
-    font-size: 14px;
-    color: #999;
-    margin-right: 8px;
-  }
-  
-  .badge {
-    min-width: 18px;
-    height: 18px;
-    background: #ff3b30;
-    color: #fff;
-    font-size: 12px;
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 5px;
-    margin-right: 8px;
-  }
-  
-  .arrow {
-    font-size: 14px;
-    color: #ccc;
-  }
-}
-
-.contact-section {
-  margin-top: 8px;
-  background: #fff;
-  
-  .section-title {
-    padding: 8px 16px;
-    font-size: 12px;
-    color: #999;
-    background: #f5f5f5;
-  }
+  flex: 1;
+  overflow: hidden;
 }
 
 .contact-item {
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #f5f5f5;
+  background: #fff;
+  border-bottom: 0.5px solid #e3e6e8;
   
   &:active {
     background: #f5f5f5;
   }
   
-  &:last-child {
-    border-bottom: none;
-  }
-  
   .name {
     margin-left: 12px;
     font-size: 16px;
-    color: #333;
+    color: #171a1c;
   }
 }
 </style>
