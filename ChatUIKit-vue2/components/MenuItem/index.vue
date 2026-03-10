@@ -37,9 +37,11 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 16px;
+  padding: 16px;
   background-color: #fff;
   border-bottom: 0.5px solid #E3E6E8;
+  min-height: 56px;
+  box-sizing: border-box;
   
   &:last-child {
     border-bottom: none;

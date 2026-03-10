@@ -221,8 +221,8 @@ export default {
   font-style: normal;
   font-weight: 500;
   line-height: 20px;
-  margin-top: 20px;
-  margin-bottom: 8px;
+  margin-top: 24px;
+  margin-bottom: 12px;
   padding: 0 16px;
 }
 
@@ -237,6 +237,7 @@ export default {
   flex-direction: column;
   background-color: #fff;
   margin-top: 8px;
+  margin-bottom: 16px;
 }
 
 .me-menu {
