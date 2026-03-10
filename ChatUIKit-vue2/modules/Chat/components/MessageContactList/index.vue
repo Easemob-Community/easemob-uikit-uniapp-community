@@ -56,8 +56,17 @@ export default {
 
   computed: {
     contacts() {
-      // 简化处理，实际应该从 store 获取联系人列表
-      return []
+      // 从 contact store 获取联系人列表
+      const contacts = this.$store.getters['contact/getContacts'] || []
+      // 合并用户信息（头像、昵称）
+      return contacts.map(contact => {
+        const userInfo = this.$store.getters['appUser/getUserInfo'](contact.userId)
+        return {
+          userId: contact.userId,
+          name: userInfo?.nickname || userInfo?.name || contact.name || contact.userId,
+          avatar: userInfo?.avatar || contact.avatar || ''
+        }
+      })
     }
   },
 
@@ -65,6 +74,23 @@ export default {
     showPopup() {
       this.visible = true
       this.selectedIds = []
+      // 加载联系人列表
+      this.loadContacts()
+    },
+
+    // 加载联系人列表
+    async loadContacts() {
+      try {
+        await this.$store.dispatch('contact/getContactsFromServer')
+        // 获取所有联系人的用户信息
+        const contacts = this.$store.getters['contact/getContacts'] || []
+        if (contacts.length > 0) {
+          const userIdList = contacts.map(c => c.userId)
+          this.$store.dispatch('appUser/getUsersInfoFromServer', { userIdList })
+        }
+      } catch (error) {
+        console.error('[MessageContactList] 加载联系人失败:', error)
+      }
     },
 
     hidePopup() {
@@ -83,7 +109,7 @@ export default {
 
     confirmSelect() {
       if (this.selectedIds.length === 0) {
-        uni.showToast({ title: $t('contact.selectContact'), icon: 'none' })
+        uni.showToast({ title: this.$t('contact.selectContact'), icon: 'none' })
         return
       }
       this.$emit('onSelect', this.selectedIds)
