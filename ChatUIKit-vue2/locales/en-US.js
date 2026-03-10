@@ -338,12 +338,6 @@ export default {
     decline: 'Decline'
   },
 
-  // Contact Supplement
-  contact: {
-    noMatch: 'No matching contacts found',
-    selectContact: 'Please select a contact'
-  },
-
   // Login
   login: {
     title: 'Login',

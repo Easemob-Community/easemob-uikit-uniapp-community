@@ -343,12 +343,6 @@ export default {
     decline: '拒绝'
   },
 
-  // 联系人补充
-  contact: {
-    noMatch: '未找到匹配的联系人',
-    selectContact: '请选择联系人'
-  },
-
   // 登录
   login: {
     title: '登录',
