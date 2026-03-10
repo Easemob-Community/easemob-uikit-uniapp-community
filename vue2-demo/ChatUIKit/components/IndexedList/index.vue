@@ -239,7 +239,7 @@ export default {
   content: '';
   width: 24px;
   height: 24px;
-  background: url('../../assets/icon/group.png') no-repeat center;
+  background: url('../../assets/icon/createGroup.png') no-repeat center;
   background-size: contain;
 }
 

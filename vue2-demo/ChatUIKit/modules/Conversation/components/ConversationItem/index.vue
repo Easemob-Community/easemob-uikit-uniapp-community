@@ -183,7 +183,7 @@ export default {
       // 使用远程资源地址（和 Vue3 版本一致）
       const ASSETS_URL = 'https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/'
       return this.conversation.conversationType === 'groupChat'
-        ? ASSETS_URL + 'group.png'
+        ? ASSETS_URL + 'createGroup.png'
         : ASSETS_URL + 'user.png'
     },
     
