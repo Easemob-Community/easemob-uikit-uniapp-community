@@ -178,6 +178,26 @@ export default {
     card: '[名片]'
   },
 
+  // Me 页面
+  me: {
+    meSettingGroupName: '设置',
+    meStatus: '在线状态',
+    meInfo: '个人信息',
+    meAbout: '关于',
+    meLoginGroupName: '账号',
+    meLogout: '退出登录',
+    profileTitle: '个人信息',
+    profileAvatar: '头像',
+    profileNick: '昵称',
+    aboutTitle: '关于',
+    chatIM: '环信 UIKIT',
+    aboutOfficialWebsite: '官方网站',
+    aboutHotline: '服务热线',
+    aboutBusiness: '商务合作',
+    aboutQudao: '渠道合作',
+    aboutIssue: '问题反馈'
+  },
+
   // 设置
   settings: {
     title: '设置',

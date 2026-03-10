@@ -177,6 +177,26 @@ export default {
     card: '[Card]'
   },
 
+  // Me Page
+  me: {
+    meSettingGroupName: 'Settings',
+    meStatus: 'Status',
+    meInfo: 'Profile',
+    meAbout: 'About',
+    meLoginGroupName: 'Account',
+    meLogout: 'Logout',
+    profileTitle: 'Profile',
+    profileAvatar: 'Avatar',
+    profileNick: 'Nickname',
+    aboutTitle: 'About',
+    chatIM: 'EaseIM UIKIT',
+    aboutOfficialWebsite: 'Official Website',
+    aboutHotline: 'Hotline',
+    aboutBusiness: 'Business',
+    aboutQudao: 'Partnership',
+    aboutIssue: 'Feedback'
+  },
+
   // Settings
   settings: {
     title: 'Settings',

@@ -17,11 +17,11 @@
       </view>
     </view>
     <view class="content">
-      <view class="menu-group-name">{{ $t('meSettingGroupName') || '设置' }}</view>
+      <view class="menu-group-name">{{ $t('me.meSettingGroupName') }}</view>
       <view class="menu-wrap">
         <MenuItem
           class="me-menu"
-          :title="$t('meStatus') || '在线状态'"
+          :title="$t('me.meStatus')"
           @tap="toPresenceSetting"
         >
           <template v-slot:left>
@@ -30,7 +30,7 @@
         </MenuItem>
         <MenuItem
           class="me-menu"
-          :title="$t('meInfo') || '个人信息'"
+          :title="$t('me.meInfo')"
           @tap="toProfile"
         >
           <template v-slot:left>
@@ -39,7 +39,7 @@
         </MenuItem>
         <MenuItem
           class="me-menu"
-          :title="$t('meAbout') || '关于'"
+          :title="$t('me.meAbout')"
           @tap="toAbout"
         >
           <template v-slot:left>
@@ -47,8 +47,8 @@
           </template>
         </MenuItem>
       </view>
-      <view class="menu-group-name">{{ $t('meLoginGroupName') || '账号' }}</view>
-      <view class="logout" @tap="logout">{{ $t('meLogout') || '退出登录' }}</view>
+      <view class="menu-group-name">{{ $t('me.meLoginGroupName') }}</view>
+      <view class="logout" @tap="logout">{{ $t('me.meLogout') }}</view>
     </view>
   </view>
 </template>
