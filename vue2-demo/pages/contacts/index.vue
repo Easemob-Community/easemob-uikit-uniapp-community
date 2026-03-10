@@ -55,10 +55,10 @@ export default {
     }
   },
   
-  onShow() {
+  async onShow() {
     // 从服务器加载联系人数据
-    this.$store.dispatch('contact/getContactsFromServer')
-    this.$store.dispatch('group/getJoinedGroupList')
+    await this.$store.dispatch('contact/getContactsFromServer')
+    await this.$store.dispatch('group/getJoinedGroupList')
     this.loadData()
   },
   
