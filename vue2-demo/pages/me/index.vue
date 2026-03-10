@@ -13,29 +13,56 @@
       <view class="name">{{ userInfo.name || userId }}</view>
       <view class="userId">
         {{ "ID: " + userId }}
-        <view class="copy" @tap="copy">复制</view>
+        <view class="copy" @tap="copy"></view>
       </view>
     </view>
     <view class="content">
-      <view class="menu-group-name">设置</view>
+      <view class="menu-group-name">{{ $t('meSettingGroupName') || '设置' }}</view>
       <view class="menu-wrap">
-        <view class="menu-item" @tap="logout">
-          <text class="menu-title">退出登录</text>
-          <text class="arrow">></text>
-        </view>
+        <MenuItem
+          class="me-menu"
+          :title="$t('meStatus') || '在线状态'"
+          @tap="toPresenceSetting"
+        >
+          <template v-slot:left>
+            <view class="icon status"></view>
+          </template>
+        </MenuItem>
+        <MenuItem
+          class="me-menu"
+          :title="$t('meInfo') || '个人信息'"
+          @tap="toProfile"
+        >
+          <template v-slot:left>
+            <view class="icon person"></view>
+          </template>
+        </MenuItem>
+        <MenuItem
+          class="me-menu"
+          :title="$t('meAbout') || '关于'"
+          @tap="toAbout"
+        >
+          <template v-slot:left>
+            <view class="icon about"></view>
+          </template>
+        </MenuItem>
       </view>
+      <view class="menu-group-name">{{ $t('meLoginGroupName') || '账号' }}</view>
+      <view class="logout" @tap="logout">{{ $t('meLogout') || '退出登录' }}</view>
     </view>
   </view>
 </template>
 
 <script>
 import Avatar from '../../ChatUIKit/components/Avatar/index.vue'
+import MenuItem from '../../ChatUIKit/components/MenuItem/index.vue'
 import { USER_AVATAR_URL } from '../../ChatUIKit/const/index'
 import { CHAT_STORE } from '../../ChatUIKit/const/index'
 
 export default {
   components: {
-    Avatar
+    Avatar,
+    MenuItem
   },
   
   data() {
@@ -57,9 +84,9 @@ export default {
         this.userId = conn.user
       }
       // 从 store 获取用户信息
-      const state = this.$store.state
-      if (state.data && state.data.userInfos) {
-        this.userInfo = state.data.userInfos[this.userId] || {}
+      const appUserState = this.$store.state.appUser
+      if (appUserState && appUserState.userInfos) {
+        this.userInfo = appUserState.userInfos[this.userId] || {}
       }
     },
     
@@ -87,6 +114,25 @@ export default {
           }
         }
       })
+    },
+    
+    toProfile() {
+      uni.navigateTo({
+        url: '/pages/me/profile'
+      })
+    },
+    
+    toAbout() {
+      uni.navigateTo({
+        url: '/pages/me/about'
+      })
+    },
+    
+    toPresenceSetting() {
+      uni.showToast({
+        title: '在线状态设置开发中',
+        icon: 'none'
+      })
     }
   }
 }
@@ -94,83 +140,115 @@ export default {
 
 <style lang="scss" scoped>
 .me-wrap {
-  min-height: 100vh;
-  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #F9FAFA;
 }
 
 .me-info-wrap {
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
   align-items: center;
-  padding: 40px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.me-avatar {
-  margin-bottom: 16px;
+  justify-content: center;
+  background-color: #F9FAFA;
+  padding-top: calc(60px + var(--status-bar-height));
+  padding-bottom: 20px;
 }
 
 .name {
+  color: #171A1C;
+  text-align: center;
   font-size: 20px;
-  font-weight: 500;
-  color: #fff;
-  margin-bottom: 8px;
+  font-weight: 590;
+  margin-top: 12px;
+  margin-bottom: 5px;
 }
 
 .userId {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
   display: flex;
   align-items: center;
-  gap: 8px;
+  color: #ACB4B9;
+  text-align: center;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .copy {
-  padding: 2px 8px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  font-size: 12px;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  background-image: url('../../static/icon/copy.png');
+  background-size: 100% 100%;
 }
 
-.content {
-  padding: 16px;
+.icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  margin-right: 8px;
+}
+
+.status {
+  background-color: #00CC52;
+  background-image: url('../../static/icon/status.png');
+  background-size: 18px 18px;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.person {
+  background-color: #FF337C;
+  background-image: url('../../static/icon/personal.png');
+  background-size: 18px 18px;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.about {
+  background-color: #009DFF;
+  background-image: url('../../static/icon/about.png');
+  background-size: 18px 18px;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 
 .menu-group-name {
-  font-size: 12px;
-  color: #999;
-  margin: 16px 8px 8px;
+  color: #75828A;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  margin-top: 10px;
+  padding: 0 16px;
+}
+
+.content {
+  flex: 1;
+  height: 100%;
+  overflow-y: scroll;
 }
 
 .menu-wrap {
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.menu-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
-  
-  &:last-child {
-    border-bottom: none;
-  }
-  
-  &:active {
-    background: #f5f5f5;
-  }
+  flex-direction: column;
+  background-color: #fff;
 }
 
-.menu-title {
+.me-menu {
+  padding: 0 16px;
+}
+
+.logout {
+  display: flex;
+  color: #009DFF;
   font-size: 16px;
-  color: #333;
-}
-
-.arrow {
-  font-size: 14px;
-  color: #999;
+  font-weight: 500;
+  border-bottom: 0.5px solid #E3E6E8;
+  padding: 16px;
+  background-color: #fff;
+  margin-top: 1px;
 }
 </style>
