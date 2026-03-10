@@ -130,8 +130,8 @@ export default {
         // 从 group store 获取
         const group = this.$store.getters['group/getGroupById'](convId)
         return {
-          name: group ? group.groupName : convId,
-          avatar: group ? group.avatar : ''
+          name: group ? (group.groupName || group.groupname || convId) : convId,
+          avatar: group ? (group.avatar || '') : ''
         }
       } else {
         // 从 appUser store 获取

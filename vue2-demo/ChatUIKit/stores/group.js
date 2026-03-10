@@ -38,8 +38,8 @@ export default {
       // 统一字段名（SDK返回的是小写，转为驼峰）
       const normalizedList = list.map(group => ({
         ...group,
-        groupId: group.groupId || group.groupid,
-        groupName: group.groupName || group.groupname
+        groupId: group.groupId || group.groupid || group.id,
+        groupName: group.groupName || group.groupname || group.name
       }))
       state.groupList = normalizedList
       // 同时更新 groupMap
@@ -72,7 +72,7 @@ export default {
 
   actions: {
     // 获取加入的群组列表
-    async getJoinedGroupList({ commit, rootState }) {
+    async getJoinedGroupList({ commit, dispatch, rootState }) {
       const chatConn = rootState.conn.chatConn
       if (!chatConn) return
 
@@ -84,8 +84,43 @@ export default {
         })
         const list = res.data || []
         commit('SET_GROUP_LIST', list)
+        
+        // 为每个群组获取详细信息（包括头像）
+        const groupIds = list.map(g => g.groupid || g.groupId).filter(Boolean)
+        if (groupIds.length > 0) {
+          console.log('[GroupStore] Fetching detailed info for groups:', groupIds)
+          await dispatch('getGroupDetails', { groupIds })
+        }
       } catch (error) {
         console.error('获取群组列表失败:', error)
+      }
+    },
+    
+    // 批量获取群组详情
+    async getGroupDetails({ commit, rootState }, { groupIds }) {
+      const chatConn = rootState.conn.chatConn
+      if (!chatConn || !groupIds || groupIds.length === 0) return
+
+      try {
+        // 环信 SDK 支持传入多个 groupId 获取批量详情
+        const res = await chatConn.getGroupInfo({ groupId: groupIds.join(',') })
+        const groupList = res.data || []
+        console.log('[GroupStore] getGroupDetails result:', groupList)
+        
+        groupList.forEach(groupInfo => {
+          if (groupInfo.id) {
+            commit('UPDATE_GROUP', {
+              groupId: groupInfo.id,
+              updates: {
+                groupId: groupInfo.id,
+                groupName: groupInfo.name,
+                avatar: groupInfo.icon || groupInfo.avatar || ''
+              }
+            })
+          }
+        })
+      } catch (error) {
+        console.error('获取群组详情失败:', error)
       }
     },
     
