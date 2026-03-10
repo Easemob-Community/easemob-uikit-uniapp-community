@@ -48,7 +48,7 @@
         </MenuItem>
         <MenuItem
           class="me-menu"
-          title="设置"
+          :title="$t('me.meSettings')"
           @click.native="toSettings"
         >
           <template v-slot:left>
@@ -109,7 +109,7 @@ export default {
       uni.setClipboardData({
         data: this.userId,
         success: () => {
-          uni.showToast({ title: '已复制', icon: 'none' })
+          uni.showToast({ title: this.$t('common.copySuccess') || '已复制', icon: 'none' })
         }
       })
     },

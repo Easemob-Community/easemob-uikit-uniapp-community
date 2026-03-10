@@ -7,6 +7,8 @@ export default {
     cancel: 'Cancel',
     save: 'Save',
     delete: 'Delete',
+    confirmDelete: 'Confirm Delete',
+    copySuccess: 'Copied',
     edit: 'Edit',
     add: 'Add',
     search: 'Search',
@@ -68,7 +70,10 @@ export default {
     markAsRead: 'Mark as Read',
     online: 'Online',
     offline: 'Offline',
-    lastSeen: 'Last seen'
+    lastSeen: 'Last seen',
+    menuNewConversation: 'New Conversation',
+    menuAddContact: 'Add Contact',
+    menuCreateGroup: 'Create Group'
   },
 
   // Chat
@@ -185,11 +190,13 @@ export default {
   // Me Page
   me: {
     meSettingGroupName: 'Settings',
+    meSettings: 'Settings',
     meStatus: 'Status',
     meInfo: 'Profile',
     meAbout: 'About',
     meLoginGroupName: 'Account',
     meLogout: 'Logout',
+    confirmLogout: 'Are you sure you want to logout?',
     profileTitle: 'Profile',
     profileAvatar: 'Avatar',
     profileNick: 'Nickname',

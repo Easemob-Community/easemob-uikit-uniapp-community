@@ -144,19 +144,19 @@ export default {
       const list = []
       // 静音功能
       list.push({
-        name: this.isMute ? '取消静音' : '静音',
+        name: this.isMute ? this.$t('conversation.unmute') : this.$t('conversation.mute'),
         action: 'mute',
         class: 'mute'
       })
       // 置顶功能
       list.push({
-        name: this.conversation.isPinned ? '取消置顶' : '置顶',
+        name: this.conversation.isPinned ? this.$t('conversation.unpin') : this.$t('conversation.pin'),
         action: 'pin',
         class: 'pin'
       })
       // 删除功能
       list.push({
-        name: '删除',
+        name: this.$t('common.delete'),
         action: 'delete',
         class: 'delete'
       })
@@ -166,7 +166,7 @@ export default {
     confirmDeleteMenu() {
       return [
         {
-          name: '确认删除',
+          name: this.$t('common.confirmDelete'),
           action: 'confirmDelete',
           class: 'confirm-delete'
         }

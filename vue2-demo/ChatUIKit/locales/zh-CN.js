@@ -7,6 +7,8 @@ export default {
     cancel: '取消',
     save: '保存',
     delete: '删除',
+    confirmDelete: '确认删除',
+    copySuccess: '已复制',
     edit: '编辑',
     add: '添加',
     search: '搜索',
@@ -69,7 +71,10 @@ export default {
     markAsRead: '标记已读',
     online: '在线',
     offline: '离线',
-    lastSeen: '最近上线'
+    lastSeen: '最近上线',
+    menuNewConversation: '新建会话',
+    menuAddContact: '添加联系人',
+    menuCreateGroup: '创建群组'
   },
 
   // 聊天
@@ -186,11 +191,13 @@ export default {
   // Me 页面
   me: {
     meSettingGroupName: '设置',
+    meSettings: '设置',
     meStatus: '在线状态',
     meInfo: '个人信息',
     meAbout: '关于',
     meLoginGroupName: '账号',
     meLogout: '退出登录',
+    confirmLogout: '确定要退出登录吗？',
     profileTitle: '个人信息',
     profileAvatar: '头像',
     profileNick: '昵称',

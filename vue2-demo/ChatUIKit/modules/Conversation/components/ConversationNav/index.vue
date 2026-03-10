@@ -66,17 +66,17 @@ export default {
       USER_AVATAR_URL,
       options: [
         {
-          name: '新建会话',
+          name: this.$t('conversation.menuNewConversation'),
           type: 'newConversation',
           icon: ChatMenuIcon
         },
         {
-          name: '添加联系人',
+          name: this.$t('conversation.menuAddContact'),
           type: 'addContact',
           icon: AddContactMenuIcon
         },
         {
-          name: '创建群组',
+          name: this.$t('conversation.menuCreateGroup'),
           type: 'createGroup',
           icon: CreateGroupIcon
         }
