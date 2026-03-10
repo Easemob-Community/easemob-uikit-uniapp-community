@@ -20,10 +20,10 @@ export default {
       return state.groupMap[id] || null
     },
     
-    // 获取群组名称
+    // 获取群组名称（兼容 groupName 和 groupname）
     getGroupName: state => id => {
       const group = state.groupMap[id]
-      return group ? group.groupName : id
+      return group ? (group.groupName || group.groupname) : id
     },
     
     // 获取群组头像
@@ -35,9 +35,15 @@ export default {
 
   mutations: {
     SET_GROUP_LIST(state, list) {
-      state.groupList = list
+      // 统一字段名（SDK返回的是小写，转为驼峰）
+      const normalizedList = list.map(group => ({
+        ...group,
+        groupId: group.groupId || group.groupid,
+        groupName: group.groupName || group.groupname
+      }))
+      state.groupList = normalizedList
       // 同时更新 groupMap
-      list.forEach(group => {
+      normalizedList.forEach(group => {
         Vue.set(state.groupMap, group.groupId, group)
       })
     },
@@ -97,7 +103,7 @@ export default {
             updates: {
               groupId: groupInfo.id,
               groupName: groupInfo.name,
-              avatar: groupInfo.icon
+              avatar: groupInfo.avatar
             }
           })
         }

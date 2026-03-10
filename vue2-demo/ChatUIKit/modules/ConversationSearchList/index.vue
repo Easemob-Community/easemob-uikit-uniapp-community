@@ -94,7 +94,7 @@ export default {
     
     toChatPage(item) {
       uni.navigateTo({
-        url: `/ChatUIKit/modules/Chat/index?id=${item.conversationId}&type=${item.conversationType}`
+        url: `/pages/chat/index?id=${item.conversationId}&type=${item.conversationType}`
       })
     }
   }

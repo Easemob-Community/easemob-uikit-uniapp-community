@@ -217,7 +217,7 @@ export default {
           // 跳转到群聊页面
           setTimeout(() => {
             uni.redirectTo({
-              url: `/ChatUIKit/modules/Chat/index?type=groupChat&id=${group.groupId}`
+              url: `/pages/chat/index?type=groupChat&id=${group.groupId}`
             })
           }, 1500)
         })

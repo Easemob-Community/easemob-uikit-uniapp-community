@@ -84,7 +84,7 @@ export default {
     
     toChatPage(item) {
       uni.redirectTo({
-        url: `/ChatUIKit/modules/Chat/index?id=${item.userId}&type=singleChat`
+        url: `/pages/chat/index?id=${item.userId}&type=singleChat`
       })
     },
     
