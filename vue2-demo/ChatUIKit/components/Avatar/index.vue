@@ -1,6 +1,6 @@
 <template>
   <view
-    :class="['avatar', shape]"
+    :class="['avatar', avatarShape]"
     :style="{ width: size + 'px', height: size + 'px' }"
   >
     <image
@@ -40,7 +40,7 @@ export default {
     },
     shape: {
       type: String,
-      default: 'circle' // 'circle' | 'square'
+      default: '' // 'circle' | 'square'，空字符串表示从 config 读取
     },
     placeholder: {
       type: String,
@@ -68,6 +68,22 @@ export default {
   },
   
   computed: {
+    avatarShape() {
+      if (this.shape) {
+        return this.shape
+      }
+      // 从 config store 读取头像形状
+      try {
+        const config = this.$store && this.$store.getters && this.$store.getters['config/getConfig']
+        if (config && config.avatarShape) {
+          return config.avatarShape
+        }
+      } catch (e) {
+        console.warn('[Avatar] Failed to get avatarShape from config:', e)
+      }
+      return 'circle'
+    },
+    
     showPresence() {
       // 简化处理，不使用 featureConfig
       return this.withPresence

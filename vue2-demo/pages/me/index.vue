@@ -46,6 +46,15 @@
             <view class="icon about"></view>
           </template>
         </MenuItem>
+        <MenuItem
+          class="me-menu"
+          title="设置"
+          @click.native="toSettings"
+        >
+          <template v-slot:left>
+            <view class="icon settings"></view>
+          </template>
+        </MenuItem>
       </view>
       <view class="menu-group-name">{{ $t('me.meLoginGroupName') }}</view>
       <view class="logout" @tap="logout">{{ $t('me.meLogout') }}</view>
@@ -138,6 +147,12 @@ export default {
       uni.navigateTo({
         url: '/pages/me/presence'
       })
+    },
+    
+    toSettings() {
+      uni.navigateTo({
+        url: '/pages/me/settings'
+      })
     }
   }
 }
@@ -218,6 +233,19 @@ export default {
   background-size: 18px 18px;
   background-position: center center;
   background-repeat: no-repeat;
+}
+
+.settings {
+  background-color: #8E8E93;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings::before {
+  content: '⚙';
+  font-size: 18px;
+  color: #fff;
 }
 
 .menu-group-name {

@@ -6,6 +6,9 @@ export default {
   onLaunch: function() {
     console.log('App Launch')
     
+    // 初始化 Config Store
+    this.initConfig()
+    
     // 初始化 ChatUIKit
     this.initChatUIKit()
   },
@@ -23,6 +26,16 @@ export default {
   },
   
   methods: {
+    initConfig() {
+      try {
+        // 初始化配置中心
+        this.$store.dispatch('config/initConfig')
+        console.log('Config initialized')
+      } catch (error) {
+        console.error('Failed to initialize config:', error)
+      }
+    },
+    
     initChatUIKit() {
       try {
         if (!EMClient) {
