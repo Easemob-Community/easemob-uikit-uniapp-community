@@ -236,12 +236,13 @@ export default {
   display: flex;
   flex-direction: column;
   background-color: #fff;
-  margin-top: 8px;
-  margin-bottom: 16px;
+  margin: 8px 16px 16px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .me-menu {
-  padding: 0;
+  /* 使用 MenuItem 默认的 padding */
 }
 
 .logout {
@@ -250,9 +251,8 @@ export default {
   font-size: 16px;
   font-weight: 500;
   background-color: #fff;
-  padding: 14px 16px;
-  margin-top: 8px;
-  background-color: #fff;
-  margin-top: 1px;
+  padding: 16px;
+  margin: 8px 16px;
+  border-radius: 8px;
 }
 </style>
