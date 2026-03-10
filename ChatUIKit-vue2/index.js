@@ -268,9 +268,8 @@ class ChatUIKit {
     // 加载会话列表（首次从服务器获取）
     this.store.dispatch('conversation/getServerConversations')
     
-    // 后续可添加：加载联系人列表、群组列表等
-    // this.store.dispatch('contact/getContacts')
-    // this.store.dispatch('group/getGroupList')
+    // 加载群组列表（用于显示群头像和名称）
+    this.store.dispatch('group/getJoinedGroupList')
   }
 
   /**
