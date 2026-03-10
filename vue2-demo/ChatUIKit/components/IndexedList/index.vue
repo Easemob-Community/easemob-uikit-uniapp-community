@@ -36,7 +36,7 @@
         class="indexed-group"
         :data-letter="group.letter"
       >
-        <view class="indexed-title">{{ group.letter }}</view>
+        <view :class="['indexed-title', { active: activeLetter === group.letter }]">{{ group.letter }}</view>
         <view
           v-for="(item, idx) in group.data"
           :key="idx"
@@ -280,6 +280,13 @@ export default {
   background: #f5f5f5;
   font-size: 14px;
   color: #666;
+  transition: all 0.3s ease;
+}
+
+.indexed-title.active {
+  background: #009dff;
+  color: #fff;
+  font-weight: 600;
 }
 
 .indexed-item {
