@@ -23,13 +23,13 @@
           <view class="contact-info">
             <text class="contact-name">{{ contact.name || contact.userId }}</text>
           </view>
-          <view class="checkbox" :class="{ checked: selectedIds.includes(contact.userId) }">
-            <text v-if="selectedIds.includes(contact.userId)" class="check-icon">✓</text>
+          <view class="checkbox" :class="{ checked: selectedId === contact.userId }">
+            <text v-if="selectedId === contact.userId" class="check-icon">✓</text>
           </view>
         </view>
       </scroll-view>
       <view class="contact-footer">
-        <button class="confirm-btn" @tap="confirmSelect">{{ $t('common.confirm') }}({{ selectedIds.length }})</button>
+        <button class="confirm-btn" @tap="confirmSelect" :disabled="!selectedId">{{ $t('common.confirm') }}</button>
       </view>
     </view>
   </view>
@@ -50,7 +50,7 @@ export default {
     return {
       visible: false,
       USER_AVATAR_URL,
-      selectedIds: []
+      selectedId: '' // 单选
     }
   },
 
@@ -73,7 +73,7 @@ export default {
   methods: {
     showPopup() {
       this.visible = true
-      this.selectedIds = []
+      this.selectedId = ''
       // 加载联系人列表
       this.loadContacts()
     },
@@ -95,24 +95,23 @@ export default {
 
     hidePopup() {
       this.visible = false
-      this.selectedIds = []
+      this.selectedId = ''
     },
 
     selectContact(contact) {
-      const index = this.selectedIds.indexOf(contact.userId)
-      if (index > -1) {
-        this.selectedIds.splice(index, 1)
-      } else {
-        this.selectedIds.push(contact.userId)
-      }
+      // 单选逻辑：点击直接选中并发送
+      this.selectedId = contact.userId
+      this.$emit('onSelect', [contact.userId])
+      this.hidePopup()
     },
 
     confirmSelect() {
-      if (this.selectedIds.length === 0) {
+      // 单选模式下不需要确认按钮，点击直接发送
+      if (!this.selectedId) {
         uni.showToast({ title: this.$t('contact.selectContact'), icon: 'none' })
         return
       }
-      this.$emit('onSelect', this.selectedIds)
+      this.$emit('onSelect', [this.selectedId])
       this.hidePopup()
     }
   }
