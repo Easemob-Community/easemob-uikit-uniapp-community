@@ -7,9 +7,13 @@ Vue.config.productionTip = false
 
 // 引入 ChatUIKit
 import ChatUIKit, { store } from './ChatUIKit'
+import { t } from './ChatUIKit/locales'
 
 // 将 ChatUIKit 挂载到 Vue 原型
 Vue.prototype.$ChatUIKit = ChatUIKit
+
+// 挂载国际化方法
+Vue.prototype.$t = t
 
 App.mpType = 'app'
 const app = new Vue({
