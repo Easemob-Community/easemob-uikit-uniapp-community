@@ -68,6 +68,35 @@ export default {
         console.error('发布在线状态失败:', error)
         throw error
       }
+    },
+    
+    // 更新用户信息
+    async updateUserInfo({ commit, rootState }, { nickname, avatar }) {
+      const chatConn = rootState.conn.chatConn
+      if (!chatConn) {
+        throw new Error('SDK not initialized')
+      }
+      
+      try {
+        const params = {}
+        if (nickname !== undefined) {
+          params.nickname = nickname
+        }
+        if (avatar !== undefined) {
+          params.avatarurl = avatar
+        }
+        
+        await chatConn.updateUserInfo(params)
+        // 更新本地状态
+        commit('SET_SELF_USER_INFO', { 
+          nickname,
+          avatar
+        })
+        return { success: true }
+      } catch (error) {
+        console.error('更新用户信息失败:', error)
+        throw error
+      }
     }
   }
 }

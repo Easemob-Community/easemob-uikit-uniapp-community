@@ -9,7 +9,7 @@
       <MenuItem
         class="profile-menu"
         title="头像"
-        @tap="changeAvatar"
+        @click.native="changeAvatar"
       >
         <template v-slot:right>
           <Avatar
@@ -23,7 +23,7 @@
       <MenuItem
         class="profile-menu"
         title="昵称"
-        @tap="toProfileSetting"
+        @click.native="toProfileSetting"
       >
         <template v-slot:right>
           <view class="profile-name ellipsis">{{ userInfo.name || userId }}</view>
@@ -48,41 +48,37 @@ export default {
   
   data() {
     return {
-      USER_AVATAR_URL,
-      userId: '',
-      userInfo: {}
+      USER_AVATAR_URL
     }
   },
   
-  onShow() {
-    this.getUserInfo()
+  computed: {
+    userId() {
+      const user = this.$store.state.conn.user
+      return user ? user.userId || '' : ''
+    },
+    
+    userInfo() {
+      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']
+      if (!selfInfo) {
+        return { name: '', avatar: '' }
+      }
+      return {
+        name: selfInfo.nickname || selfInfo.name,
+        avatar: selfInfo.avatar
+      }
+    }
   },
   
   methods: {
-    getUserInfo() {
-      // 从 conn store 获取当前登录用户ID
-      const user = this.$store.state.conn.user
-      if (user) {
-        this.userId = user.userId || ''
-      }
-      // 从 appUser store 获取用户信息
-      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']
-      if (selfInfo) {
-        this.userInfo = {
-          name: selfInfo.nickname || selfInfo.name,
-          avatar: selfInfo.avatar
-        }
-      }
-    },
     
     onBack() {
       uni.navigateBack()
     },
     
     toProfileSetting() {
-      uni.showToast({
-        title: '昵称设置开发中',
-        icon: 'none'
+      uni.navigateTo({
+        url: '/pages/me/profileSetting'
       })
     },
     
