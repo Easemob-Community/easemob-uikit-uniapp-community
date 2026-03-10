@@ -1,6 +1,11 @@
 <template>
   <view class="indexed-list">
-    <scroll-view scroll-y class="indexed-list-scroll" :scroll-into-view="scrollIntoView">
+    <scroll-view 
+      scroll-y 
+      class="indexed-list-scroll" 
+      :scroll-into-view="scrollIntoView"
+      @scroll="onScroll"
+    >
       <!-- 新的朋友入口 -->
       <view v-if="hasNewRequestItem" class="special-item" @tap="onNewRequestTap">
         <view class="special-item-content">
@@ -29,6 +34,7 @@
         :key="index"
         :id="'group-' + group.letter"
         class="indexed-group"
+        :data-letter="group.letter"
       >
         <view class="indexed-title">{{ group.letter }}</view>
         <view
@@ -47,7 +53,7 @@
       <view
         v-for="letter in indexLetters"
         :key="letter"
-        class="indexed-letter"
+        :class="['indexed-letter', { active: activeLetter === letter }]"
         @tap="scrollToLetter(letter)"
       >
         {{ letter }}
@@ -87,7 +93,8 @@ export default {
   
   data() {
     return {
-      scrollIntoView: ''
+      scrollIntoView: '',
+      activeLetter: ''
     }
   },
   
@@ -102,7 +109,13 @@ export default {
         groups[firstLetter].push(item)
       })
       
-      const sortedLetters = Object.keys(groups).sort()
+      // 排序：字母在前，# 在最后
+      const sortedLetters = Object.keys(groups).sort((a, b) => {
+        if (a === '#') return 1
+        if (b === '#') return -1
+        return a.charCodeAt(0) - b.charCodeAt(0)
+      })
+      
       return sortedLetters.map(letter => ({
         letter,
         data: groups[letter]
@@ -114,10 +127,26 @@ export default {
     }
   },
   
+  watch: {
+    indexedData: {
+      immediate: true,
+      handler(data) {
+        // 默认高亮第一个字母
+        if (data.length > 0 && !this.activeLetter) {
+          this.activeLetter = data[0].letter
+        }
+      }
+    }
+  },
+  
   methods: {
-    
     scrollToLetter(letter) {
       this.scrollIntoView = 'group-' + letter
+      this.activeLetter = letter
+      // 延迟重置 scrollIntoView，以便下次点击相同字母也能触发滚动
+      setTimeout(() => {
+        this.scrollIntoView = ''
+      }, 300)
     },
     
     onItemTap(item) {
@@ -130,6 +159,23 @@ export default {
     
     onGroupTap() {
       this.$emit('onGroupTap')
+    },
+    
+    onScroll(e) {
+      // 根据滚动位置计算当前可见的字母
+      const scrollTop = e.detail.scrollTop
+      const groups = this.indexedData
+      
+      // 估算每个分组的高度（标题32px + 每个item约60px）
+      let currentHeight = 0
+      for (const group of groups) {
+        const groupHeight = 32 + (group.data.length * 60)
+        if (scrollTop >= currentHeight && scrollTop < currentHeight + groupHeight) {
+          this.activeLetter = group.letter
+          break
+        }
+        currentHeight += groupHeight
+      }
     }
   }
 }
@@ -265,5 +311,14 @@ export default {
   font-size: 12px;
   color: #5270ad;
   line-height: 16px;
+  min-width: 16px;
+  text-align: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.indexed-letter.active {
+  background: #009dff;
+  color: #fff;
 }
 </style>
