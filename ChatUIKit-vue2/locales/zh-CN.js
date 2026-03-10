@@ -30,7 +30,12 @@ export default {
     more: '更多',
     select: '选择',
     all: '全部',
-    none: '无'
+    none: '无',
+    comingSoon: '即将上线',
+    uploading: '上传中...',
+    creating: '创建中...',
+    success: '成功',
+    tip: '提示'
   },
 
   // 登录/账号
@@ -217,7 +222,44 @@ export default {
     showDetail: '显示详情',
     autoDownload: '自动下载',
     imageQuality: '图片质量',
-    videoQuality: '视频质量'
+    videoQuality: '视频质量',
+    // UI 功能设置相关
+    appearance: '外观设置',
+    avatarShape: '头像形状',
+    circle: '圆形',
+    square: '方形',
+    inputFeatures: '输入功能',
+    messageActions: '消息操作',
+    conversationFeatures: '会话功能',
+    otherFeatures: '其他功能',
+    // 输入功能
+    inputVoice: '语音输入',
+    inputEmoji: '表情',
+    inputMention: '@提及',
+    inputQuote: '引用',
+    inputEdit: '编辑',
+    inputImage: '图片',
+    inputAudio: '语音消息',
+    inputVideo: '视频',
+    inputFile: '文件',
+    // 消息操作
+    copyMessage: '复制消息',
+    deleteMessage: '删除消息',
+    recallMessage: '撤回消息',
+    editMessage: '编辑消息',
+    replyMessage: '回复消息',
+    // 会话功能
+    pinConversation: '置顶会话',
+    muteConversation: '静音会话',
+    deleteConversation: '删除会话',
+    // 其他功能
+    useUserInfo: '用户信息',
+    usePresence: '在线状态',
+    messageStatus: '消息状态',
+    userCard: '用户名片',
+    // 语言设置
+    selectLanguage: '选择语言',
+    languageChanged: '切换成功，重新进入页面生效'
   },
 
   // 时间
@@ -250,5 +292,96 @@ export default {
     inBlackList: '对方已将你加入黑名单',
     groupFull: '群人数已满',
     banned: '你已被禁言'
+  },
+
+  // 导航栏标题
+  nav: {
+    back: '返回',
+    settings: '设置',
+    newRequest: '新请求',
+    searchContact: '搜索联系人',
+    searchConversation: '搜索会话',
+    newConversation: '新建会话',
+    addContact: '添加联系人',
+    createGroup: '创建群聊',
+    selectMention: '选择提醒的人',
+    selectContact: '选择联系人'
+  },
+
+  // 搜索
+  search: {
+    cancel: '取消',
+    placeholder: '搜索'
+  },
+
+  // 群组创建
+  groupCreate: {
+    title: '创建群聊',
+    avatar: '群头像',
+    name: '群名称',
+    namePlaceholder: '请输入群名称',
+    description: '群介绍',
+    descPlaceholder: '请输入群介绍（选填）',
+    type: '群类型',
+    public: '公开群',
+    private: '私有群',
+    needConfirm: '邀请需要确认',
+    previous: '上一步',
+    create: '创建',
+    searchMember: '搜索联系人',
+    members: '群成员 ({count}人)',
+    selectedCount: '已选择 {count} 人',
+    maxSelect: '最多选择{count}人',
+    selectAtLeastOne: '请至少选择一位联系人'
+  },
+
+  // 好友请求
+  contactRequest: {
+    title: '新的朋友',
+    requestTip: '请求添加您为好友',
+    accept: '同意',
+    decline: '拒绝'
+  },
+
+  // 联系人补充
+  contact: {
+    noMatch: '未找到匹配的联系人',
+    selectContact: '请选择联系人'
+  },
+
+  // 登录
+  login: {
+    title: '登录',
+    userIdPlaceholder: '请输入用户ID',
+    tokenPlaceholder: '请输入Token',
+    password: '密码',
+    passwordPlaceholder: '请输入密码',
+    tokenLogin: 'Token登录',
+    passwordLogin: '密码登录',
+    tip: '测试账号可以在环信控制台创建',
+    console: '打开环信控制台',
+    token: 'Token',
+    loggingIn: '登录中...',
+    configAppKey: '请先在 utils/IM.js 中配置正确的 AppKey',
+    consoleTip: '请访问 https://console.easemob.com 创建应用',
+    configAppKeyTitle: '请先配置 AppKey',
+    configAppKeyContent: '请修改 utils/IM.js 中的 SDK_CONFIG.appKey'
+  },
+
+  // 消息相关
+  message: {
+    editTitle: '编辑消息',
+    send: '发送',
+    reply: '回复',
+    userCard: '个人名片',
+    mentionAll: '所有人',
+    noMore: '没有更多消息',
+    inputPlaceholder: '发送消息',
+    unknownUser: '未知用户'
+  },
+
+  // 错误信息补充
+  errors: {
+    sdkNotInit: 'SDK 未初始化'
   }
 }

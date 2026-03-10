@@ -2,17 +2,17 @@
   <view class="settings-wrap">
     <NavBar @onLeftTap="onBack">
       <template v-slot:left>
-        <view class="title">设置</view>
+        <view class="title">{{ $t('settings.title') }}</view>
       </template>
     </NavBar>
     
     <scroll-view class="settings-content" scroll-y>
       <!-- 外观设置 -->
-      <view class="menu-group-name">外观设置</view>
+      <view class="menu-group-name">{{ $t('settings.appearance') }}</view>
       <view class="menu-wrap">
         <MenuItem
           class="settings-menu"
-          title="语言"
+          :title="$t('settings.language')"
           @click.native="showLanguagePicker = true"
         >
           <template v-slot:right>
@@ -21,23 +21,23 @@
         </MenuItem>
         <MenuItem
           class="settings-menu"
-          title="头像形状"
+          :title="$t('settings.avatarShape')"
           @click.native="toggleAvatarShape"
         >
           <template v-slot:right>
-            <view class="menu-value">{{ avatarShape === 'circle' ? '圆形' : '方形' }}</view>
+            <view class="menu-value">{{ avatarShape === 'circle' ? $t('settings.circle') : $t('settings.square') }}</view>
           </template>
         </MenuItem>
       </view>
       
       <!-- 输入区域功能 -->
-      <view class="menu-group-name">输入功能</view>
+      <view class="menu-group-name">{{ $t('settings.inputFeatures') }}</view>
       <view class="menu-wrap">
         <MenuItem
           v-for="(item, index) in inputFeatures"
           :key="index"
           class="settings-menu"
-          :title="item.label"
+          :title="$t(item.labelKey)"
           :showArrow="false"
         >
           <template v-slot:right>
@@ -51,13 +51,13 @@
       </view>
       
       <!-- 消息操作功能 -->
-      <view class="menu-group-name">消息操作</view>
+      <view class="menu-group-name">{{ $t('settings.messageActions') }}</view>
       <view class="menu-wrap">
         <MenuItem
           v-for="(item, index) in messageActionFeatures"
           :key="index"
           class="settings-menu"
-          :title="item.label"
+          :title="$t(item.labelKey)"
           :showArrow="false"
         >
           <template v-slot:right>
@@ -71,13 +71,13 @@
       </view>
       
       <!-- 会话功能 -->
-      <view class="menu-group-name">会话功能</view>
+      <view class="menu-group-name">{{ $t('settings.conversationFeatures') }}</view>
       <view class="menu-wrap">
         <MenuItem
           v-for="(item, index) in conversationFeatures"
           :key="index"
           class="settings-menu"
-          :title="item.label"
+          :title="$t(item.labelKey)"
           :showArrow="false"
         >
           <template v-slot:right>
@@ -91,13 +91,13 @@
       </view>
       
       <!-- 其他功能 -->
-      <view class="menu-group-name">其他功能</view>
+      <view class="menu-group-name">{{ $t('settings.otherFeatures') }}</view>
       <view class="menu-wrap">
         <MenuItem
           v-for="(item, index) in otherFeatures"
           :key="index"
           class="settings-menu"
-          :title="item.label"
+          :title="$t(item.labelKey)"
           :showArrow="false"
         >
           <template v-slot:right>
@@ -117,8 +117,8 @@
     <view v-if="showLanguagePicker" class="picker-mask" @tap="showLanguagePicker = false">
       <view class="picker-content" @tap.stop>
         <view class="picker-header">
-          <text class="picker-title">选择语言</text>
-          <text class="picker-cancel" @tap="showLanguagePicker = false">取消</text>
+          <text class="picker-title">{{ $t('settings.selectLanguage') }}</text>
+          <text class="picker-cancel" @tap="showLanguagePicker = false">{{ $t('common.cancel') }}</text>
         </view>
         <view class="picker-list">
           <view
@@ -157,33 +157,33 @@ export default {
       ],
       avatarShape: 'circle',
       inputFeatures: [
-        { label: '语音输入', key: 'inputVoice', enabled: true },
-        { label: '表情', key: 'inputEmoji', enabled: true },
-        { label: '@提及', key: 'inputMention', enabled: true },
-        { label: '引用', key: 'inputQuote', enabled: true },
-        { label: '编辑', key: 'inputEdit', enabled: true },
-        { label: '图片', key: 'inputImage', enabled: true },
-        { label: '语音消息', key: 'inputAudio', enabled: true },
-        { label: '视频', key: 'inputVideo', enabled: true },
-        { label: '文件', key: 'inputFile', enabled: true }
+        { labelKey: 'settings.inputVoice', key: 'inputVoice', enabled: true },
+        { labelKey: 'settings.inputEmoji', key: 'inputEmoji', enabled: true },
+        { labelKey: 'settings.inputMention', key: 'inputMention', enabled: true },
+        { labelKey: 'settings.inputQuote', key: 'inputQuote', enabled: true },
+        { labelKey: 'settings.inputEdit', key: 'inputEdit', enabled: true },
+        { labelKey: 'settings.inputImage', key: 'inputImage', enabled: true },
+        { labelKey: 'settings.inputAudio', key: 'inputAudio', enabled: true },
+        { labelKey: 'settings.inputVideo', key: 'inputVideo', enabled: true },
+        { labelKey: 'settings.inputFile', key: 'inputFile', enabled: true }
       ],
       messageActionFeatures: [
-        { label: '复制消息', key: 'copyMessage', enabled: true },
-        { label: '删除消息', key: 'deleteMessage', enabled: true },
-        { label: '撤回消息', key: 'recallMessage', enabled: true },
-        { label: '编辑消息', key: 'editMessage', enabled: true },
-        { label: '回复消息', key: 'replyMessage', enabled: true }
+        { labelKey: 'settings.copyMessage', key: 'copyMessage', enabled: true },
+        { labelKey: 'settings.deleteMessage', key: 'deleteMessage', enabled: true },
+        { labelKey: 'settings.recallMessage', key: 'recallMessage', enabled: true },
+        { labelKey: 'settings.editMessage', key: 'editMessage', enabled: true },
+        { labelKey: 'settings.replyMessage', key: 'replyMessage', enabled: true }
       ],
       conversationFeatures: [
-        { label: '置顶会话', key: 'pinConversation', enabled: true },
-        { label: '静音会话', key: 'muteConversation', enabled: true },
-        { label: '删除会话', key: 'deleteConversation', enabled: true }
+        { labelKey: 'settings.pinConversation', key: 'pinConversation', enabled: true },
+        { labelKey: 'settings.muteConversation', key: 'muteConversation', enabled: true },
+        { labelKey: 'settings.deleteConversation', key: 'deleteConversation', enabled: true }
       ],
       otherFeatures: [
-        { label: '用户信息', key: 'useUserInfo', enabled: true },
-        { label: '在线状态', key: 'usePresence', enabled: true },
-        { label: '消息状态', key: 'messageStatus', enabled: true },
-        { label: '用户名片', key: 'userCard', enabled: true }
+        { labelKey: 'settings.useUserInfo', key: 'useUserInfo', enabled: true },
+        { labelKey: 'settings.usePresence', key: 'usePresence', enabled: true },
+        { labelKey: 'settings.messageStatus', key: 'messageStatus', enabled: true },
+        { labelKey: 'settings.userCard', key: 'userCard', enabled: true }
       ]
     }
   },
@@ -243,7 +243,7 @@ export default {
       this.language = lang.value
       this.showLanguagePicker = false
       uni.showToast({ 
-        title: '切换成功，重新进入页面生效', 
+        title: $t('settings.languageChanged'), 
         icon: 'none',
         duration: 2000
       })
@@ -252,7 +252,7 @@ export default {
     toggleAvatarShape() {
       this.avatarShape = this.avatarShape === 'circle' ? 'square' : 'circle'
       this.$store.dispatch('config/setThemeConfig', { avatarShape: this.avatarShape })
-      uni.showToast({ title: '设置成功', icon: 'success' })
+      uni.showToast({ title: $t('common.success'), icon: 'success' })
     },
     
     toggleFeature(key, enabled) {

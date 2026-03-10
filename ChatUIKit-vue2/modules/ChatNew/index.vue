@@ -2,11 +2,11 @@
   <view class="new-chat-wrap">
     <NavBar @onLeftTap="onBack">
       <template v-slot:left>
-        <view class="title">新建会话</view>
+        <view class="title">{{ $t('nav.newConversation') }}</view>
       </template>
     </NavBar>
     <view class="search-wrap">
-      <SearchButton placeholder="搜索联系人" @onTap="toContactSearch" />
+      <SearchButton :placeholder="$t('contact.searchPlaceholder')" @onTap="toContactSearch" />
     </view>
     <IndexedList
       v-if="contactList.length"
@@ -61,7 +61,7 @@ export default {
   
   methods: {
     toContactSearch() {
-      uni.showToast({ title: '搜索功能开发中', icon: 'none' })
+      uni.showToast({ title: $t('common.comingSoon'), icon: 'none' })
     },
     
     toChatPage(item) {

@@ -15,9 +15,9 @@
         v-if="!isLast && !isLoading"
         @tap="getHistoryMessage"
       >
-        加载更多
+        {{ $t('common.loadMore') }}
       </view>
-      <view class="isLast" v-if="isLast">没有更多消息</view>
+      <view class="isLast" v-if="isLast">{{ $t('message.noMore') }}</view>
       <view v-if="isLoading" class="loading"></view>
       <view
         :class="[

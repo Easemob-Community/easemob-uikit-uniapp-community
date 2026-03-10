@@ -12,7 +12,7 @@
       </view>
     </view>
     <view class="card-footer">
-      <text>个人名片</text>
+      <text>{{ $t('message.userCard') }}</text>
     </view>
   </view>
 </template>
@@ -46,7 +46,7 @@ export default {
       const customExts = this.msg.customExts || (this.msg.ext && this.msg.ext.customExts) || {}
       return {
         avatar: customExts.avatar || '',
-        nickname: customExts.nickname || '未知用户',
+        nickname: customExts.nickname || $t('message.unknownUser'),
         uid: customExts.uid || ''
       }
     }

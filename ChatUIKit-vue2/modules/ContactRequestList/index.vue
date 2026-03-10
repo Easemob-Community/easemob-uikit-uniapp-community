@@ -2,7 +2,7 @@
   <view class="request-list-wrap">
     <NavBar @onLeftTap="onBack">
       <template v-slot:left>
-        <view class="title">新请求</view>
+        <view class="title">{{ $t('nav.newRequest') }}</view>
       </template>
     </NavBar>
     <view class="list">

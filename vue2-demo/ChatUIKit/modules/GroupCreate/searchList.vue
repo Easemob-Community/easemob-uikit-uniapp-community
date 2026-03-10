@@ -7,7 +7,7 @@
         <input
           class="search-input"
           v-model="searchKeyword"
-          placeholder="搜索联系人"
+          :placeholder="$t('groupCreate.searchMember')"
           confirm-type="search"
           @input="onSearchInput"
           @confirm="onSearchConfirm"
@@ -18,7 +18,7 @@
           @tap="clearSearch"
         >✕</text>
       </view>
-      <text class="cancel-btn" @tap="onCancel">取消</text>
+      <text class="cancel-btn" @tap="onCancel">{{ $t('search.cancel') }}</text>
     </view>
     
     <!-- 已选择成员区域 -->
@@ -105,20 +105,20 @@
       <view v-else class="empty-state">
         <text class="empty-icon">🔍</text>
         <text class="empty-text">
-          {{ searchKeyword ? '未找到匹配的联系人' : '暂无联系人' }}
+          {{ searchKeyword ? $t('contact.noMatch') : $t('contact.noContacts') }}
         </text>
       </view>
     </scroll-view>
     
     <!-- 底部操作栏 -->
     <view class="bottom-bar">
-      <text class="selected-count">已选择 {{ selectedUsers.length }} 人</text>
+      <text class="selected-count">{{ $t('groupCreate.selectedCount', { count: selectedUsers.length }) }}</text>
       <button 
         class="create-btn"
         :disabled="selectedUsers.length === 0"
         @tap="onCreateGroup"
       >
-        确定
+        {{ $t('common.confirm') }}
       </button>
     </view>
     
@@ -289,7 +289,7 @@ export default {
         // 添加选择
         // 限制最大选择人数
         if (this.selectedUsers.length >= 500) {
-          this.showToastTip('最多选择500人')
+          this.showToastTip($t('groupCreate.maxSelect', { count: 500 }))
           return
         }
         this.selectedUsers.push({
@@ -324,7 +324,7 @@ export default {
     // 创建群组
     onCreateGroup() {
       if (this.selectedUsers.length === 0) {
-        this.showToastTip('请至少选择一位联系人')
+        this.showToastTip($t('groupCreate.selectAtLeastOne'))
         return
       }
       

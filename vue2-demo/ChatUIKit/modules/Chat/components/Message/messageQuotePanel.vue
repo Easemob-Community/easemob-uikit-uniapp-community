@@ -2,7 +2,7 @@
   <view v-if="quoteMessage" class="quote-panel">
     <view class="quote-content">
       <view class="quote-title">
-        <text class="quote-label">回复</text>
+        <text class="quote-label">{{ $t('common.reply') }}</text>
         <text class="quote-sender">{{ quoteSender }}</text>
       </view>
       <view class="quote-preview">{{ quotePreview }}</view>

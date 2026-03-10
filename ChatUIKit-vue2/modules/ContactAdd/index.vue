@@ -2,7 +2,7 @@
   <view>
     <NavBar @onLeftTap="onBack">
       <template v-slot:left>
-        <view class="title">添加联系人</view>
+        <view class="title">{{ $t('nav.addContact') }}</view>
       </template>
     </NavBar>
     <view class="content">
@@ -11,12 +11,12 @@
           class="input"
           focus="true"
           v-model="userId"
-          placeholder="请输入用户ID"
+          :placeholder="$t('login.userIdPlaceholder')"
         />
       </view>
       <view class="btn-wrap">
         <UIKITButton :disabled="!userId.length" @tap="addContact">
-          添加
+          {{ $t('common.add') }}
         </UIKITButton>
       </view>
     </view>
@@ -53,7 +53,7 @@ export default {
       try {
         await this.$store.dispatch('contact/addContact', this.userId)
         uni.showToast({
-          title: '添加成功',
+          title: $t('contact.friendRequestSent'),
           icon: 'none'
         })
         setTimeout(() => {
@@ -61,7 +61,7 @@ export default {
         }, 1500)
       } catch (error) {
         uni.showToast({
-          title: '添加失败',
+          title: $t('common.error'),
           icon: 'none'
         })
       }

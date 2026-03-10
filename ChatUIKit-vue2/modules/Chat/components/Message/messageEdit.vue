@@ -1,7 +1,7 @@
 <template>
   <view class="message-edit-wrap">
     <view class="edit-header">
-      <text class="edit-title">编辑消息</text>
+      <text class="edit-title">{{ $t('message.editTitle') }}</text>
       <view class="close-btn" @tap="closeEdit">
         <text class="close-icon">×</text>
       </view>
@@ -16,7 +16,7 @@
       />
     </view>
     <view class="edit-footer">
-      <button class="send-btn" @tap="sendEdit">发送</button>
+      <button class="send-btn" @tap="sendEdit">{{ $t('common.send') }}</button>
     </view>
   </view>
 </template>
@@ -57,7 +57,7 @@ export default {
     sendEdit() {
       const text = this.editText.trim()
       if (!text) {
-        uni.showToast({ title: '请输入内容', icon: 'none' })
+        uni.showToast({ title: $t('chat.inputPlaceholder'), icon: 'none' })
         return
       }
 
@@ -69,7 +69,7 @@ export default {
 
       if (!chatSDK || !chatSDK.message) {
         console.error('SDK not initialized')
-        uni.showToast({ title: 'SDK 未初始化', icon: 'none' })
+        uni.showToast({ title: $t('errors.sdkNotInit'), icon: 'none' })
         return
       }
 
@@ -93,7 +93,7 @@ export default {
           this.closeEdit()
         })
         .catch(error => {
-          uni.showToast({ title: '发送失败', icon: 'none' })
+          uni.showToast({ title: $t('errors.sendFailed'), icon: 'none' })
         })
     }
   }

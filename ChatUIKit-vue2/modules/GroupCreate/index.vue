@@ -13,7 +13,7 @@
       <view class="group-form">
         <!-- 群头像 -->
         <view class="form-item avatar-item">
-          <text class="label">群头像</text>
+          <text class="label">{{ $t('groupCreate.avatar') }}</text>
           <view class="avatar-upload" @tap="chooseAvatar">
             <image 
               v-if="groupForm.avatar" 
@@ -27,29 +27,29 @@
         
         <!-- 群名称 -->
         <view class="form-item">
-          <text class="label">群名称</text>
+          <text class="label">{{ $t('groupCreate.name') }}</text>
           <input 
             class="input"
             v-model="groupForm.name"
-            placeholder="请输入群名称"
+            :placeholder="$t('groupCreate.namePlaceholder')"
             maxlength="32"
           />
         </view>
         
         <!-- 群介绍 -->
         <view class="form-item">
-          <text class="label">群介绍</text>
+          <text class="label">{{ $t('groupCreate.description') }}</text>
           <textarea 
             class="textarea"
             v-model="groupForm.description"
-            placeholder="请输入群介绍（选填）"
+            :placeholder="$t('groupCreate.descPlaceholder')"
             maxlength="200"
           />
         </view>
         
         <!-- 群类型 -->
         <view class="form-item">
-          <text class="label">群类型</text>
+          <text class="label">{{ $t('groupCreate.type') }}</text>
           <view class="radio-group">
             <view 
               class="radio-item"
@@ -57,7 +57,7 @@
               @tap="groupForm.type = 'public'"
             >
               <text class="radio-circle">{{ groupForm.type === 'public' ? '●' : '○' }}</text>
-              <text class="radio-label">公开群</text>
+              <text class="radio-label">{{ $t('groupCreate.public') }}</text>
             </view>
             <view 
               class="radio-item"
@@ -65,14 +65,14 @@
               @tap="groupForm.type = 'private'"
             >
               <text class="radio-circle">{{ groupForm.type === 'private' ? '●' : '○' }}</text>
-              <text class="radio-label">私有群</text>
+              <text class="radio-label">{{ $t('groupCreate.private') }}</text>
             </view>
           </view>
         </view>
         
         <!-- 邀请确认 -->
         <view class="form-item switch-item">
-          <text class="label">邀请需要确认</text>
+          <text class="label">{{ $t('groupCreate.needConfirm') }}</text>
           <switch 
             :checked="groupForm.needConfirm"
             @change="e => groupForm.needConfirm = e.detail.value"
@@ -82,7 +82,7 @@
         
         <!-- 已选成员 -->
         <view class="form-item members-item">
-          <text class="label">群成员 ({{ selectedMembers.length }}人)</text>
+          <text class="label">{{ $t('groupCreate.members', { count: selectedMembers.length }) }}</text>
           <view class="members-preview">
             <view 
               v-for="member in selectedMembers.slice(0, 6)" 
@@ -100,14 +100,14 @@
       
       <!-- 底部按钮 -->
       <view class="form-actions">
-        <button class="btn btn-secondary" @tap="step = 1">上一步</button>
+        <button class="btn btn-secondary" @tap="step = 1">{{ $t('groupCreate.previous') }}</button>
         <button 
           class="btn btn-primary" 
           :disabled="!canSubmit"
           :loading="creating"
           @tap="createGroup"
         >
-          创建群聊
+          {{ $t('groupCreate.create') }}
         </button>
       </view>
     </view>
@@ -178,7 +178,7 @@ export default {
     
     // 上传头像
     uploadAvatar(filePath) {
-      uni.showLoading({ title: '上传中...' })
+      uni.showLoading({ title: $t('common.uploading') })
       
       // 这里应该调用 SDK 上传文件
       // 暂时使用本地路径作为演示
@@ -193,7 +193,7 @@ export default {
       if (!this.canSubmit) return
       
       this.creating = true
-      uni.showLoading({ title: '创建中...' })
+      uni.showLoading({ title: $t('common.creating') })
       
       const memberIds = this.selectedMembers.map(m => m.userId)
       
@@ -210,7 +210,7 @@ export default {
         .then((group) => {
           uni.hideLoading()
           uni.showToast({
-            title: '创建成功',
+            title: $t('common.success'),
             icon: 'success'
           })
           
@@ -225,7 +225,7 @@ export default {
           uni.hideLoading()
           this.creating = false
           uni.showToast({
-            title: error.message || '创建失败',
+            title: error.message || $t('common.error'),
             icon: 'none'
           })
         })

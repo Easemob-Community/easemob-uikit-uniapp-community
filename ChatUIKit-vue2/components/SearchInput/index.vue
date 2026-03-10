@@ -15,7 +15,7 @@
       />
       <view v-if="text.length" class="clear-icon" @tap="handleClear"></view>
     </view>
-    <view v-if="showCancel" @tap="handleCancel" class="cancel">取消</view>
+    <view v-if="showCancel" @tap="handleCancel" class="cancel">{{ $t('search.cancel') }}</view>
   </view>
 </template>
 

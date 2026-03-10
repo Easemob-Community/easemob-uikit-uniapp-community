@@ -3,7 +3,7 @@
     <view class="contact-mask" @tap="hidePopup"></view>
     <view class="contact-content">
       <view class="contact-header">
-        <text class="contact-title">选择联系人</text>
+        <text class="contact-title">{{ $t('nav.selectContact') }}</text>
         <view class="close-btn" @tap="hidePopup">
           <text class="close-icon">×</text>
         </view>
@@ -29,7 +29,7 @@
         </view>
       </scroll-view>
       <view class="contact-footer">
-        <button class="confirm-btn" @tap="confirmSelect">确定({{ selectedIds.length }})</button>
+        <button class="confirm-btn" @tap="confirmSelect">{{ $t('common.confirm') }}({{ selectedIds.length }})</button>
       </view>
     </view>
   </view>
@@ -83,7 +83,7 @@ export default {
 
     confirmSelect() {
       if (this.selectedIds.length === 0) {
-        uni.showToast({ title: '请选择联系人', icon: 'none' })
+        uni.showToast({ title: $t('contact.selectContact'), icon: 'none' })
         return
       }
       this.$emit('onSelect', this.selectedIds)

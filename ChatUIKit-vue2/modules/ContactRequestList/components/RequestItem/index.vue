@@ -9,12 +9,12 @@
     <view class="right">
       <view class="content">
         <view class="user-name ellipsis">{{ userInfo.name }}</view>
-        <view class="tip ellipsis">请求添加您为好友</view>
+        <view class="tip ellipsis">{{ $t('contactRequest.requestTip') }}</view>
       </view>
 
       <view class="action">
-        <view class="btn btn-decline" @tap="declineContactInvite">拒绝</view>
-        <view class="btn btn-accept" @tap="acceptContactInvite">同意</view>
+        <view class="btn btn-decline" @tap="declineContactInvite">{{ $t('common.decline') }}</view>
+        <view class="btn btn-accept" @tap="acceptContactInvite">{{ $t('common.accept') }}</view>
       </view>
     </view>
   </view>
@@ -61,7 +61,7 @@ export default {
       
       if (isAlreadyContact) {
         uni.showToast({
-          title: '已经是好友',
+          title: $t('contact.alreadyFriend'),
           icon: 'none'
         })
         // 移除该通知
@@ -72,12 +72,12 @@ export default {
       try {
         await this.$store.dispatch('contact/acceptContactInvite', this.user.userId)
         uni.showToast({
-          title: '已同意',
+          title: $t('contact.accepted'),
           icon: 'none'
         })
       } catch (error) {
         uni.showToast({
-          title: '操作失败',
+          title: $t('common.error'),
           icon: 'none'
         })
       }
@@ -87,12 +87,12 @@ export default {
       try {
         await this.$store.dispatch('contact/declineContactInvite', this.user.userId)
         uni.showToast({
-          title: '已拒绝',
+          title: $t('contact.declined'),
           icon: 'none'
         })
       } catch (error) {
         uni.showToast({
-          title: '操作失败',
+          title: $t('common.error'),
           icon: 'none'
         })
       }

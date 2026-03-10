@@ -29,7 +29,12 @@ export default {
     more: 'More',
     select: 'Select',
     all: 'All',
-    none: 'None'
+    none: 'None',
+    comingSoon: 'Coming Soon',
+    uploading: 'Uploading...',
+    creating: 'Creating...',
+    success: 'Success',
+    tip: 'Tip'
   },
 
   // Auth
@@ -216,7 +221,44 @@ export default {
     showDetail: 'Show Details',
     autoDownload: 'Auto Download',
     imageQuality: 'Image Quality',
-    videoQuality: 'Video Quality'
+    videoQuality: 'Video Quality',
+    // UI Feature Settings
+    appearance: 'Appearance',
+    avatarShape: 'Avatar Shape',
+    circle: 'Circle',
+    square: 'Square',
+    inputFeatures: 'Input Features',
+    messageActions: 'Message Actions',
+    conversationFeatures: 'Conversation Features',
+    otherFeatures: 'Other Features',
+    // Input Features
+    inputVoice: 'Voice Input',
+    inputEmoji: 'Emoji',
+    inputMention: '@Mention',
+    inputQuote: 'Quote',
+    inputEdit: 'Edit',
+    inputImage: 'Image',
+    inputAudio: 'Voice Message',
+    inputVideo: 'Video',
+    inputFile: 'File',
+    // Message Actions
+    copyMessage: 'Copy Message',
+    deleteMessage: 'Delete Message',
+    recallMessage: 'Recall Message',
+    editMessage: 'Edit Message',
+    replyMessage: 'Reply Message',
+    // Conversation Features
+    pinConversation: 'Pin Conversation',
+    muteConversation: 'Mute Conversation',
+    deleteConversation: 'Delete Conversation',
+    // Other Features
+    useUserInfo: 'User Info',
+    usePresence: 'Presence',
+    messageStatus: 'Message Status',
+    userCard: 'User Card',
+    // Language Settings
+    selectLanguage: 'Select Language',
+    languageChanged: 'Switch successful, re-enter page to take effect'
   },
 
   // Time
@@ -249,5 +291,80 @@ export default {
     inBlackList: 'You have been blocked.',
     groupFull: 'Group is full.',
     banned: 'You have been muted.'
+  },
+
+  // Navigation
+  nav: {
+    back: 'Back',
+    settings: 'Settings',
+    newRequest: 'New Request',
+    searchContact: 'Search Contact',
+    searchConversation: 'Search Conversation',
+    newConversation: 'New Conversation',
+    addContact: 'Add Contact',
+    createGroup: 'Create Group',
+    selectMention: 'Select Mention',
+    selectContact: 'Select Contact'
+  },
+
+  // Search
+  search: {
+    cancel: 'Cancel',
+    placeholder: 'Search'
+  },
+
+  // Group Create
+  groupCreate: {
+    title: 'Create Group',
+    avatar: 'Group Avatar',
+    name: 'Group Name',
+    namePlaceholder: 'Enter group name',
+    description: 'Description',
+    descPlaceholder: 'Enter group description (optional)',
+    type: 'Group Type',
+    public: 'Public',
+    private: 'Private',
+    needConfirm: 'Invite requires confirmation',
+    previous: 'Previous',
+    create: 'Create',
+    searchMember: 'Search Contact'
+  },
+
+  // Contact Request
+  contactRequest: {
+    title: 'New Friends',
+    requestTip: 'wants to add you as a friend',
+    accept: 'Accept',
+    decline: 'Decline'
+  },
+
+  // Contact Supplement
+  contact: {
+    noMatch: 'No matching contacts found',
+    selectContact: 'Please select a contact'
+  },
+
+  // Login
+  login: {
+    title: 'Login',
+    userIdPlaceholder: 'Enter User ID',
+    tokenPlaceholder: 'Enter Token',
+    password: 'Password',
+    passwordPlaceholder: 'Enter password',
+    tokenLogin: 'Token Login',
+    passwordLogin: 'Password Login',
+    tip: 'Test accounts can be created in the EaseMob console',
+    console: 'Open EaseMob Console'
+  },
+
+  // Message
+  message: {
+    editTitle: 'Edit Message',
+    send: 'Send',
+    reply: 'Reply',
+    userCard: 'Contact Card',
+    mentionAll: 'Everyone',
+    noMore: 'No more messages',
+    inputPlaceholder: 'Send message'
   }
 }

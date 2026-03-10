@@ -25,7 +25,7 @@
         @confirm="handleSendMessage"
         @blur="onBlur"
         @focus="onFocus"
-        placeholder="发送消息"
+        :placeholder="$t('message.inputPlaceholder')"
       />
     </view>
     <view v-if="featureConfig.inputEmoji" class="icon-wrap">

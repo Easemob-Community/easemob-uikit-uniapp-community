@@ -11,7 +11,7 @@
         <view class="special-item-content">
           <view class="special-item-icon new-request-icon"></view>
           <view class="special-item-info">
-            <text class="special-item-title">新的朋友</text>
+            <text class="special-item-title">{{ $t('contact.newFriends') }}</text>
           </view>
           <view v-if="requestCount > 0" class="badge">{{ requestCount > 99 ? '99+' : requestCount }}</view>
         </view>
@@ -22,7 +22,7 @@
         <view class="special-item-content">
           <view class="special-item-icon group-icon"></view>
           <view class="special-item-info">
-            <text class="special-item-title">群聊</text>
+            <text class="special-item-title">{{ $t('contact.groups') }}</text>
           </view>
           <view class="special-item-count" v-if="groupCount > 0">{{ groupCount }}</view>
         </view>

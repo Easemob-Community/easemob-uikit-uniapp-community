@@ -2,7 +2,7 @@
   <view class="group-list-wrap">
     <NavBar @onLeftTap="onBack">
       <template v-slot:left>
-        <view>群聊</view>
+        <view>{{ $t('group.title') }}</view>
       </template>
     </NavBar>
     <view class="list" v-if="groupList.length">

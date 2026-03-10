@@ -5,7 +5,7 @@
         <view class="input-wrap">
           <SearchInput
             ref="searchRef"
-            placeholder="搜索联系人"
+            :placeholder="$t('contact.searchPlaceholder')"
             @input="onInput"
             @cancel="cancelSearch"
           />

@@ -3,7 +3,7 @@
     <view class="mention-mask" @tap="hidePopup"></view>
     <view class="mention-content">
       <view class="mention-header">
-        <text class="mention-title">选择提醒的人</text>
+        <text class="mention-title">{{ $t('nav.selectMention') }}</text>
         <view class="close-btn" @tap="hidePopup">
           <text class="close-icon">×</text>
         </view>
@@ -11,7 +11,7 @@
       <scroll-view class="mention-list" scroll-y>
         <view class="mention-item" @tap="selectAll">
           <Avatar :size="36" :src="''" :placeholder="GROUP_AVATAR_URL" />
-          <text class="mention-name">所有人</text>
+          <text class="mention-name">{{ $t('message.mentionAll') }}</text>
         </view>
         <view
           class="mention-item"

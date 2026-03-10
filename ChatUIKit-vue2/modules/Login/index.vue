@@ -2,16 +2,16 @@
   <view class="login-container">
     <view class="login-box">
       <view class="logo">
-        <text class="logo-text">环信 Chat</text>
+        <text class="logo-text">EaseIM Chat</text>
       </view>
       
       <view class="form">
         <view class="input-group">
-          <text class="label">用户ID</text>
+          <text class="label">{{ $t('login.username') }}</text>
           <input 
             class="input" 
             v-model="form.userId" 
-            placeholder="请输入用户ID"
+            :placeholder="$t('login.userIdPlaceholder')"
             @confirm="handleLogin"
           />
         </view>
@@ -23,34 +23,34 @@
             :class="{ active: loginType === 'token' }"
             @click="loginType = 'token'"
           >
-            <text>Token 登录</text>
+            <text>{{ $t('login.tokenLogin') }}</text>
           </view>
           <view 
             class="tab" 
             :class="{ active: loginType === 'password' }"
             @click="loginType = 'password'"
           >
-            <text>密码登录</text>
+            <text>{{ $t('login.passwordLogin') }}</text>
           </view>
         </view>
         
         <view class="input-group" v-if="loginType === 'token'">
-          <text class="label">Token</text>
+          <text class="label">{{ $t('login.token') }}</text>
           <input 
             class="input" 
             v-model="form.token" 
-            placeholder="请输入Token"
+            :placeholder="$t('login.tokenPlaceholder')"
             password
             @confirm="handleLogin"
           />
         </view>
         
         <view class="input-group" v-else>
-          <text class="label">密码</text>
+          <text class="label">{{ $t('login.password') }}</text>
           <input 
             class="input" 
             v-model="form.password" 
-            placeholder="请输入密码"
+            :placeholder="$t('login.passwordPlaceholder')"
             password
             @confirm="handleLogin"
           />
@@ -62,19 +62,19 @@
           :disabled="loading || !form.userId || !(form.token || form.password)"
           @click="handleLogin"
         >
-          {{ loading ? '登录中...' : '登录' }}
+          {{ loading ? $t('login.loggingIn') : $t('login.login') }}
         </button>
       </view>
       
       <view class="tips">
-        <text class="tip-text">测试账号可以在环信控制台创建</text>
-        <text class="tip-link" @click="openConsole">打开环信控制台</text>
+        <text class="tip-text">{{ $t('login.tip') }}</text>
+        <text class="tip-link" @click="openConsole">{{ $t('login.console') }}</text>
       </view>
       
       <!-- AppKey 配置提示 -->
       <view class="config-tip" v-if="showConfigTip">
-        <text class="config-title">⚠️ 请先配置 AppKey</text>
-        <text class="config-content">请修改 utils/IM.js 中的 SDK_CONFIG.appKey</text>
+        <text class="config-title">⚠️ {{ $t('login.configAppKeyTitle') }}</text>
+        <text class="config-content">{{ $t('login.configAppKeyContent') }}</text>
       </view>
     </view>
   </view>
@@ -117,17 +117,17 @@ export default {
     
     async handleLogin() {
       if (!this.form.userId) {
-        uni.showToast({ title: '请输入用户ID', icon: 'none' })
+        uni.showToast({ title: $t('login.userIdPlaceholder'), icon: 'none' })
         return
       }
       
       if (this.loginType === 'token' && !this.form.token) {
-        uni.showToast({ title: '请输入Token', icon: 'none' })
+        uni.showToast({ title: $t('login.tokenPlaceholder'), icon: 'none' })
         return
       }
       
       if (this.loginType === 'password' && !this.form.password) {
-        uni.showToast({ title: '请输入密码', icon: 'none' })
+        uni.showToast({ title: $t('login.passwordPlaceholder'), icon: 'none' })
         return
       }
       
@@ -155,7 +155,7 @@ export default {
           isOnline: true
         })
         
-        uni.showToast({ title: '登录成功', icon: 'success' })
+        uni.showToast({ title: $t('login.loginSuccess'), icon: 'success' })
         
         // 跳转会话列表（使用 switchTab 跳转到 tabbar 页面）
         setTimeout(() => {
@@ -167,9 +167,9 @@ export default {
       } catch (error) {
         console.error('登录失败:', error)
         
-        let errorMsg = '登录失败'
+        let errorMsg = $t('login.loginFailed')
         if (error.message && error.message.includes('appKey')) {
-          errorMsg = '请先在 utils/IM.js 中配置正确的 AppKey'
+          errorMsg = $t('login.configAppKey')
           this.showConfigTip = true
         } else if (error.message) {
           errorMsg = error.message
@@ -192,8 +192,8 @@ export default {
       
       // #ifndef H5
       uni.showModal({
-        title: '提示',
-        content: '请访问 https://console.easemob.com 创建应用',
+        title: $t('common.tip'),
+        content: $t('login.consoleTip')
         showCancel: false
       })
       // #endif
