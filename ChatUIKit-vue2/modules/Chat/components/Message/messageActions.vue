@@ -62,17 +62,13 @@ export default {
         width: 0,
         height: 0
       },
-      featureConfig: {
-        copyMessage: true,
-        editMessage: true,
-        replyMessage: true,
-        deleteMessage: true,
-        recallMessage: true
-      }
     }
   },
 
   computed: {
+    featureConfig() {
+      return this.$store.getters['config/getFeatureConfig'] || {}
+    },
     isSelf() {
       return this.$store.getters['message/checkMessageFromIsSelf'](this.msg)
     },

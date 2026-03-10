@@ -39,14 +39,9 @@ export default {
     UserCard
   },
 
-  data() {
-    return {
-      featureConfig: {
-        inputImage: true,
-        inputVideo: true,
-        inputFile: true,
-        userCard: true
-      }
+  computed: {
+    featureConfig() {
+      return this.$store.getters['config/getFeatureConfig'] || {}
     }
   },
 

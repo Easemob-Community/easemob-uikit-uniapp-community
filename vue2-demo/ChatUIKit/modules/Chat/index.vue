@@ -100,16 +100,14 @@ export default {
     return {
       isShowToolbar: false,
       isShowEmojiPicker: false,
-      keyboardHeight: '0px',
-      featureConfig: {
-        inputMention: true,
-        userCard: true,
-        usePresence: false
-      }
+      keyboardHeight: '0px'
     }
   },
 
   computed: {
+    featureConfig() {
+      return this.$store.getters['config/getFeatureConfig'] || {}
+    },
     isShowMask() {
       return this.isShowToolbar || this.isShowEmojiPicker
     },

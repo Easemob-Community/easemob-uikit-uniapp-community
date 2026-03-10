@@ -35,14 +35,14 @@ export default {
   data() {
     return {
       USER_AVATAR_URL,
-      GROUP_AVATAR_URL,
-      featureConfig: {
-        usePresence: false
-      }
+      GROUP_AVATAR_URL
     }
   },
 
   computed: {
+    featureConfig() {
+      return this.$store.getters['config/getFeatureConfig'] || {}
+    },
     currentConversation() {
       return this.$store.state.conversation.currentConversation
     },

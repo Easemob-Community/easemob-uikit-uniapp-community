@@ -30,8 +30,86 @@
         </MenuItem>
       </view>
       
-
-
+      <!-- 输入区域功能 -->
+      <view class="menu-group-name">输入功能</view>
+      <view class="menu-wrap">
+        <MenuItem
+          v-for="(item, index) in inputFeatures"
+          :key="index"
+          class="settings-menu"
+          :title="item.label"
+          :showArrow="false"
+        >
+          <template v-slot:right>
+            <switch
+              :checked="item.enabled"
+              @change="e => toggleFeature(item.key, e.detail.value)"
+              color="#009DFF"
+            />
+          </template>
+        </MenuItem>
+      </view>
+      
+      <!-- 消息操作功能 -->
+      <view class="menu-group-name">消息操作</view>
+      <view class="menu-wrap">
+        <MenuItem
+          v-for="(item, index) in messageActionFeatures"
+          :key="index"
+          class="settings-menu"
+          :title="item.label"
+          :showArrow="false"
+        >
+          <template v-slot:right>
+            <switch
+              :checked="item.enabled"
+              @change="e => toggleFeature(item.key, e.detail.value)"
+              color="#009DFF"
+            />
+          </template>
+        </MenuItem>
+      </view>
+      
+      <!-- 会话功能 -->
+      <view class="menu-group-name">会话功能</view>
+      <view class="menu-wrap">
+        <MenuItem
+          v-for="(item, index) in conversationFeatures"
+          :key="index"
+          class="settings-menu"
+          :title="item.label"
+          :showArrow="false"
+        >
+          <template v-slot:right>
+            <switch
+              :checked="item.enabled"
+              @change="e => toggleFeature(item.key, e.detail.value)"
+              color="#009DFF"
+            />
+          </template>
+        </MenuItem>
+      </view>
+      
+      <!-- 其他功能 -->
+      <view class="menu-group-name">其他功能</view>
+      <view class="menu-wrap">
+        <MenuItem
+          v-for="(item, index) in otherFeatures"
+          :key="index"
+          class="settings-menu"
+          :title="item.label"
+          :showArrow="false"
+        >
+          <template v-slot:right>
+            <switch
+              :checked="item.enabled"
+              @change="e => toggleFeature(item.key, e.detail.value)"
+              color="#009DFF"
+            />
+          </template>
+        </MenuItem>
+      </view>
+      
       <view class="bottom-space"></view>
     </scroll-view>
     
@@ -76,13 +154,42 @@ export default {
         { label: '简体中文', value: 'zh-CN' },
         { label: 'English', value: 'en' }
       ],
-      avatarShape: 'circle'
+      avatarShape: 'circle',
+      inputFeatures: [
+        { label: '语音输入', key: 'inputVoice', enabled: true },
+        { label: '表情', key: 'inputEmoji', enabled: true },
+        { label: '@提及', key: 'inputMention', enabled: true },
+        { label: '引用', key: 'inputQuote', enabled: true },
+        { label: '编辑', key: 'inputEdit', enabled: true },
+        { label: '图片', key: 'inputImage', enabled: true },
+        { label: '语音消息', key: 'inputAudio', enabled: true },
+        { label: '视频', key: 'inputVideo', enabled: true },
+        { label: '文件', key: 'inputFile', enabled: true }
+      ],
+      messageActionFeatures: [
+        { label: '复制消息', key: 'copyMessage', enabled: true },
+        { label: '删除消息', key: 'deleteMessage', enabled: true },
+        { label: '撤回消息', key: 'recallMessage', enabled: true },
+        { label: '编辑消息', key: 'editMessage', enabled: true },
+        { label: '回复消息', key: 'replyMessage', enabled: true }
+      ],
+      conversationFeatures: [
+        { label: '置顶会话', key: 'pinConversation', enabled: true },
+        { label: '静音会话', key: 'muteConversation', enabled: true },
+        { label: '删除会话', key: 'deleteConversation', enabled: true }
+      ],
+      otherFeatures: [
+        { label: '用户信息', key: 'useUserInfo', enabled: true },
+        { label: '在线状态', key: 'usePresence', enabled: true },
+        { label: '消息状态', key: 'messageStatus', enabled: true },
+        { label: '用户名片', key: 'userCard', enabled: true }
+      ]
     }
   },
   
   computed: {
     language() {
-      return this.$store.getters['config/getLanguage']
+      return this.$store.getters['config/getLanguage'] || 'zh-CN'
     },
     
     currentLanguage() {
@@ -97,29 +204,42 @@ export default {
   
   methods: {
     loadConfig() {
-      const config = this.$store.getters['config/getConfig']
-      if (config) {
-        // 加载头像形状
-        this.avatarShape = config.avatarShape || 'circle'
-        
-        // 加载功能开关
-        this.loadFeatures(config.features)
-        this.loadPrivacy(config.privacy)
-        this.loadChat(config.chat)
+      const themeConfig = this.$store.getters['config/getThemeConfig']
+      const featureConfig = this.$store.getters['config/getFeatureConfig']
+      
+      if (themeConfig) {
+        this.avatarShape = themeConfig.avatarShape || 'circle'
+      }
+      
+      if (featureConfig) {
+        // 加载输入功能
+        this.inputFeatures.forEach(item => {
+          item.enabled = featureConfig[item.key] !== false
+        })
+        // 加载消息操作
+        this.messageActionFeatures.forEach(item => {
+          item.enabled = featureConfig[item.key] !== false
+        })
+        // 加载会话功能
+        this.conversationFeatures.forEach(item => {
+          item.enabled = featureConfig[item.key] !== false
+        })
+        // 加载其他功能
+        this.otherFeatures.forEach(item => {
+          item.enabled = featureConfig[item.key] !== false
+        })
       }
     },
     
-
-
     onBack() {
       uni.navigateBack()
     },
     
     selectLanguage(lang) {
-      this.$store.dispatch('config/setLanguage', lang)
+      // 语言切换需要重启应用才能完全生效
       this.showLanguagePicker = false
       uni.showToast({ 
-        title: '设置成功，重启后生效', 
+        title: '切换成功，重启后生效', 
         icon: 'none',
         duration: 2000
       })
@@ -127,11 +247,13 @@ export default {
     
     toggleAvatarShape() {
       this.avatarShape = this.avatarShape === 'circle' ? 'square' : 'circle'
-      this.$store.commit('config/UPDATE_CONFIG', { avatarShape: this.avatarShape })
+      this.$store.dispatch('config/setThemeConfig', { avatarShape: this.avatarShape })
       uni.showToast({ title: '设置成功', icon: 'success' })
     },
     
-
+    toggleFeature(key, enabled) {
+      this.$store.dispatch('config/setFeature', { feature: key, enabled })
+    }
   }
 }
 </script>

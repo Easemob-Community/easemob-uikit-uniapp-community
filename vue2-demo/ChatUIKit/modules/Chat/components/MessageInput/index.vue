@@ -63,17 +63,15 @@ export default {
     return {
       isFocus: false,
       text: '',
-      mentionUserIds: [],
-      featureConfig: {
-        inputAudio: true,
-        inputEmoji: true,
-        inputVideo: true,
-        inputImage: true
-      }
+      mentionUserIds: []
     }
   },
 
   computed: {
+    featureConfig() {
+      return this.$store.getters['config/getFeatureConfig'] || {}
+    },
+    
     isShowToolbar() {
       return this.featureConfig.inputVideo || this.featureConfig.inputImage
     },
