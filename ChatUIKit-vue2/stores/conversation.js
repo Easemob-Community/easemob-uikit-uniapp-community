@@ -214,15 +214,20 @@ export default {
       if (!chatConn) return
 
       try {
+        // SDK 需要 options 包装参数
         if (isMute) {
           await chatConn.setSilentModeForConversation({
-            conversationId,
-            type: conversationType
+            options: {
+              conversationId,
+              type: conversationType
+            }
           })
         } else {
           await chatConn.clearRemindTypeForConversation({
-            conversationId,
-            type: conversationType
+            options: {
+              conversationId,
+              type: conversationType
+            }
           })
         }
         
@@ -233,12 +238,16 @@ export default {
     },
     
     // 置顶/取消置顶会话
-    async pinConversation({ commit, rootState }, { conversationId, conversationType, isPinned }) {
+    async pinConversation({ commit, rootState }, payload) {
+      const { conversationId, conversationType, isPinned } = payload || {}
       const chatConn = rootState.conn.chatConn
-      if (!chatConn) return
+      if (!chatConn || !conversationId) return
 
       try {
-        if (isPinned) {
+        // 确保 isPinned 是布尔值
+        const pinned = !!isPinned
+        
+        if (pinned) {
           await chatConn.pinConversation({
             conversationId,
             conversationType
@@ -252,7 +261,7 @@ export default {
         
         commit('UPDATE_CONVERSATION', {
           conversationId,
-          updates: { isPinned, pinnedTime: isPinned ? Date.now() : undefined }
+          updates: { isPinned: pinned, pinnedTime: pinned ? Date.now() : undefined }
         })
       } catch (error) {
         console.error('设置置顶状态失败:', error)
