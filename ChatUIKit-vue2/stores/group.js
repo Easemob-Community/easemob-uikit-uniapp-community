@@ -71,7 +71,11 @@ export default {
       if (!chatConn) return
 
       try {
-        const res = await chatConn.getJoinedGroups()
+        // SDK 需要传入参数对象
+        const res = await chatConn.getJoinedGroups({
+          pageNum: 1,
+          pageSize: 50
+        })
         const list = res.data || []
         commit('SET_GROUP_LIST', list)
       } catch (error) {
