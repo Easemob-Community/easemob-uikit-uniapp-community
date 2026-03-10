@@ -73,15 +73,8 @@ export default {
         return this.shape
       }
       // 从 config store 读取头像形状
-      try {
-        const themeConfig = this.$store && this.$store.getters && this.$store.getters['config/getThemeConfig']
-        if (themeConfig && themeConfig.avatarShape) {
-          return themeConfig.avatarShape
-        }
-      } catch (e) {
-        console.warn('[Avatar] Failed to get avatarShape from config:', e)
-      }
-      return 'circle'
+      const themeConfig = this.$store.getters['config/getThemeConfig']
+      return themeConfig?.avatarShape || 'circle'
     },
     
     showPresence() {
