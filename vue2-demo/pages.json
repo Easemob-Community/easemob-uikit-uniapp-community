@@ -55,6 +55,12 @@
 			}
 		},
 		{
+			"path": "ChatUIKit/modules/ContactRequestList/index",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
 			"path": "pages/me/index",
 			"style": {
 				"navigationStyle": "custom"

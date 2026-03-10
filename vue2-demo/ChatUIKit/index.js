@@ -142,21 +142,35 @@ class ChatUIKit {
       // 联系人相关事件
       onContactInvited: (msg) => {
         console.log('[ChatUIKit] Contact invited:', msg)
+        // 添加好友申请通知
+        this.store.dispatch('contact/addContactNotice', {
+          from: msg.from,
+          to: msg.to,
+          status: 'pending',
+          ext: 'invited',
+          time: Date.now()
+        })
         uni.$emit('chatContactInvited', msg)
       },
 
       onContactAdded: (msg) => {
         console.log('[ChatUIKit] Contact added:', msg)
+        // 刷新联系人列表
+        this.store.dispatch('contact/getContactsFromServer')
         uni.$emit('chatContactAdded', msg)
       },
 
       onContactDeleted: (msg) => {
         console.log('[ChatUIKit] Contact deleted:', msg)
+        // 从本地移除联系人
+        this.store.commit('contact/REMOVE_CONTACT', msg.from)
         uni.$emit('chatContactDeleted', msg)
       },
 
       onContactAgreed: (msg) => {
         console.log('[ChatUIKit] Contact agreed:', msg)
+        // 刷新联系人列表
+        this.store.dispatch('contact/getContactsFromServer')
         uni.$emit('chatContactAgreed', msg)
       },
 
@@ -236,7 +250,7 @@ class ChatUIKit {
     this.store.dispatch('contact/getContactsFromServer')
     
     // 加载群组列表
-    this.store.dispatch('group/getJoinedGroupList')
+    this.store.dispatch('group/getGroupList')
   }
 
   /**

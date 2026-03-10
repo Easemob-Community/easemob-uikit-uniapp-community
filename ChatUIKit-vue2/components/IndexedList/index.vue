@@ -1,6 +1,29 @@
 <template>
   <view class="indexed-list">
     <scroll-view scroll-y class="indexed-list-scroll" :scroll-into-view="scrollIntoView">
+      <!-- 新的朋友入口 -->
+      <view v-if="hasNewRequestItem" class="special-item" @tap="onNewRequestTap">
+        <view class="special-item-content">
+          <view class="special-item-icon new-request-icon"></view>
+          <view class="special-item-info">
+            <text class="special-item-title">新的朋友</text>
+          </view>
+          <view v-if="requestCount > 0" class="badge">{{ requestCount > 99 ? '99+' : requestCount }}</view>
+        </view>
+      </view>
+      
+      <!-- 群聊入口 -->
+      <view v-if="hasGroupItem" class="special-item" @tap="onGroupTap">
+        <view class="special-item-content">
+          <view class="special-item-icon group-icon"></view>
+          <view class="special-item-info">
+            <text class="special-item-title">群聊</text>
+          </view>
+          <view class="special-item-count" v-if="groupCount > 0">{{ groupCount }}</view>
+        </view>
+      </view>
+      
+      <!-- 联系人列表 -->
       <view
         v-for="(group, index) in indexedData"
         :key="index"
@@ -41,6 +64,22 @@ export default {
     options: {
       type: Array,
       default: () => []
+    },
+    hasGroupItem: {
+      type: Boolean,
+      default: false
+    },
+    hasNewRequestItem: {
+      type: Boolean,
+      default: false
+    },
+    requestCount: {
+      type: Number,
+      default: 0
+    },
+    groupCount: {
+      type: Number,
+      default: 0
     }
   },
   
@@ -88,7 +127,15 @@ export default {
     },
     
     onItemTap(item) {
-      this.$emit('itemTap', item)
+      this.$emit('onContactTap', item.userId || item.id)
+    },
+    
+    onNewRequestTap() {
+      this.$emit('onNewRequestTap')
+    },
+    
+    onGroupTap() {
+      this.$emit('onGroupTap')
     }
   }
 }
@@ -106,6 +153,63 @@ export default {
   height: 100%;
 }
 
+/* 特殊入口项样式 */
+.special-item {
+  background: #fff;
+  padding: 0 16px;
+}
+
+.special-item-content {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 0.5px solid #e3e6e8;
+}
+
+.special-item-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.new-request-icon {
+  background: #ff9d00;
+}
+
+.group-icon {
+  background: #00a4fd;
+}
+
+.special-item-info {
+  flex: 1;
+}
+
+.special-item-title {
+  font-size: 16px;
+  color: #171a1c;
+  font-weight: 500;
+}
+
+.special-item-count {
+  font-size: 14px;
+  color: #75828a;
+}
+
+.badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #ff4d4f;
+  color: #fff;
+  font-size: 12px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .indexed-group {
   margin-bottom: 10px;
 }
@@ -118,14 +222,14 @@ export default {
 }
 
 .indexed-item {
-  padding: 12px 16px;
-  border-bottom: 0.5px solid #e3e6e8;
   background: #fff;
 }
 
 .default-item {
   font-size: 16px;
   color: #171a1c;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid #e3e6e8;
 }
 
 .indexed-sidebar {

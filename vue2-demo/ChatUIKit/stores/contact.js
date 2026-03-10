@@ -20,9 +20,6 @@ export default {
     // 获取联系人列表
     getContacts: state => state.contacts,
     
-    // 获取联系人数量
-    getContactCount: state => state.contacts.length,
-    
     // 获取好友申请列表
     getContactsNoticeList: state => state.contactsNoticeInfo.list,
     
@@ -64,11 +61,6 @@ export default {
       }
     },
     
-    // 设置好友申请通知信息
-    SET_CONTACTS_NOTICE_INFO(state, info) {
-      state.contactsNoticeInfo = { ...state.contactsNoticeInfo, ...info }
-    },
-    
     // 添加好友申请通知
     ADD_CONTACT_NOTICE(state, notice) {
       const exists = state.contactsNoticeInfo.list.some(
@@ -79,19 +71,23 @@ export default {
           item => item.from !== notice.from
         )
       }
+      
       state.contactsNoticeInfo.list.unshift(notice)
+      
       if (notice.ext === 'invited') {
         state.contactsNoticeInfo.unReadCount++
       }
     },
     
     // 移除好友申请通知
-    REMOVE_CONTACT_NOTICE(state, from) {
+    REMOVE_CONTACT_NOTICE(state, userId) {
       const index = state.contactsNoticeInfo.list.findIndex(
-        item => item.from === from
+        item => item.from === userId
       )
       if (index > -1) {
-        state.contactsNoticeInfo.list.splice(index, 1)
+        state.contactsNoticeInfo.list = state.contactsNoticeInfo.list.filter(
+          item => item.from !== userId
+        )
         state.contactsNoticeInfo.unReadCount = Math.max(
           0,
           state.contactsNoticeInfo.unReadCount - 1
@@ -104,14 +100,16 @@ export default {
       state.contactsNoticeInfo.unReadCount = 0
     },
     
-    // 重置好友申请通知
-    RESET_CONTACT_NOTICE(state) {
-      state.contactsNoticeInfo = { list: [], unReadCount: 0 }
+    // 设置当前查看的用户信息
+    SET_VIEWED_USER_INFO(state, userInfo) {
+      state.viewedUserInfo = userInfo
     },
     
-    // 设置当前查看的用户信息
-    SET_VIEWED_USER_INFO(state, info) {
-      state.viewedUserInfo = info
+    // 清空数据
+    CLEAR_CONTACTS(state) {
+      state.contacts = []
+      state.contactsNoticeInfo = { list: [], unReadCount: 0 }
+      state.viewedUserInfo = null
     }
   },
 
@@ -119,24 +117,18 @@ export default {
     // 从服务器获取联系人列表
     async getContactsFromServer({ commit, rootState }) {
       const chatConn = rootState.conn.chatConn
-      if (!chatConn) {
-        console.warn('[ContactStore] chatConn is null, cannot get contacts')
-        return
-      }
+      if (!chatConn) return
 
       try {
-        console.log('[ContactStore] Fetching contacts from server...')
         const res = await chatConn.getContacts()
-        console.log('[ContactStore] getContacts response:', res)
         const contacts = (res.data || []).map(userId => ({
           userId,
           name: userId
         }))
-        console.log('[ContactStore] Parsed contacts:', contacts)
         commit('SET_CONTACTS', contacts)
         return contacts
       } catch (error) {
-        console.error('[ContactStore] 获取联系人列表失败:', error)
+        console.error('获取联系人列表失败:', error)
         throw error
       }
     },
@@ -170,14 +162,16 @@ export default {
     },
     
     // 接受好友申请
-    async acceptContactInvite({ commit, rootState }, userId) {
+    async acceptContactInvite({ commit, rootState, dispatch }, userId) {
       const chatConn = rootState.conn.chatConn
       if (!chatConn) return
 
       try {
         await chatConn.acceptContactInvite(userId)
         commit('REMOVE_CONTACT_NOTICE', userId)
-        commit('ADD_CONTACT', { userId, name: userId })
+        // 刷新联系人列表
+        dispatch('getContactsFromServer')
+        return { data: true }
       } catch (error) {
         console.error('接受好友申请失败:', error)
         throw error
@@ -192,10 +186,36 @@ export default {
       try {
         await chatConn.declineContactInvite(userId)
         commit('REMOVE_CONTACT_NOTICE', userId)
+        return { data: true }
       } catch (error) {
         console.error('拒绝好友申请失败:', error)
         throw error
       }
+    },
+    
+    // 添加好友申请通知
+    addContactNotice({ commit }, notice) {
+      commit('ADD_CONTACT_NOTICE', notice)
+    },
+    
+    // 移除好友申请通知
+    removeContactNotice({ commit }, userId) {
+      commit('REMOVE_CONTACT_NOTICE', userId)
+    },
+    
+    // 清空好友申请未读数
+    clearContactNoticeUnread({ commit }) {
+      commit('CLEAR_CONTACT_NOTICE_UNREAD')
+    },
+    
+    // 设置当前查看的用户信息
+    setViewedUserInfo({ commit }, userInfo) {
+      commit('SET_VIEWED_USER_INFO', userInfo)
+    },
+    
+    // 清空数据
+    clear({ commit }) {
+      commit('CLEAR_CONTACTS')
     }
   }
 }
