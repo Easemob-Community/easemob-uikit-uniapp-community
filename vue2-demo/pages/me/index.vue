@@ -221,7 +221,8 @@ export default {
   font-style: normal;
   font-weight: 500;
   line-height: 20px;
-  margin-top: 10px;
+  margin-top: 20px;
+  margin-bottom: 8px;
   padding: 0 16px;
 }
 
@@ -235,10 +236,11 @@ export default {
   display: flex;
   flex-direction: column;
   background-color: #fff;
+  margin-top: 8px;
 }
 
 .me-menu {
-  padding: 0 16px;
+  padding: 0;
 }
 
 .logout {
@@ -246,8 +248,9 @@ export default {
   color: #009DFF;
   font-size: 16px;
   font-weight: 500;
-  border-bottom: 0.5px solid #E3E6E8;
-  padding: 16px;
+  background-color: #fff;
+  padding: 14px 16px;
+  margin-top: 8px;
   background-color: #fff;
   margin-top: 1px;
 }
