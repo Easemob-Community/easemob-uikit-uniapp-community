@@ -13,7 +13,7 @@ export const ASSETS_URL = '/static/'
 export const USER_AVATAR_URL = ASSETS_URL + 'user.png'
 
 // 默认群组头像
-export const GROUP_AVATAR_URL = ASSETS_URL + 'icon/createGroup.png'
+export const GROUP_AVATAR_URL = ASSETS_URL + 'group.png'
 
 // 会话中消息的最大数量
 export const MAX_MESSAGES_PER_CONVERSATION = 100
