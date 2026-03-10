@@ -146,6 +146,15 @@ export default {
         
         await this.login(loginParams)
         
+        // 设置当前用户信息
+        this.$store.commit('appUser/SET_SELF_USER_INFO', {
+          name: this.form.userId,
+          nickname: this.form.userId,
+          userId: this.form.userId,
+          presenceExt: 'Online',
+          isOnline: true
+        })
+        
         uni.showToast({ title: '登录成功', icon: 'success' })
         
         // 跳转会话列表（使用 switchTab 跳转到 tabbar 页面）

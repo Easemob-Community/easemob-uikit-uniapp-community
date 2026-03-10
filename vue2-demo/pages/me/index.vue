@@ -22,7 +22,7 @@
         <MenuItem
           class="me-menu"
           :title="$t('me.meStatus')"
-          @tap="toPresenceSetting"
+          @click.native="toPresenceSetting"
         >
           <template v-slot:left>
             <view class="icon status"></view>
@@ -31,7 +31,7 @@
         <MenuItem
           class="me-menu"
           :title="$t('me.meInfo')"
-          @tap="toProfile"
+          @click.native="toProfile"
         >
           <template v-slot:left>
             <view class="icon person"></view>
@@ -40,7 +40,7 @@
         <MenuItem
           class="me-menu"
           :title="$t('me.meAbout')"
-          @tap="toAbout"
+          @click.native="toAbout"
         >
           <template v-slot:left>
             <view class="icon about"></view>
@@ -67,28 +67,34 @@ export default {
   
   data() {
     return {
-      USER_AVATAR_URL,
-      userId: '',
-      userInfo: {}
+      USER_AVATAR_URL
     }
   },
   
-  onShow() {
-    this.getUserInfo()
+  computed: {
+    userId() {
+      const user = this.$store.state.conn.user
+      return user ? user.userId || '' : ''
+    },
+    
+    userInfo() {
+      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']
+      if (!selfInfo) {
+        return { name: '', avatar: '', presenceExt: 'Online', isOnline: true }
+      }
+      // 根据 presenceExt 判断是否在线（Online/Away/Busy/Do Not Disturb 都算在线）
+      const presenceExt = selfInfo.presenceExt || 'Online'
+      const isOnline = presenceExt !== 'Offline'
+      return {
+        name: selfInfo.nickname || selfInfo.name,
+        avatar: selfInfo.avatar,
+        presenceExt: presenceExt,
+        isOnline: isOnline
+      }
+    }
   },
   
   methods: {
-    getUserInfo() {
-      const conn = this.$store.state.conn.conn
-      if (conn) {
-        this.userId = conn.user
-      }
-      // 从 store 获取用户信息
-      const appUserState = this.$store.state.appUser
-      if (appUserState && appUserState.userInfos) {
-        this.userInfo = appUserState.userInfos[this.userId] || {}
-      }
-    },
     
     copy() {
       uni.setClipboardData({
@@ -129,9 +135,8 @@ export default {
     },
     
     toPresenceSetting() {
-      uni.showToast({
-        title: '在线状态设置开发中',
-        icon: 'none'
+      uni.navigateTo({
+        url: '/pages/me/presence'
       })
     }
   }

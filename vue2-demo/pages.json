@@ -77,6 +77,12 @@
 			"style": {
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path": "pages/me/presence",
+			"style": {
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"tabBar": {

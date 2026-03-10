@@ -60,13 +60,18 @@ export default {
   
   methods: {
     getUserInfo() {
-      const conn = this.$store.state.conn.conn
-      if (conn) {
-        this.userId = conn.user
+      // 从 conn store 获取当前登录用户ID
+      const user = this.$store.state.conn.user
+      if (user) {
+        this.userId = user.userId || ''
       }
-      const appUserState = this.$store.state.appUser
-      if (appUserState && appUserState.userInfos) {
-        this.userInfo = appUserState.userInfos[this.userId] || {}
+      // 从 appUser store 获取用户信息
+      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']
+      if (selfInfo) {
+        this.userInfo = {
+          name: selfInfo.nickname || selfInfo.name,
+          avatar: selfInfo.avatar
+        }
       }
     },
     
@@ -98,12 +103,8 @@ export default {
       // 这里简化处理，实际应该调用上传接口
       setTimeout(() => {
         // 更新本地用户信息
-        this.$store.commit('appUser/SET_USER_INFO', {
-          userId: this.userId,
-          userInfo: {
-            ...this.userInfo,
-            avatar: filePath
-          }
+        this.$store.commit('appUser/SET_SELF_USER_INFO', {
+          avatar: filePath
         })
         this.getUserInfo()
         uni.hideLoading()

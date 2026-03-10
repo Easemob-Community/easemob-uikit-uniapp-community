@@ -48,6 +48,26 @@ export default {
           info: { name: userId, avatar: '' }
         })
       })
+    },
+    
+    // 发布在线状态
+    async publishPresence({ commit, rootState }, { presenceExt }) {
+      const chatConn = rootState.conn.chatConn
+      if (!chatConn) {
+        throw new Error('SDK not initialized')
+      }
+      
+      try {
+        await chatConn.publishPresence({
+          description: presenceExt
+        })
+        // 更新本地状态
+        commit('SET_SELF_USER_INFO', { presenceExt })
+        return { success: true }
+      } catch (error) {
+        console.error('发布在线状态失败:', error)
+        throw error
+      }
     }
   }
 }
