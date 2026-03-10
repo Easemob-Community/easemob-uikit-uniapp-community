@@ -74,7 +74,6 @@ export default {
 
 .list {
   flex: 1;
-  padding-right: 16px;
   overflow-y: scroll;
 }
 </style>

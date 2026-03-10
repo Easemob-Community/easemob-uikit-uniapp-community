@@ -63,7 +63,7 @@ export default {
 .group-item-wrap {
   display: flex;
   align-items: center;
-  padding: 10px;
+  padding: 12px 16px;
   background: #fff;
   border-bottom: 0.5px solid #e3e6e8;
 }
