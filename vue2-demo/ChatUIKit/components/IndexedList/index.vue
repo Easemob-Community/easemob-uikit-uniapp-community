@@ -170,10 +170,31 @@ export default {
 
 .new-request-icon {
   background: #ff9d00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.new-request-icon::before {
+  content: '+';
+  font-size: 24px;
+  color: #fff;
+  font-weight: bold;
 }
 
 .group-icon {
   background: #00a4fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.group-icon::before {
+  content: '';
+  width: 24px;
+  height: 24px;
+  background: url('../../assets/icon/group.png') no-repeat center;
+  background-size: contain;
 }
 
 .special-item-info {
