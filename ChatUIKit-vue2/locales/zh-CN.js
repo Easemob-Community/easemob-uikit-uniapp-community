@@ -361,6 +361,8 @@ export default {
     tokenLogin: 'Token登录',
     passwordLogin: '密码登录',
     login: '登录',
+    loginSuccess: '登录成功',
+    loginFailed: '登录失败',
     tip: '测试账号可以在环信控制台创建',
     console: '打开环信控制台',
     token: 'Token',
