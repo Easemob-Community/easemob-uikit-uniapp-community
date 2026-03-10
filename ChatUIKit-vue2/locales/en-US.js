@@ -240,12 +240,13 @@ export default {
     otherFeatures: 'Other Features',
     // Input Features
     inputVoice: 'Voice Input',
+    inputVoiceDesc: 'Mini Program & App only',
     inputEmoji: 'Emoji',
-    inputMention: '@Mention',
     inputQuote: 'Quote',
     inputEdit: 'Edit',
     inputImage: 'Image',
     inputAudio: 'Voice Message',
+    inputAudioDesc: 'Record and send voice messages',
     inputVideo: 'Video',
     inputFile: 'File',
     // Message Actions

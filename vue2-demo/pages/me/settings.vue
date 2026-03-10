@@ -38,6 +38,7 @@
           :key="index"
           class="settings-menu"
           :title="$t(item.labelKey)"
+          :description="item.descKey ? $t(item.descKey) : ''"
           :showArrow="false"
         >
           <template v-slot:right>
@@ -158,13 +159,12 @@ export default {
       ],
       avatarShape: 'circle',
       inputFeatures: [
-        { labelKey: 'settings.inputVoice', key: 'inputVoice', enabled: true },
+        { labelKey: 'settings.inputVoice', key: 'inputVoice', enabled: true, descKey: 'settings.inputVoiceDesc' },
         { labelKey: 'settings.inputEmoji', key: 'inputEmoji', enabled: true },
-        { labelKey: 'settings.inputMention', key: 'inputMention', enabled: true },
         { labelKey: 'settings.inputQuote', key: 'inputQuote', enabled: true },
         { labelKey: 'settings.inputEdit', key: 'inputEdit', enabled: true },
         { labelKey: 'settings.inputImage', key: 'inputImage', enabled: true },
-        { labelKey: 'settings.inputAudio', key: 'inputAudio', enabled: true },
+        { labelKey: 'settings.inputAudio', key: 'inputAudio', enabled: true, descKey: 'settings.inputAudioDesc' },
         { labelKey: 'settings.inputVideo', key: 'inputVideo', enabled: true },
         { labelKey: 'settings.inputFile', key: 'inputFile', enabled: true }
       ],

@@ -241,12 +241,13 @@ export default {
     otherFeatures: '其他功能',
     // 输入功能
     inputVoice: '语音输入',
+    inputVoiceDesc: '仅支持小程序和 App',
     inputEmoji: '表情',
-    inputMention: '@提及',
     inputQuote: '引用',
     inputEdit: '编辑',
     inputImage: '图片',
     inputAudio: '语音消息',
+    inputAudioDesc: '录制语音消息发送',
     inputVideo: '视频',
     inputFile: '文件',
     // 消息操作
