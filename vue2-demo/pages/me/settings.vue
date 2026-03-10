@@ -140,6 +140,7 @@
 <script>
 import NavBar from '../../ChatUIKit/components/NavBar/index.vue'
 import MenuItem from '../../ChatUIKit/components/MenuItem/index.vue'
+import { setLocale } from '../../ChatUIKit/locales'
 
 export default {
   components: {
@@ -189,7 +190,8 @@ export default {
   
   computed: {
     language() {
-      return this.$store.getters['config/getLanguage'] || 'zh-CN'
+      // 从 localStorage 读取语言设置
+      return uni.getStorageSync('ChatUIKit_Locale') || 'zh-CN'
     },
     
     currentLanguage() {
@@ -236,10 +238,12 @@ export default {
     },
     
     selectLanguage(lang) {
-      // 语言切换需要重启应用才能完全生效
+      // 设置语言并保存
+      setLocale(lang.value)
+      this.language = lang.value
       this.showLanguagePicker = false
       uni.showToast({ 
-        title: '切换成功，重启后生效', 
+        title: '切换成功，重新进入页面生效', 
         icon: 'none',
         duration: 2000
       })

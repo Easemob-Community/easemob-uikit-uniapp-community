@@ -74,9 +74,9 @@ export default {
       }
       // 从 config store 读取头像形状
       try {
-        const config = this.$store && this.$store.getters && this.$store.getters['config/getConfig']
-        if (config && config.avatarShape) {
-          return config.avatarShape
+        const themeConfig = this.$store && this.$store.getters && this.$store.getters['config/getThemeConfig']
+        if (themeConfig && themeConfig.avatarShape) {
+          return themeConfig.avatarShape
         }
       } catch (e) {
         console.warn('[Avatar] Failed to get avatarShape from config:', e)
