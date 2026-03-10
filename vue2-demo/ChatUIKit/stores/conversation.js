@@ -214,20 +214,19 @@ export default {
       if (!chatConn) return
 
       try {
-        // SDK 需要 options 包装参数
+        // SDK 参数格式：type 需要是 'chat' 或 'groupchat'
+        const type = conversationType === 'singleChat' ? 'chat' : 'groupchat'
+        
         if (isMute) {
           await chatConn.setSilentModeForConversation({
-            options: {
-              conversationId,
-              type: conversationType
-            }
+            conversationId,
+            type,
+            options: { paramType: 0, remindType: 'NONE' }
           })
         } else {
           await chatConn.clearRemindTypeForConversation({
-            options: {
-              conversationId,
-              type: conversationType
-            }
+            conversationId,
+            type
           })
         }
         
@@ -238,30 +237,21 @@ export default {
     },
     
     // 置顶/取消置顶会话
-    async pinConversation({ commit, rootState }, payload) {
-      const { conversationId, conversationType, isPinned } = payload || {}
+    async pinConversation({ commit, rootState }, { conversationId, conversationType, isPinned }) {
       const chatConn = rootState.conn.chatConn
-      if (!chatConn || !conversationId) return
+      if (!chatConn) return
 
       try {
-        // 确保 isPinned 是布尔值
-        const pinned = !!isPinned
-        
-        if (pinned) {
-          await chatConn.pinConversation({
-            conversationId,
-            conversationType
-          })
-        } else {
-          await chatConn.unpinConversation({
-            conversationId,
-            conversationType
-          })
-        }
+        // 调用 SDK 的 pinConversation 方法
+        await chatConn.pinConversation({
+          conversationId,
+          conversationType,
+          isPinned
+        })
         
         commit('UPDATE_CONVERSATION', {
           conversationId,
-          updates: { isPinned: pinned, pinnedTime: pinned ? Date.now() : undefined }
+          updates: { isPinned, pinnedTime: isPinned ? Date.now() : undefined }
         })
       } catch (error) {
         console.error('设置置顶状态失败:', error)
