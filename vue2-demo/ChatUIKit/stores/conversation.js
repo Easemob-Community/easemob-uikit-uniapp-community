@@ -105,7 +105,7 @@ export default {
 
   actions: {
     // 从服务器获取会话列表
-    async getServerConversations({ commit, rootState }) {
+    async getServerConversations({ commit, rootState, dispatch }) {
       const chatConn = rootState.conn.chatConn
       if (!chatConn) return
 
@@ -147,6 +147,17 @@ export default {
         // 计算总未读数
         const totalUnread = formattedList.reduce((sum, item) => sum + (item.unReadCount || 0), 0)
         commit('SET_TOTAL_UNREAD_COUNT', totalUnread)
+        
+        // 收集单聊会话的用户ID，批量获取用户信息
+        const userIdList = formattedList
+          .filter(item => item.conversationType !== 'groupChat')
+          .map(item => item.conversationId)
+          .filter((id, index, arr) => arr.indexOf(id) === index) // 去重
+        
+        if (userIdList.length > 0) {
+          console.log('[ConversationStore] Fetching user info for:', userIdList)
+          dispatch('appUser/getUsersInfoFromServer', { userIdList }, { root: true })
+        }
         
       } catch (error) {
         console.error('获取会话列表失败:', error)

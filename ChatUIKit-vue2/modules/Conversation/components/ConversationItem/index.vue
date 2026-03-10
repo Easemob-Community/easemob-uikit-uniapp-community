@@ -91,6 +91,7 @@
 <script>
 import Avatar from '../../../../components/Avatar'
 import { renderTxt } from '../../../../utils/index.js'
+import { GROUP_AVATAR_URL, USER_AVATAR_URL } from '../../../../const/index.js'
 
 export default {
   name: 'ConversationItem',
@@ -129,14 +130,23 @@ export default {
       if (this.conversation.conversationType === 'groupChat') {
         // 从 group store 获取
         const group = this.$store.getters['group/getGroupById'](convId)
+        // 优先使用 avatar 字段，如果为空则使用默认群头像
+        const avatar = group?.avatar || ''
         return {
           name: group ? (group.groupName || group.groupname || convId) : convId,
-          avatar: group ? (group.avatar || '') : ''
+          avatar: avatar || GROUP_AVATAR_URL
         }
       } else {
         // 从 appUser store 获取
         const userInfo = this.$store.getters['appUser/getUserInfo'](convId)
-        return userInfo || { name: convId, avatar: '' }
+        // 如果没有用户信息或头像，触发从服务器获取
+        if (!userInfo || !userInfo.avatar) {
+          this.fetchUserInfoIfNeeded(convId)
+        }
+        return {
+          name: userInfo?.name || userInfo?.nickname || convId,
+          avatar: userInfo?.avatar || USER_AVATAR_URL
+        }
       }
     },
     
@@ -180,11 +190,21 @@ export default {
   
   methods: {
     getAvatarPlaceholder() {
-      // 使用远程资源地址（和 Vue3 版本一致）
-      const ASSETS_URL = 'https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/'
+      // 使用本地静态资源作为默认头像
       return this.conversation.conversationType === 'groupChat'
-        ? ASSETS_URL + 'createGroup.png'
-        : ASSETS_URL + 'user.png'
+        ? GROUP_AVATAR_URL
+        : USER_AVATAR_URL
+    },
+    
+    // 如果需要，从服务器获取用户信息
+    fetchUserInfoIfNeeded(userId) {
+      const userInfo = this.$store.getters['appUser/getUserInfo'](userId)
+      // 如果没有用户信息或头像，从服务器获取
+      if (!userInfo || !userInfo.avatar) {
+        this.$store.dispatch('appUser/getUsersInfoFromServer', { 
+          userIdList: [userId] 
+        })
+      }
     },
     
     getLastMsgFrom(msg) {
