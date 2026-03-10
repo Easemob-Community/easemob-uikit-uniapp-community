@@ -56,6 +56,9 @@ export default {
   },
   
   onShow() {
+    // 从服务器加载联系人数据
+    this.$store.dispatch('contact/getContactsFromServer')
+    this.$store.dispatch('group/getJoinedGroupList')
     this.loadData()
   },
   
