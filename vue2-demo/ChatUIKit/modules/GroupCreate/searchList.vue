@@ -31,7 +31,7 @@
         >
           <image 
             class="selected-avatar" 
-            :src="user.avatar || '/static/images/default_avatar.png'" 
+            :src="user.avatar || '/static/user.png'" 
             mode="aspectFill"
           />
           <text class="selected-name">{{ user.nickname || user.userId }}</text>
@@ -88,7 +88,7 @@
             <!-- 头像 -->
             <image 
               class="contact-avatar" 
-              :src="contact.avatar || '/static/images/default_avatar.png'" 
+              :src="contact.avatar || '/static/user.png'" 
               mode="aspectFill"
             />
             
@@ -413,6 +413,8 @@ export default {
   align-items: center;
   margin-right: 16px;
   position: relative;
+  padding-top: 4px;
+  padding-right: 4px;
 }
 
 .selected-avatar {
@@ -434,17 +436,19 @@ export default {
 
 .remove-btn {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 16px;
-  height: 16px;
-  background-color: #999;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  background-color: #ff4d4f;
   color: #fff;
   border-radius: 50%;
   font-size: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 10;
+  border: 2px solid #fff;
 }
 
 // 联系人列表
@@ -492,8 +496,8 @@ export default {
   transition: all 0.3s ease;
   
   &.title-highlight {
-    background-color: #009dff;
-    color: #fff;
+    background-color: #e6f7ff;
+    color: #009dff;
   }
 }
 

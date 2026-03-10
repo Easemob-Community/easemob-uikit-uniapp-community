@@ -284,8 +284,8 @@ export default {
 }
 
 .indexed-title.active {
-  background: #009dff;
-  color: #fff;
+  background: #e6f7ff;
+  color: #009dff;
   font-weight: 600;
 }
 
@@ -325,7 +325,7 @@ export default {
 }
 
 .indexed-letter.active {
-  background: #009dff;
-  color: #fff;
+  background: #e6f7ff;
+  color: #009dff;
 }
 </style>
