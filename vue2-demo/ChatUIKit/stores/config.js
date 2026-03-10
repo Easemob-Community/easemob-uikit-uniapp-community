@@ -180,6 +180,16 @@ export default {
     // 重置配置
     resetConfig({ commit }) {
       commit('RESET_CONFIG')
+    },
+    
+    // 批量更新配置（兼容初始化调用）
+    updateConfig({ commit }, config) {
+      if (config.themeConfig) {
+        commit('SET_THEME_CONFIG', config.themeConfig)
+      }
+      if (config.featureConfig) {
+        commit('SET_FEATURE_CONFIG', config.featureConfig)
+      }
     }
   }
 }
