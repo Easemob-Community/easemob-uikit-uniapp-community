@@ -107,8 +107,9 @@ export default {
     },
     
     userInfo() {
-      // 简化处理，从 store 获取
-      return this.$store.state.appUser.selfUserInfo || {}
+      // 使用 getSelfUserInfo getter 获取当前用户信息
+      const info = this.$store.getters['appUser/getSelfUserInfo']
+      return info ? info() : { name: '', avatar: '', presenceExt: '', isOnline: false }
     }
   },
   

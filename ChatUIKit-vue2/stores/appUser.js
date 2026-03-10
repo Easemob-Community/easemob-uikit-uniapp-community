@@ -31,9 +31,19 @@ export default {
       }
     },
     
-    // 获取当前用户信息
-    getSelfUserInfo: state => {
-      return state.selfUserInfo
+    // 获取当前用户信息（从 userMap 中获取，兼容 TS 版本）
+    getSelfUserInfo: (state, getters, rootState) => () => {
+      const userId = rootState.conn.chatConn?.user
+      if (!userId) {
+        return { name: '', nickname: '', avatar: '', sign: '' }
+      }
+      const userInfo = state.userMap[userId]
+      return {
+        name: userInfo?.nickname || userId,
+        nickname: userInfo?.nickname || '',
+        avatar: userInfo?.avatarurl || userInfo?.avatar || '',
+        sign: userInfo?.sign || ''
+      }
     }
   },
 
@@ -56,6 +66,28 @@ export default {
   },
 
   actions: {
+    // 获取当前登录用户自己的信息
+    async getSelfUserInfoFromServer({ commit, rootState }) {
+      const chatConn = rootState.conn.chatConn
+      if (!chatConn || !chatConn.user) return
+      
+      try {
+        // 使用 fetchUserInfoById 获取当前用户信息
+        const res = await chatConn.fetchUserInfoById([chatConn.user])
+        
+        if (res.data && res.data[chatConn.user]) {
+          const userInfo = res.data[chatConn.user]
+          commit('SET_USER_INFO', { 
+            userId: chatConn.user, 
+            info: userInfo 
+          })
+          console.log('[AppUserStore] Self user info loaded:', userInfo)
+        }
+      } catch (error) {
+        console.error('[AppUserStore] 获取当前用户信息失败:', error)
+      }
+    },
+    
     // 从服务器获取用户信息
     async getUsersInfoFromServer({ commit, state, rootState }, { userIdList }) {
       const chatConn = rootState.conn.chatConn

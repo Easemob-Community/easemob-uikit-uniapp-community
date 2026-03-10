@@ -128,7 +128,8 @@ export default {
       if (this.mentionUserIds.includes('ALL')) isAtAll = true
 
       const quoteMessage = this.$store.state.message.quoteMessage
-      const selfUserInfo = this.$store.getters['appUser/getSelfUserInfo']
+      const selfInfoGetter = this.$store.getters['appUser/getSelfUserInfo']
+      const selfUserInfo = selfInfoGetter ? selfInfoGetter() : { name: '', avatar: '' }
       const chatSDK = this.$store.state.conn.chatSDK
 
       if (!chatSDK || !chatSDK.message) {

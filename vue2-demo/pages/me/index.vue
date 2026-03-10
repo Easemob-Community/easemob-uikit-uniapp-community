@@ -87,7 +87,8 @@ export default {
     },
     
     userInfo() {
-      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']
+      // getSelfUserInfo 现在是一个函数，需要调用
+      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']()
       if (!selfInfo) {
         return { name: '', avatar: '', presenceExt: 'Online', isOnline: true }
       }
@@ -95,7 +96,7 @@ export default {
       const presenceExt = selfInfo.presenceExt || 'Online'
       const isOnline = presenceExt !== 'Offline'
       return {
-        name: selfInfo.nickname || selfInfo.name,
+        name: selfInfo.nickname || selfInfo.name || this.userId,
         avatar: selfInfo.avatar,
         presenceExt: presenceExt,
         isOnline: isOnline

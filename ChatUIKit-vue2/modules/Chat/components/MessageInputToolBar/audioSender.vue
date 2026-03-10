@@ -43,7 +43,8 @@ export default {
     },
 
     selfUserInfo() {
-      return this.$store.getters['appUser/getSelfUserInfo']
+      const info = this.$store.getters['appUser/getSelfUserInfo']
+      return info ? info() : { name: '', avatar: '' }
     }
   },
 

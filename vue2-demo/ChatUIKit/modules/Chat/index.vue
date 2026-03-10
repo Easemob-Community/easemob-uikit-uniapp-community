@@ -205,7 +205,8 @@ export default {
     onSelectUserCard(userIds) {
       const userId = userIds[0]
       const userInfo = this.$store.getters['appUser/getUserInfo'](userId)
-      const selfUserInfo = this.$store.getters['appUser/getSelfUserInfo']
+      const selfInfoGetter = this.$store.getters['appUser/getSelfUserInfo']
+      const selfUserInfo = selfInfoGetter ? selfInfoGetter() : { name: '', avatar: '' }
       const chatSDK = this.$store.state.conn.chatSDK
       
       if (!chatSDK || !chatSDK.message) {

@@ -65,7 +65,8 @@ export default {
       if (!msg) return
 
       const chatSDK = this.$store.state.conn.chatSDK
-      const selfUserInfo = this.$store.getters['appUser/getSelfUserInfo']
+      const selfInfoGetter = this.$store.getters['appUser/getSelfUserInfo']
+      const selfUserInfo = selfInfoGetter ? selfInfoGetter() : { name: '', avatar: '' }
 
       if (!chatSDK || !chatSDK.message) {
         console.error('SDK not initialized')

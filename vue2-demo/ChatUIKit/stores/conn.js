@@ -48,7 +48,7 @@ export default {
     },
 
     // 登录
-    async login({ commit, state }, { user, pwd, accessToken }) {
+    async login({ commit, dispatch, state }, { user, pwd, accessToken }) {
       if (!state.chatConn) {
         throw new Error('SDK not initialized')
       }
@@ -73,6 +73,9 @@ export default {
         commit('SET_USER', { userId: user })
         commit('SET_LOGIN_STATUS', true)
         commit('SET_CONNECTED', true)
+        
+        // 登录成功后获取当前用户信息
+        dispatch('appUser/getSelfUserInfoFromServer', null, { root: true })
         
         return res
       } catch (error) {

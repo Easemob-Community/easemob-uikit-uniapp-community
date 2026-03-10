@@ -80,6 +80,9 @@ class ChatUIKit {
         this.store.commit('conn/SET_CONNECTED', true)
         this.store.commit('conn/SET_LOGIN_STATUS', true)
         
+        // 获取当前用户信息
+        this.store.dispatch('appUser/getSelfUserInfoFromServer')
+        
         // 加载初始数据
         this._loadInitialData()
         
