@@ -404,17 +404,25 @@ export function checkCharacter(character) {
   }
 }
 
-// 按名称分组
+import { pinyin } from 'pinyin-pro'
+
+// 按名称分组（支持拼音首字母）
 export function groupByName(name) {
   let initial = '#'
   if (!name || typeof name !== 'string') {
     return initial
   }
-  if (checkCharacter(name.substring(0, 1)) === 'en') {
-    initial = name.substring(0, 1).toUpperCase()
-  } else if (checkCharacter(name.substring(0, 1)) === 'zh') {
-    // 简化为返回第一个字符
-    initial = name.substring(0, 1)
+  const firstChar = name.substring(0, 1)
+  if (checkCharacter(firstChar) === 'en') {
+    initial = firstChar.toUpperCase()
+  } else if (checkCharacter(firstChar) === 'zh') {
+    // 使用 pinyin-pro 转换为拼音首字母
+    try {
+      const py = pinyin(firstChar, { toneType: 'none' })
+      initial = py.charAt(0).toUpperCase()
+    } catch (e) {
+      initial = '#'
+    }
   } else {
     initial = '#'
   }

@@ -57,6 +57,8 @@
 </template>
 
 <script>
+import { groupByName } from '../../utils/index'
+
 export default {
   name: 'IndexedList',
   
@@ -93,7 +95,7 @@ export default {
     indexedData() {
       const groups = {}
       this.options.forEach(item => {
-        const firstLetter = this.getFirstLetter(item.name || item.userId || '#')
+        const firstLetter = groupByName(item.name || item.userId || '#')
         if (!groups[firstLetter]) {
           groups[firstLetter] = []
         }
@@ -113,14 +115,6 @@ export default {
   },
   
   methods: {
-    getFirstLetter(str) {
-      if (!str) return '#'
-      const first = str.charAt(0).toUpperCase()
-      if (/[A-Z]/.test(first)) {
-        return first
-      }
-      return '#'
-    },
     
     scrollToLetter(letter) {
       this.scrollIntoView = 'group-' + letter
