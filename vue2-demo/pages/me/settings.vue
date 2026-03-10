@@ -151,6 +151,7 @@ export default {
   data() {
     return {
       showLanguagePicker: false,
+      currentLanguageValue: uni.getStorageSync('ChatUIKit_Locale') || 'zh-CN',
       languages: [
         { label: '简体中文', value: 'zh-CN' },
         { label: 'English', value: 'en' }
@@ -190,12 +191,11 @@ export default {
   
   computed: {
     language() {
-      // 从 localStorage 读取语言设置
-      return uni.getStorageSync('ChatUIKit_Locale') || 'zh-CN'
+      return this.currentLanguageValue
     },
     
     currentLanguage() {
-      const lang = this.languages.find(l => l.value === this.language)
+      const lang = this.languages.find(l => l.value === this.currentLanguageValue)
       return lang ? lang.label : '简体中文'
     }
   },
@@ -239,11 +239,11 @@ export default {
     
     selectLanguage(lang) {
       // 设置语言并保存
-      setLocale(lang.value)
-      this.language = lang.value
+      setLocale(lang)
+      this.currentLanguageValue = lang
       this.showLanguagePicker = false
       uni.showToast({ 
-        title: $t('settings.languageChanged'), 
+        title: this.$t('settings.languageChanged'), 
         icon: 'none',
         duration: 2000
       })
@@ -252,7 +252,7 @@ export default {
     toggleAvatarShape() {
       this.avatarShape = this.avatarShape === 'circle' ? 'square' : 'circle'
       this.$store.dispatch('config/setThemeConfig', { avatarShape: this.avatarShape })
-      uni.showToast({ title: $t('common.success'), icon: 'success' })
+      uni.showToast({ title: this.$t('common.success'), icon: 'success' })
     },
     
     toggleFeature(key, enabled) {
