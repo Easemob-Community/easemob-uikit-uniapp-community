@@ -17,71 +17,40 @@ export default {
     
     // 根据ID获取群组
     getGroupById: state => id => {
-      // 优先从 groupMap 获取
-      if (state.groupMap[id]) {
-        return state.groupMap[id]
-      }
-      // 从 groupList 中查找（兼容 groupId/groupid）
-      return state.groupList.find(g => 
-        (g.groupId === id) || (g.groupid === id)
-      ) || null
+      return state.groupMap[id] || null
     },
     
     // 获取群组名称
     getGroupName: state => id => {
-      // 优先从 groupMap 获取
-      const groupFromMap = state.groupMap[id]
-      if (groupFromMap) {
-        // 兼容 groupName/groupname 两种字段名
-        return groupFromMap.groupName || groupFromMap.groupname || id
-      }
-      // 从 groupList 中查找（兼容 groupId/groupid）
-      const groupFromList = state.groupList.find(g => 
-        (g.groupId === id) || (g.groupid === id)
-      )
-      return groupFromList?.groupName || groupFromList?.groupname || id
+      const group = state.groupMap[id]
+      return group ? group.groupName : id
     },
     
     // 获取群组头像
     getGroupAvatar: state => id => {
-      // 优先从 groupMap 获取
-      const groupFromMap = state.groupMap[id]
-      if (groupFromMap) {
-        // 兼容 avatar/icon 两种字段名
-        return groupFromMap.avatar || groupFromMap.icon || ''
-      }
-      // 从 groupList 中查找
-      const groupFromList = state.groupList.find(g => 
-        (g.groupId === id) || (g.groupid === id)
-      )
-      return groupFromList?.avatar || groupFromList?.icon || ''
+      const group = state.groupMap[id]
+      return group ? group.avatar : ''
     }
   },
 
   mutations: {
     SET_GROUP_LIST(state, list) {
       state.groupList = list
-      // 同时更新 groupMap（兼容 groupId/groupid 两种字段名）
+      // 同时更新 groupMap
       list.forEach(group => {
-        const groupId = group.groupId || group.groupid
-        if (groupId) {
-          Vue.set(state.groupMap, groupId, group)
-        }
+        Vue.set(state.groupMap, group.groupId, group)
       })
     },
     
     ADD_GROUP(state, group) {
-      const groupId = group.groupId || group.groupid
-      if (groupId && !state.groupMap[groupId]) {
+      if (!state.groupMap[group.groupId]) {
         state.groupList.push(group)
-        Vue.set(state.groupMap, groupId, group)
+        Vue.set(state.groupMap, group.groupId, group)
       }
     },
     
     REMOVE_GROUP(state, groupId) {
-      const index = state.groupList.findIndex(g => 
-        (g.groupId === groupId) || (g.groupid === groupId)
-      )
+      const index = state.groupList.findIndex(g => g.groupId === groupId)
       if (index > -1) {
         state.groupList.splice(index, 1)
       }
@@ -91,13 +60,6 @@ export default {
     UPDATE_GROUP(state, { groupId, updates }) {
       if (state.groupMap[groupId]) {
         Vue.set(state.groupMap, groupId, { ...state.groupMap[groupId], ...updates })
-      }
-      // 同时更新 groupList 中的对应项
-      const index = state.groupList.findIndex(g => 
-        (g.groupId === groupId) || (g.groupid === groupId)
-      )
-      if (index > -1) {
-        Vue.set(state.groupList, index, { ...state.groupList[index], ...updates })
       }
     }
   },
@@ -109,12 +71,7 @@ export default {
       if (!chatConn) return
 
       try {
-        const res = await chatConn.getJoinedGroups({
-          pageNum: 1,
-          pageSize: 500,
-          needAffiliations: false,
-          needRole: false
-        })
+        const res = await chatConn.getJoinedGroups()
         const list = res.data || []
         commit('SET_GROUP_LIST', list)
       } catch (error) {
@@ -146,15 +103,40 @@ export default {
     },
     
     // 创建群组
-    async createGroup({ rootState }, payload) {
+    async createGroup({ commit, rootState }, params) {
       const chatConn = rootState.conn.chatConn
       if (!chatConn) throw new Error('未连接')
 
       try {
-        // 兼容两种调用方式：直接传 params 或传 { data: params }
-        const params = payload.data || payload
-        const res = await chatConn.createGroup({ data: params })
-        return res
+        // 转换参数格式
+        const groupParams = {
+          data: {
+            groupname: params.name,
+            desc: params.description || '',
+            public: params.type === 'public',
+            approval: params.needConfirm !== false, // 默认需要确认
+            inviteNeedConfirm: params.needConfirm !== false,
+            members: params.members || []
+          }
+        }
+        
+        const res = await chatConn.createGroup(groupParams)
+        
+        // 添加到本地群组列表
+        if (res.data && res.data.groupid) {
+          const newGroup = {
+            groupId: res.data.groupid,
+            groupName: params.name,
+            groupname: params.name,
+            description: params.description,
+            type: params.type,
+            avatar: params.avatar || ''
+          }
+          commit('ADD_GROUP', newGroup)
+          return newGroup
+        }
+        
+        return res.data
       } catch (error) {
         console.error('创建群组失败:', error)
         throw error

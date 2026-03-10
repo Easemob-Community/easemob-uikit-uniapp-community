@@ -103,13 +103,40 @@ export default {
     },
     
     // 创建群组
-    async createGroup({ rootState }, params) {
+    async createGroup({ commit, rootState }, params) {
       const chatConn = rootState.conn.chatConn
       if (!chatConn) throw new Error('未连接')
 
       try {
-        const res = await chatConn.createGroup(params)
-        return res
+        // 转换参数格式
+        const groupParams = {
+          data: {
+            groupname: params.name,
+            desc: params.description || '',
+            public: params.type === 'public',
+            approval: params.needConfirm !== false, // 默认需要确认
+            inviteNeedConfirm: params.needConfirm !== false,
+            members: params.members || []
+          }
+        }
+        
+        const res = await chatConn.createGroup(groupParams)
+        
+        // 添加到本地群组列表
+        if (res.data && res.data.groupid) {
+          const newGroup = {
+            groupId: res.data.groupid,
+            groupName: params.name,
+            groupname: params.name,
+            description: params.description,
+            type: params.type,
+            avatar: params.avatar || ''
+          }
+          commit('ADD_GROUP', newGroup)
+          return newGroup
+        }
+        
+        return res.data
       } catch (error) {
         console.error('创建群组失败:', error)
         throw error

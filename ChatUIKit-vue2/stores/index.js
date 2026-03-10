@@ -6,6 +6,7 @@ import group from './group'
 import appUser from './appUser'
 import message from './message'
 import contact from './contact'
+import config from './config'
 
 Vue.use(Vuex)
 
@@ -16,9 +17,10 @@ export default new Vuex.Store({
     group,
     appUser,
     message,
-    contact
+    contact,
+    config
   }
 })
 
 // 导出模块方便单独引用
-export { conn, conversation, group, appUser, message, contact }
+export { conn, conversation, group, appUser, message, contact, config }

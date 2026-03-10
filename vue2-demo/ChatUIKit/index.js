@@ -1,4 +1,5 @@
 import store from './stores'
+import { i18n } from './locales'
 
 // ChatUIKit 主类
 class ChatUIKit {
@@ -14,7 +15,7 @@ class ChatUIKit {
    * @param {object} params - 初始化参数
    * @param {object} params.chat - 环信 SDK 实例 (EMClient/connection)
    * @param {object} params.sdk - 环信 SDK 本身 (包含 message 方法)
-   * @param {object} params.config - 配置项
+   * @param {object} params.config - 配置项（可选）
    */
   init(params) {
     if (this._initialized) {
@@ -32,6 +33,27 @@ class ChatUIKit {
     this.store.commit('conn/SET_CHAT_CONN', params.chat)
     if (params.sdk) {
       this.store.commit('conn/SET_CHAT_SDK', params.sdk)
+    }
+    
+    // 初始化配置中心
+    this.store.dispatch('config/initConfig')
+    
+    // 初始化 i18n
+    i18n.init()
+    
+    // 如果传入自定义配置，合并到配置中心
+    if (params.config) {
+      this.store.dispatch('config/updateConfig', params.config)
+      // 如果配置了语言，同步设置 i18n
+      if (params.config.language) {
+        i18n.setLocale(params.config.language)
+      }
+    } else {
+      // 同步配置中心的语言设置到 i18n
+      const storedLang = uni.getStorageSync('ChatUIKit_Locale')
+      if (storedLang) {
+        i18n.setLocale(storedLang)
+      }
     }
     
     // 设置 SDK 监听
@@ -246,11 +268,9 @@ class ChatUIKit {
     // 加载会话列表（首次从服务器获取）
     this.store.dispatch('conversation/getServerConversations')
     
-    // 加载联系人列表
-    this.store.dispatch('contact/getContactsFromServer')
-    
-    // 加载群组列表
-    this.store.dispatch('group/getGroupList')
+    // 后续可添加：加载联系人列表、群组列表等
+    // this.store.dispatch('contact/getContacts')
+    // this.store.dispatch('group/getGroupList')
   }
 
   /**

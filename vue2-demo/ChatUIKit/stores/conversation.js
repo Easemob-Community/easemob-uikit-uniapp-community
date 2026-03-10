@@ -213,20 +213,16 @@ export default {
       const chatConn = rootState.conn.chatConn
       if (!chatConn) return
 
-      // 转换 conversationType 为 SDK 需要的格式
-      const type = conversationType === 'singleChat' ? 'chat' : 'groupchat'
-
       try {
         if (isMute) {
           await chatConn.setSilentModeForConversation({
             conversationId,
-            type,
-            options: { paramType: 0, remindType: 'NONE' }
+            type: conversationType
           })
         } else {
           await chatConn.clearRemindTypeForConversation({
             conversationId,
-            type
+            type: conversationType
           })
         }
         
@@ -245,14 +241,12 @@ export default {
         if (isPinned) {
           await chatConn.pinConversation({
             conversationId,
-            conversationType,
-            isPinned: true
+            conversationType
           })
         } else {
-          await chatConn.pinConversation({
+          await chatConn.unpinConversation({
             conversationId,
-            conversationType,
-            isPinned: false
+            conversationType
           })
         }
         

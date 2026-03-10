@@ -1,140 +1,238 @@
 <template>
-  <view class="group-create-wrap">
-    <NavBar @onLeftTap="onBack">
-      <template v-slot:left>
-        <view class="title">创建群组</view>
-      </template>
-    </NavBar>
-    <view class="search-wrap">
-      <SearchButton placeholder="搜索联系人" />
+  <view class="group-create">
+    <!-- 步骤1：选择成员 -->
+    <view v-if="step === 1" class="step-container">
+      <SearchList
+        @onCreateGroup="onMembersSelected"
+        @onCancel="onCancel"
+      />
     </view>
-    <scroll-view scroll-y class="contact-list">
-      <view
-        v-for="contact in contactList"
-        :key="contact.userId"
-        class="contact-item"
-        @tap="toggleSelect(contact.userId)"
-      >
-        <view class="checkbox" :class="{ checked: selectedUserIds.includes(contact.userId) }">
-          <view v-if="selectedUserIds.includes(contact.userId)" class="check-icon">✓</view>
+    
+    <!-- 步骤2：设置群信息 -->
+    <view v-else-if="step === 2" class="step-container">
+      <view class="group-form">
+        <!-- 群头像 -->
+        <view class="form-item avatar-item">
+          <text class="label">群头像</text>
+          <view class="avatar-upload" @tap="chooseAvatar">
+            <image 
+              v-if="groupForm.avatar" 
+              class="avatar-img" 
+              :src="groupForm.avatar" 
+              mode="aspectFill"
+            />
+            <text v-else class="upload-placeholder">+</text>
+          </view>
         </view>
-        <UserItem :user="contact" />
+        
+        <!-- 群名称 -->
+        <view class="form-item">
+          <text class="label">群名称</text>
+          <input 
+            class="input"
+            v-model="groupForm.name"
+            placeholder="请输入群名称"
+            maxlength="32"
+          />
+        </view>
+        
+        <!-- 群介绍 -->
+        <view class="form-item">
+          <text class="label">群介绍</text>
+          <textarea 
+            class="textarea"
+            v-model="groupForm.description"
+            placeholder="请输入群介绍（选填）"
+            maxlength="200"
+          />
+        </view>
+        
+        <!-- 群类型 -->
+        <view class="form-item">
+          <text class="label">群类型</text>
+          <view class="radio-group">
+            <view 
+              class="radio-item"
+              :class="{ active: groupForm.type === 'public' }"
+              @tap="groupForm.type = 'public'"
+            >
+              <text class="radio-circle">{{ groupForm.type === 'public' ? '●' : '○' }}</text>
+              <text class="radio-label">公开群</text>
+            </view>
+            <view 
+              class="radio-item"
+              :class="{ active: groupForm.type === 'private' }"
+              @tap="groupForm.type = 'private'"
+            >
+              <text class="radio-circle">{{ groupForm.type === 'private' ? '●' : '○' }}</text>
+              <text class="radio-label">私有群</text>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 邀请确认 -->
+        <view class="form-item switch-item">
+          <text class="label">邀请需要确认</text>
+          <switch 
+            :checked="groupForm.needConfirm"
+            @change="e => groupForm.needConfirm = e.detail.value"
+            color="#009dff"
+          />
+        </view>
+        
+        <!-- 已选成员 -->
+        <view class="form-item members-item">
+          <text class="label">群成员 ({{ selectedMembers.length }}人)</text>
+          <view class="members-preview">
+            <view 
+              v-for="member in selectedMembers.slice(0, 6)" 
+              :key="member.userId"
+              class="member-tag"
+            >
+              {{ member.nickname || member.userId }}
+            </view>
+            <text v-if="selectedMembers.length > 6" class="more-members">
+              +{{ selectedMembers.length - 6 }}
+            </text>
+          </view>
+        </view>
       </view>
-      <Empty v-if="!contactList.length" />
-    </scroll-view>
-    <view class="create-btn-wrap">
-      <UIKITButton
-        :disabled="!selectedUserIds.length"
-        @tap="createGroup"
-      >
-        创建({{ selectedUserIds.length }})
-      </UIKITButton>
+      
+      <!-- 底部按钮 -->
+      <view class="form-actions">
+        <button class="btn btn-secondary" @tap="step = 1">上一步</button>
+        <button 
+          class="btn btn-primary" 
+          :disabled="!canSubmit"
+          :loading="creating"
+          @tap="createGroup"
+        >
+          创建群聊
+        </button>
+      </view>
     </view>
   </view>
 </template>
 
 <script>
-import NavBar from '../../components/NavBar'
-import SearchButton from '../../components/SearchButton'
-import UserItem from '../ContactList/components/UserItem'
-import Empty from '../../components/Empty'
-import UIKITButton from '../../components/Button'
+import SearchList from './searchList.vue'
+import { mapState } from 'vuex'
 
 export default {
   name: 'GroupCreate',
   
   components: {
-    NavBar,
-    SearchButton,
-    UserItem,
-    Empty,
-    UIKITButton
+    SearchList
   },
   
   data() {
     return {
-      selectedUserIds: []
+      step: 1,
+      selectedMembers: [],
+      groupForm: {
+        name: '',
+        description: '',
+        avatar: '',
+        type: 'public', // public | private
+        needConfirm: true
+      },
+      creating: false
     }
   },
   
   computed: {
-    contactList() {
-      const contacts = this.$store.state.contact.contacts || []
-      return contacts.map(contact => {
-        const userInfo = this.$store.getters['appUser/getUserInfo'](contact.userId)
-        return {
-          ...contact,
-          name: userInfo.name || userInfo.nickname || contact.userId,
-          avatar: userInfo.avatar || userInfo.avatarURL || ''
-        }
-      })
-    },
+    ...mapState('appUser', {
+      userInfo: state => state.userInfos
+    }),
     
-    selfUserInfo() {
-      return this.$store.state.appUser.selfUserInfo || {}
+    canSubmit() {
+      return this.groupForm.name.trim().length > 0 && !this.creating
     }
   },
   
-  mounted() {
-    this.$store.dispatch('contact/getContactsFromServer')
-  },
-  
   methods: {
-    toggleSelect(userId) {
-      const index = this.selectedUserIds.indexOf(userId)
-      if (index > -1) {
-        this.selectedUserIds.splice(index, 1)
-      } else {
-        this.selectedUserIds.push(userId)
+    // 成员选择完成
+    onMembersSelected(data) {
+      this.selectedMembers = data.memberDetails || []
+      // 默认群名
+      if (!this.groupForm.name) {
+        const myName = this.userInfo?.nickname || this.userInfo?.userId || '我'
+        this.groupForm.name = `${myName}创建的群`
       }
+      this.step = 2
     },
     
-    async createGroup() {
-      if (!this.selectedUserIds.length) {
-        return
-      }
-      
-      const userNames = this.selectedUserIds.map(userId => {
-        const userInfo = this.$store.getters['appUser/getUserInfo'](userId)
-        return userInfo.name || userInfo.nickname || userId
-      })
-      
-      const groupName = (this.selfUserInfo.nickname || this.selfUserInfo.name) + '、' + userNames.join('、')
-      
-      uni.showLoading({
-        title: '创建中',
-        mask: true
-      })
-      
-      try {
-        const result = await this.$store.dispatch('group/createGroup', {
-          groupname: groupName,
-          members: this.selectedUserIds,
-          desc: groupName,
-          public: true,
-          allowinvites: true,
-          inviteNeedConfirm: false,
-          approval: false,
-          maxusers: 1000
-        })
-        
-        const groupId = result.data?.groupid || result.data?.groupId
-        if (groupId) {
-          uni.redirectTo({
-            url: `/pages/chat/index?type=groupChat&id=${groupId}`
-          })
+    // 选择头像
+    chooseAvatar() {
+      uni.chooseImage({
+        count: 1,
+        sizeType: ['compressed'],
+        sourceType: ['album', 'camera'],
+        success: (res) => {
+          const tempFilePath = res.tempFilePaths[0]
+          // 上传头像
+          this.uploadAvatar(tempFilePath)
         }
-      } catch (error) {
-        uni.showToast({
-          title: '创建失败',
-          icon: 'none'
-        })
-      } finally {
-        uni.hideLoading()
-      }
+      })
     },
     
-    onBack() {
+    // 上传头像
+    uploadAvatar(filePath) {
+      uni.showLoading({ title: '上传中...' })
+      
+      // 这里应该调用 SDK 上传文件
+      // 暂时使用本地路径作为演示
+      setTimeout(() => {
+        this.groupForm.avatar = filePath
+        uni.hideLoading()
+      }, 500)
+    },
+    
+    // 创建群组
+    createGroup() {
+      if (!this.canSubmit) return
+      
+      this.creating = true
+      uni.showLoading({ title: '创建中...' })
+      
+      const memberIds = this.selectedMembers.map(m => m.userId)
+      
+      const groupData = {
+        name: this.groupForm.name.trim(),
+        description: this.groupForm.description.trim(),
+        avatar: this.groupForm.avatar,
+        type: this.groupForm.type,
+        needConfirm: this.groupForm.needConfirm,
+        members: memberIds
+      }
+      
+      this.$store.dispatch('group/createGroup', groupData)
+        .then((group) => {
+          uni.hideLoading()
+          uni.showToast({
+            title: '创建成功',
+            icon: 'success'
+          })
+          
+          // 跳转到群聊页面
+          setTimeout(() => {
+            uni.redirectTo({
+              url: `/ChatUIKit/modules/Chat/index?type=groupChat&id=${group.groupId}`
+            })
+          }, 1500)
+        })
+        .catch((error) => {
+          uni.hideLoading()
+          this.creating = false
+          uni.showToast({
+            title: error.message || '创建失败',
+            icon: 'none'
+          })
+        })
+    },
+    
+    // 取消创建
+    onCancel() {
       uni.navigateBack()
     }
   }
@@ -142,63 +240,181 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.title {
-  color: #171a1c;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 22px;
+.group-create {
+  height: 100vh;
+  background-color: #f5f5f5;
 }
 
-.search-wrap {
-  flex-shrink: 0;
-  padding: 7px 8px;
-}
-
-.group-create-wrap {
+.step-container {
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 }
 
-.contact-list {
-  flex: 1;
-  overflow-y: scroll;
+// 表单样式
+.group-form {
+  padding: 12px;
 }
 
-.contact-item {
+.form-item {
   display: flex;
-  align-items: center;
-  padding: 8px 16px;
-  border-bottom: 0.5px solid #e3e6e8;
-  background: #fff;
-}
-
-.checkbox {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid #ccc;
-  margin-right: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  background-color: #fff;
+  padding: 12px 16px;
+  margin-bottom: 1px;
   
-  &.checked {
-    background: #009dff;
-    border-color: #009dff;
+  &.avatar-item {
+    align-items: center;
+  }
+  
+  &.switch-item {
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  &.members-item {
+    flex-direction: column;
+    
+    .label {
+      margin-bottom: 10px;
+    }
   }
 }
 
-.check-icon {
-  color: #fff;
-  font-size: 12px;
+.label {
+  width: 80px;
+  font-size: 14px;
+  color: #333;
+  flex-shrink: 0;
 }
 
-.create-btn-wrap {
-  flex-shrink: 0;
-  padding: 14px;
-  border-top: 0.5px solid #e3e6e8;
-  background: #f9fafa;
+.avatar-upload {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+}
+
+.upload-placeholder {
+  font-size: 24px;
+  color: #999;
+}
+
+.input {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+  height: 24px;
+}
+
+.textarea {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+  height: 60px;
+  line-height: 1.5;
+}
+
+.radio-group {
+  display: flex;
+  gap: 24px;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  
+  &.active {
+    .radio-circle {
+      color: #009dff;
+    }
+    .radio-label {
+      color: #333;
+    }
+  }
+}
+
+.radio-circle {
+  font-size: 16px;
+  color: #999;
+  margin-right: 6px;
+}
+
+.radio-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.members-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.member-tag {
+  background-color: #f0f0f0;
+  color: #666;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.more-members {
+  font-size: 12px;
+  color: #999;
+  padding: 4px 8px;
+}
+
+// 底部按钮
+.form-actions {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.btn {
+  flex: 1;
+  height: 44px;
+  border-radius: 6px;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-secondary {
+  background-color: #f5f5f5;
+  color: #666;
+  
+  &:active {
+    background-color: #e5e5e5;
+  }
+}
+
+.btn-primary {
+  background-color: #009dff;
+  color: #fff;
+  
+  &[disabled] {
+    background-color: #ccc;
+    color: #fff;
+  }
+  
+  &:active:not([disabled]) {
+    opacity: 0.9;
+  }
 }
 </style>

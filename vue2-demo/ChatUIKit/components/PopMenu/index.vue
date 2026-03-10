@@ -1,12 +1,12 @@
 <template>
-  <view class="mask" @tap.self="handleClose">
+  <view class="mask" @tap="handleClose">
     <view class="pop show" :style="popStyle">
       <view
         v-for="(item, index) in options"
         class="pop-menu-item"
         :key="item.type"
         :title="item.name"
-        @tap.stop.prevent="handleClick(item, $event)"
+        @tap.stop="handleClick(item)"
       >
         <view class="icon">
           <image class="icon-img" :src="item.icon" />
@@ -33,14 +33,13 @@ export default {
   },
   
   methods: {
-    handleClick(item, event) {
-      console.log('PopMenu item clicked:', item.type)
-      this.$emit('menu-tap', { type: item.type })
-      this.$emit('menu-close')
+    handleClick(item) {
+      this.$emit('onMenuTap', { type: item.type })
+      this.$emit('onMenuClose')
     },
     
     handleClose() {
-      this.$emit('menu-close')
+      this.$emit('onMenuClose')
     }
   }
 }

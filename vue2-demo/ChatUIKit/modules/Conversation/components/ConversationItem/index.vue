@@ -127,12 +127,11 @@ export default {
     conversationInfo() {
       const convId = this.conversation.conversationId
       if (this.conversation.conversationType === 'groupChat') {
-        // 从 group store 获取，使用封装的 getter 兼容字段名
-        const groupName = this.$store.getters['group/getGroupName'](convId)
-        const groupAvatar = this.$store.getters['group/getGroupAvatar'](convId)
+        // 从 group store 获取
+        const group = this.$store.getters['group/getGroupById'](convId)
         return {
-          name: groupName,
-          avatar: groupAvatar
+          name: group ? group.groupName : convId,
+          avatar: group ? group.avatar : ''
         }
       } else {
         // 从 appUser store 获取
