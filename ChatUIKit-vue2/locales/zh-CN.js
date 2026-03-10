@@ -352,12 +352,14 @@ export default {
   // 登录
   login: {
     title: '登录',
+    username: '用户ID',
     userIdPlaceholder: '请输入用户ID',
     tokenPlaceholder: '请输入Token',
     password: '密码',
     passwordPlaceholder: '请输入密码',
     tokenLogin: 'Token登录',
     passwordLogin: '密码登录',
+    login: '登录',
     tip: '测试账号可以在环信控制台创建',
     console: '打开环信控制台',
     token: 'Token',

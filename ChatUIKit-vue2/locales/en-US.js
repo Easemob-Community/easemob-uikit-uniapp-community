@@ -347,14 +347,24 @@ export default {
   // Login
   login: {
     title: 'Login',
+    username: 'User ID',
     userIdPlaceholder: 'Enter User ID',
     tokenPlaceholder: 'Enter Token',
     password: 'Password',
     passwordPlaceholder: 'Enter password',
     tokenLogin: 'Token Login',
     passwordLogin: 'Password Login',
+    login: 'Login',
+    loginSuccess: 'Login successful',
+    loginFailed: 'Login failed',
     tip: 'Test accounts can be created in the EaseMob console',
-    console: 'Open EaseMob Console'
+    console: 'Open EaseMob Console',
+    token: 'Token',
+    loggingIn: 'Logging in...',
+    configAppKey: 'Please configure the correct AppKey in utils/IM.js first',
+    consoleTip: 'Please visit https://console.easemob.com to create an app',
+    configAppKeyTitle: 'Please configure AppKey first',
+    configAppKeyContent: 'Please modify SDK_CONFIG.appKey in utils/IM.js'
   },
 
   // Message

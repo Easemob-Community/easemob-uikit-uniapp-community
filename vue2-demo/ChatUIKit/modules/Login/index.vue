@@ -117,17 +117,17 @@ export default {
     
     async handleLogin() {
       if (!this.form.userId) {
-        uni.showToast({ title: $t('login.userIdPlaceholder'), icon: 'none' })
+        uni.showToast({ title: this.$t('login.userIdPlaceholder'), icon: 'none' })
         return
       }
       
       if (this.loginType === 'token' && !this.form.token) {
-        uni.showToast({ title: $t('login.tokenPlaceholder'), icon: 'none' })
+        uni.showToast({ title: this.$t('login.tokenPlaceholder'), icon: 'none' })
         return
       }
       
       if (this.loginType === 'password' && !this.form.password) {
-        uni.showToast({ title: $t('login.passwordPlaceholder'), icon: 'none' })
+        uni.showToast({ title: this.$t('login.passwordPlaceholder'), icon: 'none' })
         return
       }
       
@@ -155,7 +155,7 @@ export default {
           isOnline: true
         })
         
-        uni.showToast({ title: $t('login.loginSuccess'), icon: 'success' })
+        uni.showToast({ title: this.$t('login.loginSuccess'), icon: 'success' })
         
         // 跳转会话列表（使用 switchTab 跳转到 tabbar 页面）
         setTimeout(() => {
@@ -167,9 +167,9 @@ export default {
       } catch (error) {
         console.error('登录失败:', error)
         
-        let errorMsg = $t('login.loginFailed')
+        let errorMsg = this.$t('login.loginFailed')
         if (error.message && error.message.includes('appKey')) {
-          errorMsg = $t('login.configAppKey')
+          errorMsg = this.$t('login.configAppKey')
           this.showConfigTip = true
         } else if (error.message) {
           errorMsg = error.message
@@ -192,8 +192,8 @@ export default {
       
       // #ifndef H5
       uni.showModal({
-        title: $t('common.tip'),
-        content: $t('login.consoleTip')
+        title: this.$t('common.tip'),
+        content: this.$t('login.consoleTip')
         showCancel: false
       })
       // #endif
