@@ -78,7 +78,11 @@ export default {
     },
     
     showPresence() {
-      // 简化处理，不使用 featureConfig
+      // 检查功能配置是否启用在线状态
+      const featureConfig = this.$store.getters['config/getFeatureConfig']
+      if (featureConfig?.usePresence === false) {
+        return false
+      }
       return this.withPresence
     },
     

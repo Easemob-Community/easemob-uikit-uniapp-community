@@ -5,7 +5,7 @@
         <Avatar
           :size="32"
           :src="userInfo.avatar"
-          :withPresence="true"
+          :withPresence="showPresenceIndicator"
           :placeholder="USER_AVATAR_URL"
           :presenceExt="userInfo.presenceExt"
           :isOnline="userInfo.isOnline"
@@ -85,6 +85,15 @@ export default {
   },
   
   computed: {
+    featureConfig() {
+      return this.$store.getters['config/getFeatureConfig'] || {}
+    },
+
+    showPresenceIndicator() {
+      // 检查功能配置是否启用在线状态
+      return this.featureConfig.usePresence !== false
+    },
+
     isWXProgram() {
       try {
         return uni.getSystemInfoSync().uniPlatform === 'mp-weixin'

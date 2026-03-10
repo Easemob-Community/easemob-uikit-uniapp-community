@@ -8,7 +8,7 @@
             :size="32"
             :src="info.avatar"
             :placeholder="isSingleChat ? USER_AVATAR_URL : GROUP_AVATAR_URL"
-            :withPresence="isSingleChat ? true : false"
+            :withPresence="showPresenceIndicator"
             :presenceExt="info.presenceExt"
             :isOnline="info.isOnline"
           />
@@ -78,6 +78,14 @@ export default {
 
     isSingleChat() {
       return this.info.conversationType === 'singleChat'
+    },
+
+    showPresenceIndicator() {
+      // 检查功能配置是否启用在线状态
+      if (this.featureConfig.usePresence === false) {
+        return false
+      }
+      return this.isSingleChat
     }
   },
 
