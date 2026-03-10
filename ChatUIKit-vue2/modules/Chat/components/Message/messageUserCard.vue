@@ -43,11 +43,12 @@ export default {
 
   computed: {
     userInfo() {
+      // 支持两种数据结构：msg.customExts 或 msg.ext.customExts
       const customExts = this.msg.customExts || (this.msg.ext && this.msg.ext.customExts) || {}
       return {
         avatar: customExts.avatar || '',
-        nickname: customExts.nickname || $t('message.unknownUser'),
-        uid: customExts.uid || ''
+        nickname: customExts.nickname || this.$t('message.unknownUser'),
+        uid: customExts.uid || customExts.userId || ''
       }
     }
   },
