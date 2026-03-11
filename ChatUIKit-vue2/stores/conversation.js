@@ -14,7 +14,9 @@ export default {
     // 未读消息总数
     totalUnreadCount: 0,
     // 静音会话映射
-    muteConvsMap: {}
+    muteConvsMap: {},
+    // 上次获取会话列表的时间戳（用于防重）
+    lastFetchTime: 0
   },
 
   getters: {
@@ -100,15 +102,28 @@ export default {
       } else {
         Vue.delete(state.muteConvsMap, conversationId)
       }
+    },
+    
+    SET_LAST_FETCH_TIME(state, time) {
+      state.lastFetchTime = time
     }
   },
 
   actions: {
     // 从服务器获取会话列表
-    async getServerConversations({ commit, rootState, dispatch }) {
+    async getServerConversations({ commit, state, rootState, dispatch }) {
       const chatConn = rootState.conn.chatConn
       if (!chatConn) return
 
+      // 防重机制：5秒内不允许重复获取
+      const now = Date.now()
+      const minInterval = 5000 // 5秒间隔
+      if (now - state.lastFetchTime < minInterval) {
+        console.log('[ConversationStore] Skip fetch, too frequent. Last fetch:', now - state.lastFetchTime, 'ms ago')
+        return
+      }
+      
+      commit('SET_LAST_FETCH_TIME', now)
       commit('SET_LOADING', true)
       
       try {
@@ -267,6 +282,12 @@ export default {
       } catch (error) {
         console.error('设置置顶状态失败:', error)
       }
+    },
+    
+    // 重新计算总未读数
+    recalculateTotalUnread({ state, commit }) {
+      const totalUnread = state.conversationList.reduce((sum, item) => sum + (item.unReadCount || 0), 0)
+      commit('SET_TOTAL_UNREAD_COUNT', totalUnread)
     }
   }
 }

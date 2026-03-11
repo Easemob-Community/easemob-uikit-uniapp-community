@@ -193,7 +193,7 @@ export default {
       // #ifndef H5
       uni.showModal({
         title: this.$t('common.tip'),
-        content: this.$t('login.consoleTip')
+        content: this.$t('login.consoleTip'),
         showCancel: false
       })
       // #endif

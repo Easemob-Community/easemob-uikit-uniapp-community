@@ -66,7 +66,7 @@ export default {
   
   methods: {
     getPresenceStatus() {
-      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']
+      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']()
       if (selfInfo && selfInfo.presenceExt) {
         this.presenceExt = selfInfo.presenceExt
         if (PRESENCE_STATUS_LIST.includes(selfInfo.presenceExt)) {

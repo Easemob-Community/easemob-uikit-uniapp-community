@@ -50,7 +50,7 @@ export default {
   
   methods: {
     getUserInfo() {
-      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']
+      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']()
       if (selfInfo) {
         this.originalName = selfInfo.nickname || selfInfo.name || ''
         this.inputValue = this.originalName

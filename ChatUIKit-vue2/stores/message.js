@@ -180,7 +180,12 @@ export default {
         const newMessageIds = []
         res.messages && res.messages.forEach(msg => {
           if (!state.messageMap[msg.id]) {
-            commit('ADD_MESSAGE_TO_MAP', msg)
+            // 确保 serverMsgId 被保存（历史消息中的 id 通常是服务器消息ID）
+            const msgWithServerId = {
+              ...msg,
+              serverMsgId: msg.serverMsgId || msg.id
+            }
+            commit('ADD_MESSAGE_TO_MAP', msgWithServerId)
             newMessageIds.push(msg.id)
           }
         })
@@ -305,17 +310,21 @@ export default {
 
         // 发送消息
         const res = await chatConn.send(msg)
-        console.log('[MessageStore] Message sent:', res)
+        console.log('[MessageStore] Message sent, full response:', JSON.stringify(res, null, 2))
 
         // 更新本地消息状态
         const convId = msgCopy.chatType === 'groupChat' ? msgCopy.to : 
           (msgCopy.from === currentUserId ? msgCopy.to : msgCopy.from)
 
+        // 获取服务器消息ID - SDK可能返回不同字段名
+        const serverMsgId = res.serverMsgId || res.mid || (res.message && res.message.id)
+        console.log('[MessageStore] Extracted serverMsgId:', serverMsgId, 'from fields:', Object.keys(res))
+
         const newLocalMsg = {
           ...msgCopy,
           ...res.message,
           status: 'sent',
-          serverMsgId: res.serverMsgId,
+          serverMsgId: serverMsgId,
           id: msgCopy.id
         }
 
@@ -381,10 +390,15 @@ export default {
 
     // 处理接收到的消息
     onMessage({ commit, state, rootState, dispatch }, msg) {
+      // 确保 serverMsgId 被保存（接收到的消息 id 通常是服务器消息ID）
+      const msgWithServerId = {
+        ...msg,
+        serverMsgId: msg.serverMsgId || msg.id
+      }
       // 添加到消息映射
       if (!state.messageMap[msg.id]) {
-        commit('ADD_MESSAGE_TO_MAP', msg)
-        dispatch('insertMessage', msg)
+        commit('ADD_MESSAGE_TO_MAP', msgWithServerId)
+        dispatch('insertMessage', msgWithServerId)
       }
 
       // 获取会话ID
@@ -590,6 +604,108 @@ export default {
     // 清空会话消息
     clearConversationMessages({ commit }, convId) {
       commit('CLEAR_CONVERSATION_MESSAGES', convId)
+    },
+
+    // 修改消息（编辑消息）
+    async modifyServerMessage({ commit, state, rootState }, { oldMsg, newMsgText }) {
+      console.log('[MessageStore] Modifying message:', oldMsg)
+      
+      try {
+        const chatConn = rootState.conn.chatConn
+        if (!chatConn) {
+          throw new Error('SDK not initialized')
+        }
+
+        // 获取消息ID：优先使用 serverMsgId（修改消息必须使用服务器消息ID）
+        // 注意：modifyMessage API 要求传入服务器消息ID
+        const msgId = oldMsg.serverMsgId
+        if (!msgId) {
+          console.error('[MessageStore] Cannot modify message: missing serverMsgId', oldMsg)
+          uni.showToast({ title: '消息尚未同步到服务器，请稍后再试', icon: 'none' })
+          throw new Error('Missing serverMsgId')
+        }
+        
+        console.log('[MessageStore] Using serverMsgId:', msgId)
+        
+        const res = await chatConn.modifyMessage({
+          id: msgId,
+          msg: newMsgText,
+          to: oldMsg.to,
+          chatType: oldMsg.chatType
+        })
+
+        console.log('[MessageStore] Message modified:', res)
+
+        // 更新本地消息 - 使用本地消息ID
+        const localMsgId = oldMsg.id || oldMsg.mid
+        if (localMsgId) {
+          commit('UPDATE_MESSAGE_IN_MAP', {
+            msgId: localMsgId,
+            updates: {
+              msg: newMsgText,
+              isModified: true,
+              modifiedTime: Date.now()
+            }
+          })
+        }
+
+        // 同时更新 serverMsgId 对应的记录
+        if (oldMsg.serverMsgId) {
+          commit('UPDATE_MESSAGE_IN_MAP', {
+            msgId: oldMsg.serverMsgId,
+            updates: {
+              msg: newMsgText,
+              isModified: true,
+              modifiedTime: Date.now()
+            }
+          })
+        }
+
+        return res
+      } catch (error) {
+        console.error('[MessageStore] Failed to modify message:', error)
+        throw error
+      }
+    },
+
+    // 更新被修改的消息（收到 onModifiedMessage 事件时调用）
+    updateModifiedMessage({ commit, state }, { mid, msg, from }) {
+      console.log('[MessageStore] Updating modified message:', mid, msg)
+      
+      // 查找包含此消息的记录
+      let found = false
+      
+      // 通过 serverMsgId 查找
+      if (state.messageMap[mid]) {
+        commit('UPDATE_MESSAGE_IN_MAP', {
+          msgId: mid,
+          updates: {
+            msg: msg,
+            isModified: true,
+            modifiedTime: Date.now()
+          }
+        })
+        found = true
+      }
+      
+      // 遍历所有消息查找可能引用此 serverMsgId 的本地消息
+      Object.values(state.messageMap).forEach(message => {
+        if (message.serverMsgId === mid) {
+          commit('UPDATE_MESSAGE_IN_MAP', {
+            msgId: message.id,
+            updates: {
+              msg: msg,
+              isModified: true,
+              modifiedTime: Date.now()
+            }
+          })
+          found = true
+        }
+      })
+      
+      if (!found) {
+        console.warn('[MessageStore] Modified message not found in local:', mid)
+      }
     },
 
     // 清空所有数据

@@ -161,7 +161,14 @@ export default {
         }
         
         await chatConn.updateUserInfo(params)
-        // 更新本地状态
+        // 更新本地状态 - 同时更新 userMap 和 selfUserInfo
+        const userId = chatConn.user
+        if (userId) {
+          commit('SET_USER_INFO', { 
+            userId, 
+            info: { nickname, avatarurl: avatar }
+          })
+        }
         commit('SET_SELF_USER_INFO', { 
           nickname,
           avatar

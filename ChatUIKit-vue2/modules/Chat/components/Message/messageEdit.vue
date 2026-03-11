@@ -57,44 +57,30 @@ export default {
     sendEdit() {
       const text = this.editText.trim()
       if (!text) {
-        uni.showToast({ title: $t('chat.inputPlaceholder'), icon: 'none' })
+        uni.showToast({ title: this.$t('message.inputPlaceholder'), icon: 'none' })
         return
       }
 
-      const msg = this.editingMessage
-      if (!msg) return
+      const oldMsg = this.editingMessage
+      if (!oldMsg) return
 
       const chatSDK = this.$store.state.conn.chatSDK
-      const selfInfoGetter = this.$store.getters['appUser/getSelfUserInfo']
-      const selfUserInfo = selfInfoGetter ? selfInfoGetter() : { name: '', avatar: '' }
 
       if (!chatSDK || !chatSDK.message) {
         console.error('SDK not initialized')
-        uni.showToast({ title: $t('errors.sdkNotInit'), icon: 'none' })
+        uni.showToast({ title: this.$t('errors.sdkNotInit') || 'SDK未初始化', icon: 'none' })
         return
       }
 
-      // 创建修改后的消息
-      const modifiedMsg = chatSDK.message.create({
-        type: 'txt',
-        to: msg.to,
-        chatType: msg.chatType,
-        msg: text,
-        ext: {
-          ease_chat_uikit_user_info: {
-            avatarURL: selfUserInfo.avatar,
-            nickname: selfUserInfo.name
-          }
-        }
-      })
-
-      // 发送消息
-      this.$store.dispatch('message/sendMessage', { msg: modifiedMsg })
+      // 调用修改消息接口 - 直接传递新的消息文本
+      this.$store.dispatch('message/modifyServerMessage', { oldMsg, newMsgText: text })
         .then(() => {
+          uni.showToast({ title: '修改成功', icon: 'success' })
           this.closeEdit()
         })
         .catch(error => {
-          uni.showToast({ title: $t('errors.sendFailed'), icon: 'none' })
+          console.error('修改消息失败:', error)
+          uni.showToast({ title: this.$t('errors.sendFailed') || '修改失败', icon: 'none' })
         })
     }
   }

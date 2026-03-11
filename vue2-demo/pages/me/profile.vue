@@ -59,7 +59,7 @@ export default {
     },
     
     userInfo() {
-      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']
+      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']()
       if (!selfInfo) {
         return { name: '', avatar: '' }
       }

@@ -8,6 +8,7 @@ class ChatUIKit {
     this._initialized = false
     this._chatConn = null
     this._eventHandlerName = 'chatUIKitHandler'
+    this._listenersSetup = false
   }
 
   /**
@@ -69,7 +70,9 @@ class ChatUIKit {
    */
   _setupSDKListeners() {
     if (!this._chatConn) return
-
+    if (this._listenersSetup) return
+    
+    this._listenersSetup = true
     const conn = this._chatConn
 
     // 添加事件处理器
@@ -145,6 +148,20 @@ class ChatUIKit {
         uni.$emit('chatRecallMessage', msg)
       },
 
+      // 消息被修改（编辑）
+      onModifiedMessage: (msg) => {
+        console.log('[ChatUIKit] Message modified:', msg)
+        // 更新本地消息
+        if (msg.mid && msg.msg) {
+          this.store.dispatch('message/updateModifiedMessage', {
+            mid: msg.mid,
+            msg: msg.msg,
+            from: msg.from
+          })
+        }
+        uni.$emit('chatModifiedMessage', msg)
+      },
+
       // 消息已读回执
       onReadMessage: (msg) => {
         console.log('[ChatUIKit] Message read:', msg)
@@ -159,8 +176,16 @@ class ChatUIKit {
       // 会话已读（channel ack）
       onChannelMessage: (msg) => {
         console.log('[ChatUIKit] Channel message:', msg)
-        // 刷新会话列表以更新未读数
-        this.store.dispatch('conversation/getServerConversations')
+        // 只更新对应会话的未读数，不刷新整个列表
+        if (msg.from) {
+          const conversationId = msg.from
+          this.store.commit('conversation/UPDATE_CONVERSATION', {
+            conversationId: conversationId,
+            updates: { unReadCount: 0 }
+          })
+          // 重新计算总未读数
+          this.store.dispatch('conversation/recalculateTotalUnread')
+        }
         uni.$emit('chatChannelMessage', msg)
       },
 

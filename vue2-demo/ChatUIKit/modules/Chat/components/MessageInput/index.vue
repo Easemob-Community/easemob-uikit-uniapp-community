@@ -255,24 +255,25 @@ export default {
 .icon {
   width: 28px;
   height: 28px;
-  background-size: cover;
   background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
 }
 
 .audio-icon {
-  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/audio.png");
+  background-image: url("/static/icon/audioButton.png");
 }
 
 .emoji-icon {
-  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/emoji.png");
+  background-image: url("/static/icon/emoji.png");
 }
 
 .plus-icon {
-  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/plus.png");
+  background-image: url("/static/icon/plus.png");
 }
 
 .send-icon {
-  background-image: url("https://uikit-demo.oss-cn-beijing.aliyuncs.com/demo-assets/icon/send.png");
+  background-image: url("/static/icon/send.png");
 }
 
 .send-input {

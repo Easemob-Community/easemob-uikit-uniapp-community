@@ -121,7 +121,8 @@ export default {
         this.isSelf &&
         this.msg.type === 'txt' &&
         this.msg.status !== 'failed' &&
-        this.msg.status !== 'sending'
+        this.msg.status !== 'sending' &&
+        this.msg.serverMsgId
       const isMsgReplyable =
         this.msg.status !== 'failed' && this.msg.status !== 'sending'
 
@@ -227,6 +228,12 @@ export default {
     },
 
     editMessage() {
+      // 检查消息是否有 serverMsgId（已同步到服务器的消息才能编辑）
+      if (!this.msg.serverMsgId) {
+        uni.showToast({ title: '消息尚未同步到服务器，请稍后再试', icon: 'none' })
+        this.showActions = false
+        return
+      }
       this.$store.dispatch('message/setEditingMessage', this.msg)
       this.showActions = false
     },

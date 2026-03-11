@@ -1,7 +1,7 @@
 <template>
   <view class="item-container">
     <view class="item-icon-wrap">
-      <image class="item-icon" :src="iconUrl" mode="aspectFit" />
+      <image class="item-icon" :src="iconUrl" />
     </view>
     <view class="item-title">{{ title }}</view>
   </view>
