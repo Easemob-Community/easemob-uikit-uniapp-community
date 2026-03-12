@@ -16,6 +16,10 @@
           @keyboardheightchange="onKeyboardHeightChange"
         />
 
+        <!-- 使用 touchstart 而非 tap 事件的原因：
+             点击按钮时 textarea 会先触发 blur 失焦事件，导致键盘收起，
+             然后 keyboardheightchange 事件会检测到键盘高度变为0而关闭编辑框。
+             使用 touchstart.prevent 可以在 blur 之前执行编辑操作，阻止默认行为触发失焦。 -->
         <view
           @touchstart.prevent="onEditButtonTap"
           :class="editAble ? 'edit' : 'edit-disabled'"
@@ -70,9 +74,11 @@ export default {
 
     onEditButtonTap(e) {
       console.log('[MessageEdit] onEditButtonTap called')
+      // 标记正在提交，避免 keyboardheightchange 事件误关闭编辑框。
+      // 尽管 touchstart.prevent 已阻止 blur，但此标志作为双保险防止竞争条件。
       this.isSubmitting = true
       this.editMessage()
-      // 延迟重置标志
+      // 延迟重置标志，确保键盘完全收起后再允许关闭。
       setTimeout(() => {
         this.isSubmitting = false
       }, 300)
@@ -91,7 +97,10 @@ export default {
     onKeyboardHeightChange(e) {
       const height = e.detail?.height || 0
       this.keyboardHeight = height
-      // 键盘收起时关闭编辑框（提交中不关闭）
+      // 键盘收起时关闭编辑框。
+      // 注意：isSubmitting 标志用于避免点击确认按钮时，按钮触发的失焦导致键盘收起，
+      // 进而触发此方法关闭编辑框。touchstart 事件会在 blur 之前执行，
+      // 但为保险起见仍保留此标志作为防护机制。
       if (height === 0 && this.editingMsg && !this.isSubmitting) {
         this.$store.dispatch('message/setEditingMessage', null)
       }
