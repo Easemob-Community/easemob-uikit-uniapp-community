@@ -1,5 +1,36 @@
 import App from './App'
 
+// #ifdef MP-WEIXIN
+// Polyfill for util module used by Easemob-chat SDK
+if (typeof global === 'undefined') {
+  var global = Function('return this')() || (typeof window !== 'undefined' ? window : {})
+}
+if (!global.util) {
+  global.util = {
+    inherits: function(ctor, superCtor) {
+      ctor.super_ = superCtor
+      ctor.prototype = Object.create(superCtor.prototype, {
+        constructor: {
+          value: ctor,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        }
+      })
+    },
+    inspect: function(obj) {
+      return JSON.stringify(obj)
+    },
+    isArray: function(obj) {
+      return Array.isArray(obj)
+    },
+    isObject: function(obj) {
+      return typeof obj === 'object' && obj !== null
+    }
+  }
+}
+// #endif
+
 // #ifndef VUE3
 import Vue from 'vue'
 import './uni.promisify.adaptor'
