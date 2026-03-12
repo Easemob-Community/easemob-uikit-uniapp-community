@@ -33,6 +33,9 @@ logger.init({
 	conn: EMClient
 });
 
+// 如需禁用控制台输出（避免 hbuilderx 等 IDE 控制台日志过多）
+// logger.setConsoleOutput(false);
+
 websdk.logger.onLog = (data) => {
 	logger.handleSDKLog(data);
 }

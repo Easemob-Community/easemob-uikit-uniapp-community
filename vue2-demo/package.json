@@ -7,7 +7,7 @@
     "copy:uikit": "node ../copy-chat-uikit-vue2.js"
   },
   "dependencies": {
-    "easemob-uniapp-logger-plugin": "^1.4.4",
+    "easemob-uniapp-logger-plugin": "^1.5.0",
     "easemob-websdk": "^4.11.0",
     "pinyin-pro": "^3.28.0",
     "vuex": "^3.6.2"
