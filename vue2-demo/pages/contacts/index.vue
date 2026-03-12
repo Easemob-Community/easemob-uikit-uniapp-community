@@ -4,39 +4,81 @@
       <text class="title">联系人</text>
     </view>
     <view class="content">
-      <IndexedList
-        :options="contactList"
-        :hasGroupItem="true"
-        :hasNewRequestItem="true"
-        @onGroupTap="goToGroups"
-        @onContactTap="goToChat"
-        @onNewRequestTap="goToRequests"
-        :requestCount="unreadCount"
-        :groupCount="groupList.length"
-      >
-        <view class="contact-item" slot="indexedItem" slot-scope="{ item }" @tap.stop="goToChat(item.userId)">
-          <Avatar 
-            :src="item.avatar" 
-            :size="40" 
-            :placeholder="USER_AVATAR_URL"
-            :withPresence="showPresenceIndicator"
-            :userId="item.userId"
-          />
-          <text class="name">{{ item.name || item.userId }}</text>
+      <!-- 新的朋友入口 -->
+      <view class="special-item" @tap="goToRequests">
+        <view class="special-item-content">
+          <view class="special-item-icon new-request-icon"></view>
+          <view class="special-item-info">
+            <text class="special-item-title">{{ $t('contact.newFriends') }}</text>
+          </view>
+          <view v-if="unreadCount > 0" class="badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</view>
         </view>
-      </IndexedList>
+      </view>
+      
+      <!-- 群聊入口 -->
+      <view class="special-item" @tap="goToGroups">
+        <view class="special-item-content">
+          <view class="special-item-icon group-icon"></view>
+          <view class="special-item-info">
+            <text class="special-item-title">{{ $t('contact.groups') }}</text>
+          </view>
+          <view class="special-item-count" v-if="groupList.length > 0">{{ groupList.length }}</view>
+        </view>
+      </view>
+      
+      <!-- 联系人列表 - 不使用插槽，直接渲染 -->
+      <scroll-view 
+        scroll-y 
+        class="contact-scroll" 
+        :scroll-into-view="scrollIntoView"
+      >
+        <view
+          v-for="(group, gIndex) in indexedContactList"
+          :key="gIndex"
+          :id="'group-' + group.letter"
+          class="contact-group"
+        >
+          <view class="group-title">{{ group.letter }}</view>
+          <view
+            v-for="(item, idx) in group.data"
+            :key="idx"
+            class="contact-item"
+            @tap="goToChat(item.userId)"
+          >
+            <Avatar 
+              :src="item.avatar" 
+              :size="40" 
+              :placeholder="USER_AVATAR_URL"
+              :withPresence="showPresenceIndicator"
+              :userId="item.userId"
+            />
+            <text class="name">{{ item.name || item.userId }}</text>
+          </view>
+        </view>
+      </scroll-view>
+      
+      <!-- 侧边索引 -->
+      <view class="index-sidebar">
+        <view
+          v-for="letter in indexLetters"
+          :key="letter"
+          class="index-letter"
+          @tap="scrollToLetter(letter)"
+        >
+          {{ letter }}
+        </view>
+      </view>
     </view>
   </view>
 </template>
 
 <script>
-import IndexedList from '../../ChatUIKit/components/IndexedList/index.vue'
 import Avatar from '../../ChatUIKit/components/Avatar/index.vue'
 import { USER_AVATAR_URL } from '../../ChatUIKit/const/index'
+import { groupByName } from '../../ChatUIKit/utils/index'
 
 export default {
   components: {
-    IndexedList,
     Avatar
   },
   
@@ -45,7 +87,8 @@ export default {
       USER_AVATAR_URL,
       contactList: [],
       contactRequests: [],
-      groupList: []
+      groupList: [],
+      scrollIntoView: ''
     }
   },
   
@@ -64,6 +107,35 @@ export default {
         return false
       }
       return true
+    },
+    
+    // 按字母分组的联系人列表
+    indexedContactList() {
+      const groups = {}
+      this.contactList.forEach(item => {
+        const firstLetter = groupByName(item.name || item.userId || '#')
+        if (!groups[firstLetter]) {
+          groups[firstLetter] = []
+        }
+        groups[firstLetter].push(item)
+      })
+      
+      // 排序：字母在前，# 在最后
+      const sortedLetters = Object.keys(groups).sort((a, b) => {
+        if (a === '#') return 1
+        if (b === '#') return -1
+        return a.charCodeAt(0) - b.charCodeAt(0)
+      })
+      
+      return sortedLetters.map(letter => ({
+        letter,
+        data: groups[letter]
+      }))
+    },
+    
+    // 索引字母列表
+    indexLetters() {
+      return this.indexedContactList.map(g => g.letter)
     }
   },
   
@@ -118,6 +190,13 @@ export default {
       uni.navigateTo({
         url: '/ChatUIKit/modules/GroupList/index'
       })
+    },
+    
+    scrollToLetter(letter) {
+      this.scrollIntoView = 'group-' + letter
+      setTimeout(() => {
+        this.scrollIntoView = ''
+      }, 300)
     }
   }
 }
@@ -152,7 +231,102 @@ export default {
 
 .content {
   flex: 1;
+  position: relative;
   overflow: hidden;
+}
+
+.contact-scroll {
+  height: 100%;
+}
+
+/* 特殊入口项样式 */
+.special-item {
+  background: #fff;
+  padding: 0 16px;
+}
+
+.special-item-content {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 0.5px solid #e3e6e8;
+}
+
+.special-item-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.new-request-icon {
+  background: #ff9d00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.new-request-icon::before {
+  content: '+';
+  font-size: 24px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.group-icon {
+  background: #00a4fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.group-icon::before {
+  content: '';
+  width: 24px;
+  height: 24px;
+  background: url('../../ChatUIKit/assets/icon/createGroup.png') no-repeat center;
+  background-size: contain;
+}
+
+.special-item-info {
+  flex: 1;
+}
+
+.special-item-title {
+  font-size: 16px;
+  color: #171a1c;
+  font-weight: 500;
+}
+
+.special-item-count {
+  font-size: 14px;
+  color: #75828a;
+}
+
+.badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #ff4d4f;
+  color: #fff;
+  font-size: 12px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 联系人分组 */
+.contact-group {
+  margin-bottom: 10px;
+}
+
+.group-title {
+  padding: 8px 16px;
+  background: #f5f5f5;
+  font-size: 14px;
+  color: #666;
 }
 
 .contact-item {
@@ -171,5 +345,28 @@ export default {
     font-size: 16px;
     color: #171a1c;
   }
+}
+
+/* 侧边索引 */
+.index-sidebar {
+  position: absolute;
+  right: 8px;
+  top: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+}
+
+.index-letter {
+  padding: 2px 4px;
+  font-size: 12px;
+  color: #5270ad;
+  line-height: 16px;
+  min-width: 16px;
+  text-align: center;
+  border-radius: 50%;
 }
 </style>

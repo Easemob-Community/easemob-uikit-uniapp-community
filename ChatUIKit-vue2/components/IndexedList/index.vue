@@ -43,9 +43,10 @@
           class="indexed-item"
           @tap="onItemTap(item)"
         >
-          <slot name="indexedItem" :item="item" :index="idx">
-            <view class="default-item">{{ item.name || item.userId }}</view>
-          </slot>
+          <!-- 使用作用域插槽，小程序环境通过 $scopedSlots 访问 -->
+          <slot name="indexedItem" :item="item" :index="idx"></slot>
+          <!-- 默认内容在没有插槽内容时显示 -->
+          <view v-if="!hasIndexedItemSlot" class="default-item">{{ item.name || item.userId }}</view>
         </view>
       </view>
     </scroll-view>
@@ -99,6 +100,17 @@ export default {
   },
   
   computed: {
+    // 检测是否有自定义的 indexedItem 插槽内容
+    hasIndexedItemSlot() {
+      // #ifdef MP
+      // 小程序环境下，检查 $slots 或 $scopedSlots
+      return !!(this.$scopedSlots && this.$scopedSlots.indexedItem)
+      // #endif
+      // #ifndef MP
+      return !!this.$slots.indexedItem
+      // #endif
+    },
+    
     indexedData() {
       const groups = {}
       this.options.forEach(item => {
