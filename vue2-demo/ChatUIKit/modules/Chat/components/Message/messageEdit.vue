@@ -12,6 +12,7 @@
           :focus="isFocus"
           :confirm-type="'send'"
           :show-confirm-bar="false"
+          :adjust-position="false"
           @keyboardheightchange="onKeyboardHeightChange"
         />
 
