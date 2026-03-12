@@ -1,6 +1,11 @@
 <template>
   <view class="user-item-wrap" @tap="onTap">
-    <Avatar :src="userInfo.avatar" :placeholder="userAvatarPlaceholder" />
+    <Avatar 
+      :src="userInfo.avatar" 
+      :placeholder="userAvatarPlaceholder"
+      :withPresence="showPresenceIndicator"
+      :userId="user.userId"
+    />
     <view class="user-info">
       <view class="user-name">{{ userInfo.name }}</view>
     </view>
@@ -32,6 +37,10 @@ export default {
   },
   
   computed: {
+    featureConfig() {
+      return this.$store.getters['config/getFeatureConfig'] || {}
+    },
+    
     userInfo() {
       const userId = this.user.userId
       // 从 store 获取用户信息
@@ -40,6 +49,14 @@ export default {
         name: storeUser.nickname || storeUser.name || this.user.name || userId,
         avatar: storeUser.avatarURL || storeUser.avatar || this.user.avatar || ''
       }
+    },
+    
+    showPresenceIndicator() {
+      // 检查功能配置是否启用在线状态
+      if (this.featureConfig.usePresence === false) {
+        return false
+      }
+      return true
     }
   },
   

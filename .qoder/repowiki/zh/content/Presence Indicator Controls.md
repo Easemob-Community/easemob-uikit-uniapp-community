@@ -10,15 +10,18 @@
 - [demo/pages/PresenceSetting/index.vue](file://demo/pages/PresenceSetting/index.vue)
 - [vue2-demo/pages/me/presence.vue](file://vue2-demo/pages/me/presence.vue)
 - [ChatUIKit/types/index.ts](file://ChatUIKit/types/index.ts)
+- [ChatUIKit-vue2/components/Avatar/index.vue](file://ChatUIKit-vue2/components/Avatar/index.vue)
+- [ChatUIKit-vue2/modules/Conversation/components/ConversationItem/index.vue](file://ChatUIKit-vue2/modules/Conversation/components/ConversationItem/index.vue)
 </cite>
 
 ## 更新摘要
 **所做更改**
-- 更新了头像组件Avatar的新属性支持说明
+- 更新了头像组件Avatar的新属性支持说明，包括Vue2版本的userId属性
 - 新增了会话项组件ConversationItem的showPresenceIndicator计算属性说明
 - 更新了用户状态管理appUser/store.js的getter逻辑说明
 - 新增了登录流程优化的相关说明
 - 更新了架构图和组件关系图
+- 新增了Vue2版本组件的详细分析
 
 ## 目录
 1. [简介](#简介)
@@ -35,7 +38,7 @@
 
 在线状态指示器控制（Presence Indicator Controls）是Easemob UI Kit中的一个核心功能模块，用于显示用户在线状态和提供状态设置界面。该模块包含完整的在线状态管理、状态显示、状态设置和状态订阅功能。
 
-**更新** 基于应用变更，系统现已支持更精细的状态控制，包括会话项组件的showPresenceIndicator计算属性、头像组件的withPresence、presenceExt、isOnline新属性，以及优化的用户状态管理逻辑。
+**更新** 基于应用变更，系统现已支持更精细的状态控制，包括会话项组件的showPresenceIndicator计算属性、头像组件的withPresence、presenceExt、isOnline新属性，以及优化的用户状态管理逻辑。特别地，Vue2版本的Avatar组件新增了userId属性，用于自动获取用户状态，简化了组件使用方式。
 
 该系统支持多种预定义的在线状态（在线、离线、离开、忙碌、勿扰）以及自定义状态，并通过头像组件直观地展示用户的实时在线状态。
 
@@ -51,25 +54,33 @@ B[ChatUIKit/stores/appUser.ts<br/>用户状态存储]
 C[ChatUIKit/stores/config.ts<br/>配置管理]
 end
 subgraph "UI组件"
-D[ChatUIKit/components/Avatar/index.vue<br/>头像状态显示]
+D[ChatUIKit/components/Avatar/index.vue<br/>Vue3头像状态显示]
 E[ChatUIKit/modules/Conversation/<br/>会话项组件]
-F[demo/pages/PresenceSetting/index.vue<br/>状态设置页面]
-G[vue2-demo/pages/me/presence.vue<br/>Vue2状态设置页面]
+F[ChatUIKit-vue2/components/Avatar/index.vue<br/>Vue2头像状态显示]
+G[ChatUIKit-vue2/modules/Conversation/<br/>Vue2会话项组件]
+H[demo/pages/PresenceSetting/index.vue<br/>状态设置页面]
+I[vue2-demo/pages/me/presence.vue<br/>Vue2状态设置页面]
 end
 subgraph "类型定义"
-H[ChatUIKit/types/index.ts<br/>状态类型定义]
-I[会话项类型定义]
+J[ChatUIKit/types/index.ts<br/>状态类型定义]
+K[会话项类型定义]
 end
 A --> B
 B --> D
 B --> E
+B --> F
+B --> G
 C --> D
 C --> E
+C --> F
+C --> G
 E --> D
-F --> B
-G --> B
+G --> F
 H --> B
-I --> E
+I --> B
+J --> B
+K --> E
+K --> G
 ```
 
 **图表来源**
@@ -77,6 +88,8 @@ I --> E
 - [ChatUIKit/stores/appUser.ts:17-28](file://ChatUIKit/stores/appUser.ts#L17-L28)
 - [ChatUIKit/stores/config.ts:14-57](file://ChatUIKit/stores/config.ts#L14-L57)
 - [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue:1-260](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue#L1-L260)
+- [ChatUIKit-vue2/components/Avatar/index.vue:56-78](file://ChatUIKit-vue2/components/Avatar/index.vue#L56-L78)
+- [ChatUIKit-vue2/modules/Conversation/components/ConversationItem/index.vue:161-167](file://ChatUIKit-vue2/modules/Conversation/components/ConversationItem/index.vue#L161-L167)
 
 **章节来源**
 - [ChatUIKit/const/index.ts:1-37](file://ChatUIKit/const/index.ts#L1-L37)
@@ -104,7 +117,7 @@ AppUserStore提供了完整的状态管理功能，包括状态获取、发布�
 
 ### 头像状态显示
 
-Avatar组件实现了状态指示器的可视化展示，支持多种状态图标和样式配置。**更新** 现在支持withPresence、presenceExt、isOnline三个新属性。
+Avatar组件实现了状态指示器的可视化展示，支持多种状态图标和样式配置。**更新** 现在支持withPresence、presenceExt、isOnline三个新属性。**新增** Vue2版本的Avatar组件还支持userId属性，用于自动获取用户状态。
 
 ### 会话项组件
 
@@ -214,7 +227,7 @@ UseCache --> End
 
 ### 头像状态显示组件
 
-Avatar组件实现了状态指示器的核心显示逻辑，**更新** 现在支持三个新属性：
+Avatar组件实现了状态指示器的核心显示逻辑，**更新** 现在支持三个新属性。**新增** Vue2版本的Avatar组件还支持userId属性：
 
 ```mermaid
 classDiagram
@@ -227,6 +240,7 @@ class AvatarComponent {
 +withPresence : boolean
 +isOnline : boolean
 +presenceExt : string
++userId : string
 +showPresence() : boolean
 +presenceClass() : string
 +imageSrc() : string
@@ -286,6 +300,72 @@ ConversationItem --> UserInfoWithPresence : "使用"
 **章节来源**
 - [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue:134-144](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue#L134-L144)
 - [ChatUIKit/stores/appUser.ts:35-46](file://ChatUIKit/stores/appUser.ts#L35-L46)
+
+### Vue2版本组件详解
+
+**更新** Vue2版本的组件在状态管理方面有更完善的实现：
+
+#### Vue2头像组件增强
+
+Vue2版本的Avatar组件支持userId属性，用于自动获取用户状态：
+
+```mermaid
+classDiagram
+class Vue2AvatarComponent {
++src : string
++alt : string
++size : number
++shape : "circle"|"square"
++placeholder : string
++withPresence : boolean
++isOnline : boolean
++presenceExt : string
++userId : string
++showPresence() : boolean
++storePresence() : PresenceInfo
++finalIsOnline() : boolean
++finalPresenceExt() : string
++presenceClass() : string
++imageSrc() : string
+}
+class PresenceInfo {
++isOnline : boolean
++presenceExt : string
+}
+Vue2AvatarComponent --> PresenceInfo : "使用"
+```
+
+**图表来源**
+- [ChatUIKit-vue2/components/Avatar/index.vue:56-78](file://ChatUIKit-vue2/components/Avatar/index.vue#L56-L78)
+
+#### Vue2会话项组件优化
+
+Vue2版本的ConversationItem组件优化了showPresenceIndicator计算属性：
+
+```mermaid
+classDiagram
+class Vue2ConversationItem {
++conversation : UIKITConversationItem
++showMenu : boolean
++conversationInfo : computed
++showPresenceIndicator() : boolean
++getLastMsgFrom(msg) : string
++formatLastMessage(conv) : string
+}
+class PresenceCalculation {
++featureConfig.usePresence : boolean
++conversationType : string
++showIndicator : boolean
+}
+Vue2ConversationItem --> PresenceCalculation : "使用"
+```
+
+**图表来源**
+- [ChatUIKit-vue2/modules/Conversation/components/ConversationItem/index.vue:161-167](file://ChatUIKit-vue2/modules/Conversation/components/ConversationItem/index.vue#L161-L167)
+
+**章节来源**
+- [ChatUIKit-vue2/components/Avatar/index.vue:56-78](file://ChatUIKit-vue2/components/Avatar/index.vue#L56-L78)
+- [ChatUIKit-vue2/modules/Conversation/components/ConversationItem/index.vue:161-167](file://ChatUIKit-vue2/modules/Conversation/components/ConversationItem/index.vue#L161-L167)
 
 ### 状态设置界面
 
@@ -386,6 +466,7 @@ ConvItem --> Avatar
 2. **特征开关**：通过usePresence配置控制状态功能的启用/禁用
 3. **按需加载**：仅在需要时才从服务器获取状态信息
 4. **响应式优化**：使用computed属性自动追踪状态变化，避免不必要的组件重渲染
+5. **Vue2优化**：userId属性的引入减少了手动状态传递的需求
 
 ### 响应式优化
 
@@ -410,6 +491,8 @@ ConvItem --> Avatar
 | 界面无响应 | 点击事件不生效 | 事件绑定错误 | 检查模板语法和事件处理器 |
 | 图标显示问题 | 状态图标不显示 | 资源路径错误 | 验证assets/presence目录存在 |
 | 会话项状态不显示 | 会话列表中无在线状态 | showPresenceIndicator计算属性问题 | 检查withPresence和usePresence配置 |
+| Vue2组件问题 | userId属性无效 | 状态存储未更新 | 确认userPresenceMap正确更新 |
+| Vue3组件问题 | 属性不生效 | 类型定义不匹配 | 检查Props接口定义 |
 
 ### 调试建议
 
@@ -418,6 +501,7 @@ ConvItem --> Avatar
 3. **验证权限设置**：确认用户具有查看和发布状态的权限
 4. **监控日志输出**：关注logger.info和logger.error输出
 5. **检查用户状态存储**：确认userPresenceMap正确更新
+6. **Vue2特有问题**：验证userId属性与userPresenceMap的对应关系
 
 **章节来源**
 - [ChatUIKit/stores/config.ts:98-121](file://ChatUIKit/stores/config.ts#L98-L121)
@@ -432,7 +516,10 @@ ConvItem --> Avatar
 3. **高效的性能表现**：通过缓存和响应式优化提升用户体验
 4. **精细化的控制**：支持会话项级别的状态显示控制
 5. **优化的架构设计**：模块化的设计便于维护和扩展
+6. **Vue2版本增强**：新增userId属性简化状态管理，提供更好的开发体验
 
 **更新** 特别是在登录流程优化方面，移除了手动用户状态设置，现在由SDK事件回调自动更新状态，简化了开发流程并提高了系统的可靠性。
+
+**新增** Vue2版本的组件在状态管理方面有显著改进，特别是userId属性的引入，使得开发者可以更轻松地管理用户状态，而不需要手动传递isOnline和presenceExt属性。
 
 该模块的成功实现为即时通讯应用提供了重要的用户体验增强功能，使用户能够直观地了解联系人的在线状态，从而改善沟通效率。

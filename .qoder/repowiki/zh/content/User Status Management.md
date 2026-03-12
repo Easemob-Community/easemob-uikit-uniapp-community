@@ -7,6 +7,7 @@
 - [ChatUIKit/stores/conn.ts](file://ChatUIKit/stores/conn.ts)
 - [ChatUIKit/stores/config.ts](file://ChatUIKit/stores/config.ts)
 - [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts)
+- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts)
 - [ChatUIKit/types/index.ts](file://ChatUIKit/types/index.ts)
 - [ChatUIKit/const/index.ts](file://ChatUIKit/const/index.ts)
 - [ChatUIKit/components/Avatar/index.vue](file://ChatUIKit/components/Avatar/index.vue)
@@ -18,14 +19,15 @@
 - [demo/pages/Me/index.vue](file://demo/pages/Me/index.vue)
 - [demo/pages/Profile/index.vue](file://demo/pages/Profile/index.vue)
 - [ChatUIKit/configType.ts](file://ChatUIKit/configType.ts)
+- [ChatUIKit/log.ts](file://ChatUIKit/log.ts)
 </cite>
 
 ## 更新摘要
 **所做更改**
-- 新增会话项组件ConversationItem的增强头像显示逻辑分析
-- 更新群组状态管理getter的字段兼容性和双重缓存机制说明
-- 完善用户状态管理从userPresenceMap获取presence信息的getter逻辑
-- 增强自动用户信息获取功能的实现细节
+- 新增SDK数据结构兼容性处理（statusDetails数组支持）的详细说明
+- 增强自动presence信息获取功能的实现细节和调试模式增强
+- 更新用户状态管理getter逻辑以支持新的SDK格式
+- 完善日志系统的调试模式配置和使用方法
 
 ## 目录
 1. [简介](#简介)
@@ -44,7 +46,7 @@
 
 系统采用 Pinia 状态管理库，通过 Store 模式实现状态的集中管理和响应式更新。用户状态信息包括在线状态、自定义状态描述、头像等，支持实时更新和持久化存储。
 
-**更新** 本次更新重点关注会话项组件的增强功能，包括智能头像回退机制、自动用户信息获取功能，以及群组状态管理的字段兼容性和双重缓存机制。
+**更新** 本次更新重点关注SDK数据结构兼容性处理，特别是statusDetails数组的支持，以及自动presence信息获取功能的增强和调试模式的改进。系统现在能够同时兼容新旧两种SDK格式的数据结构。
 
 ## 项目结构
 
@@ -62,37 +64,47 @@ subgraph "状态存储层"
 F[conn.ts] --> G[IM 连接管理]
 H[config.ts] --> I[配置管理]
 J[group.ts] --> K[群组状态管理]
+L[chat.ts] --> M[聊天状态管理]
 end
 subgraph "UI 展示层"
-L[Avatar 组件] --> M[状态图标显示]
-N[ConversationItem] --> O[智能头像显示]
-P[ContactList] --> Q[联系人列表状态]
-R[PresenceSetting] --> S[状态设置界面]
+N[Avatar 组件] --> O[状态图标显示]
+P[ConversationItem] --> Q[智能头像显示]
+R[ContactList] --> S[联系人列表状态]
+T[PresenceSetting] --> U[状态设置界面]
 end
 subgraph "数据类型定义"
-T[index.ts] --> U[UserInfoWithPresence]
-T --> V[PresenceInfo]
-T --> W[Chat 类型]
+V[index.ts] --> W[UserInfoWithPresence]
+V --> X[PresenceInfo]
+V --> Y[Chat 类型]
+end
+subgraph "日志系统"
+Z[log.ts] --> AA[调试模式]
+AA --> AB[日志级别控制]
 end
 B --> F
 B --> H
-L --> B
 N --> B
-N --> J
 P --> B
+P --> J
 R --> B
+T --> B
+L --> B
+Z --> B
 ```
 
 **图表来源**
 - [ChatUIKit/index.ts:18-132](file://ChatUIKit/index.ts#L18-L132)
 - [ChatUIKit/stores/appUser.ts:24-241](file://ChatUIKit/stores/appUser.ts#L24-L241)
 - [ChatUIKit/stores/group.ts:27-96](file://ChatUIKit/stores/group.ts#L27-L96)
+- [ChatUIKit/stores/chat.ts:29-398](file://ChatUIKit/stores/chat.ts#L29-L398)
 - [ChatUIKit/components/Avatar/index.vue:1-188](file://ChatUIKit/components/Avatar/index.vue#L1-L188)
+- [ChatUIKit/log.ts:1-78](file://ChatUIKit/log.ts#L1-L78)
 
 **章节来源**
 - [ChatUIKit/index.ts:1-139](file://ChatUIKit/index.ts#L1-L139)
 - [ChatUIKit/stores/appUser.ts:1-242](file://ChatUIKit/stores/appUser.ts#L1-L242)
 - [ChatUIKit/stores/group.ts:1-317](file://ChatUIKit/stores/group.ts#L1-L317)
+- [ChatUIKit/stores/chat.ts:1-407](file://ChatUIKit/stores/chat.ts#L1-L407)
 
 ## 核心组件
 
@@ -110,7 +122,7 @@ AppUserStore 是用户状态管理的核心组件，负责管理用户信息和�
 - `userInfoMap`: 用户信息映射表
 - `userPresenceMap`: 用户在线状态映射表
 
-**更新** getter逻辑得到增强，现在提供更完善的用户信息合并功能，包括presence信息的自动获取和默认值处理。
+**更新** getter逻辑得到增强，现在提供更完善的用户信息合并功能，包括presence信息的自动获取和默认值处理。同时增强了SDK数据结构兼容性，支持statusDetails数组格式。
 
 **章节来源**
 - [ChatUIKit/stores/appUser.ts:17-28](file://ChatUIKit/stores/appUser.ts#L17-L28)
@@ -133,18 +145,39 @@ GroupStore 提供群组信息的管理功能，特别增强了头像和名称的
 **章节来源**
 - [ChatUIKit/stores/group.ts:68-95](file://ChatUIKit/stores/group.ts#L68-L95)
 
-### ChatUIKit - 应用入口管理器
+### ChatStore - 聊天状态管理
 
-ChatUIKit 作为应用的统一入口，提供全局状态管理和组件初始化功能。
+ChatStore 作为聊天功能的核心协调器，负责处理各种SDK事件和状态管理。
 
-**核心职责：**
-- Pinia 状态管理器初始化
-- 各个 Store 的延迟初始化
-- IM SDK 连接管理
-- 主题和功能配置管理
+**主要功能特性：**
+- SDK事件监听和处理
+- 用户信息和状态的自动获取
+- 会话列表和联系人的初始化加载
+
+**增强功能：**
+- 自动获取当前用户信息和在线状态
+- 消息接收时的用户信息异步获取
+- 群组事件的处理和数据同步
 
 **章节来源**
-- [ChatUIKit/index.ts:18-132](file://ChatUIKit/index.ts#L18-L132)
+- [ChatUIKit/stores/chat.ts:29-398](file://ChatUIKit/stores/chat.ts#L29-L398)
+
+### Logger - 日志系统
+
+Logger 提供统一的日志管理功能，支持调试模式的启用和禁用。
+
+**主要功能特性：**
+- 调试模式控制
+- 多级别日志输出（info、warn、error、log）
+- 条件性日志输出
+
+**增强功能：**
+- 支持动态启用/禁用调试模式
+- 统一的日志格式输出
+- 性能友好的条件日志记录
+
+**章节来源**
+- [ChatUIKit/log.ts:1-78](file://ChatUIKit/log.ts#L1-L78)
 
 ### 类型定义系统
 
@@ -174,16 +207,19 @@ end
 subgraph "业务逻辑层"
 F[AppUserStore]
 G[GroupStore]
-H[ContactStore]
-I[ConfigStore]
+H[ChatStore]
+I[ContactStore]
+J[ConfigStore]
 end
 subgraph "数据访问层"
-J[ConnStore]
-K[IM SDK]
+K[ConnStore]
+L[IM SDK]
+M[Logger]
 end
 subgraph "状态管理层"
-L[Pinia Store]
-M[响应式状态]
+N[Pinia Store]
+O[响应式状态]
+P[日志系统]
 end
 A --> F
 B --> F
@@ -194,11 +230,15 @@ E --> F
 F --> G
 F --> H
 F --> I
-G --> J
-J --> K
-F --> L
-G --> L
-L --> M
+F --> J
+G --> K
+H --> K
+K --> L
+F --> N
+G --> N
+H --> N
+N --> O
+M --> P
 ```
 
 **图表来源**
@@ -206,6 +246,7 @@ L --> M
 - [ChatUIKit/stores/group.ts:27-96](file://ChatUIKit/stores/group.ts#L27-L96)
 - [ChatUIKit/stores/conn.ts:20-83](file://ChatUIKit/stores/conn.ts#L20-L83)
 - [ChatUIKit/stores/config.ts:59-123](file://ChatUIKit/stores/config.ts#L59-L123)
+- [ChatUIKit/log.ts:1-78](file://ChatUIKit/log.ts#L1-L78)
 
 ## 详细组件分析
 
@@ -370,16 +411,58 @@ L --> F
 M[ConversationItem] --> N[fetchUserInfoIfNeeded]
 N --> O[AppUserStore.getUserInfo]
 O --> P[自动服务器获取]
+Q[SDK 事件] --> R[AppUserStore.setUserPresence]
+R --> F
+S[Logger 调试] --> T[日志输出]
 ```
 
 **图表来源**
 - [ChatUIKit/stores/appUser.ts:130-159](file://ChatUIKit/stores/appUser.ts#L130-L159)
 - [ChatUIKit/stores/appUser.ts:164-182](file://ChatUIKit/stores/appUser.ts#L164-L182)
 - [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue:216-225](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue#L216-L225)
+- [ChatUIKit/stores/chat.ts:320-321](file://ChatUIKit/stores/chat.ts#L320-L321)
 
 **章节来源**
 - [ChatUIKit/stores/appUser.ts:127-182](file://ChatUIKit/stores/appUser.ts#L127-L182)
 - [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue:1-260](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue#L1-L260)
+- [ChatUIKit/stores/chat.ts:299-328](file://ChatUIKit/stores/chat.ts#L299-L328)
+
+### SDK数据结构兼容性处理
+
+#### statusDetails数组支持
+
+系统现在支持两种SDK数据结构格式：
+
+**新格式（statusDetails数组）：**
+```typescript
+// SDK 返回的新格式
+presenceData: {
+  statusDetails: [
+    { status: 1, platform: "web" },
+    { status: 0, platform: "mobile" }
+  ]
+}
+```
+
+**旧格式（status对象）：**
+```typescript
+// SDK 返回的旧格式
+presenceData: {
+  status: {
+    web: "1",
+    mobile: "0"
+  }
+}
+```
+
+**兼容性处理逻辑：**
+- 首先检查 `statusDetails` 是否为数组
+- 如果是数组，遍历每个元素检查 `status === 1`
+- 如果不是数组，使用旧的 `Object.values(status).indexOf('1') > -1` 方式
+- 兼容两种格式确保系统稳定性
+
+**章节来源**
+- [ChatUIKit/stores/appUser.ts:141-155](file://ChatUIKit/stores/appUser.ts#L141-L155)
 
 ## 依赖关系分析
 
@@ -392,38 +475,47 @@ A[Pinia]
 B[Vue 3]
 C[Easemob IM SDK]
 D[SCSS]
+E[Logger]
 end
 subgraph "内部模块"
-E[ChatUIKit 核心]
-F[AppUserStore]
-G[GroupStore]
-H[ConnStore]
-I[ConfigStore]
-J[Avatar 组件]
-K[ConversationItem]
-L[ContactList]
+F[ChatUIKit 核心]
+G[AppUserStore]
+H[GroupStore]
+I[ConnStore]
+J[ConfigStore]
+K[Avatar 组件]
+L[ConversationItem]
+M[ContactList]
+N[ChatStore]
+O[Logger]
 end
-A --> E
-B --> E
-C --> H
-D --> K
-E --> F
-E --> G
-E --> H
-E --> I
+A --> F
+B --> F
+C --> I
+D --> L
+E --> O
+F --> G
 F --> H
 F --> I
-G --> H
-J --> F
-K --> F
+F --> J
+F --> N
+G --> I
+G --> J
+H --> I
+N --> I
 K --> G
-L --> F
+L --> G
+L --> H
+M --> G
+O --> G
+O --> N
 ```
 
 **图表来源**
 - [ChatUIKit/index.ts:1-139](file://ChatUIKit/index.ts#L1-L139)
 - [ChatUIKit/stores/appUser.ts:1-242](file://ChatUIKit/stores/appUser.ts#L1-L242)
 - [ChatUIKit/stores/group.ts:1-317](file://ChatUIKit/stores/group.ts#L1-L317)
+- [ChatUIKit/log.ts:1-78](file://ChatUIKit/log.ts#L1-L78)
 
 ### 状态管理依赖
 
@@ -437,6 +529,7 @@ L --> F
 **Store 间依赖：**
 - AppUserStore 依赖 ConnStore 和 ConfigStore
 - GroupStore 依赖 ConnStore 和 AppUserStore
+- ChatStore 依赖所有其他 Store
 - UI 组件依赖相关 Store 获取状态信息
 
 **章节来源**
@@ -479,6 +572,23 @@ L --> F
 **章节来源**
 - [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue:126-132](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue#L126-L132)
 
+### 调试模式增强
+
+**日志系统增强：**
+- 支持动态启用/禁用调试模式
+- 多级别日志输出（info、warn、error、log）
+- 条件性日志输出，避免生产环境性能影响
+- 统一的日志格式和时间戳
+
+**调试建议：**
+- 开发环境使用 `logger.enableDebug()` 启用详细日志
+- 生产环境保持调试模式关闭
+- 关键操作添加日志记录点
+- 错误处理包含详细的上下文信息
+
+**章节来源**
+- [ChatUIKit/log.ts:18-74](file://ChatUIKit/log.ts#L18-L74)
+
 ## 故障排除指南
 
 ### 常见问题及解决方案
@@ -487,6 +597,7 @@ L --> F
 1. 检查 Presence 订阅是否正常
 2. 验证用户 ID 格式正确性
 3. 确认网络连接状态
+4. 检查 SDK 版本兼容性
 
 **头像显示异常：**
 1. 检查图片 URL 是否有效
@@ -508,6 +619,11 @@ L --> F
 2. 验证服务器连接状态
 3. 确认配置开关启用
 
+**SDK数据结构兼容性问题：**
+1. 检查 SDK 版本
+2. 验证 statusDetails 格式
+3. 确认旧格式兼容处理逻辑
+
 **章节来源**
 - [ChatUIKit/stores/appUser.ts:110-125](file://ChatUIKit/stores/appUser.ts#L110-L125)
 - [ChatUIKit/stores/group.ts:71-80](file://ChatUIKit/stores/group.ts#L71-L80)
@@ -519,11 +635,19 @@ L --> F
 - 启用调试模式查看详细日志
 - 使用浏览器开发者工具监控状态变化
 - 验证 API 请求和响应
+- 检查 SDK 事件处理
 
 **生产环境监控：**
 - 监控网络请求成功率
 - 跟踪状态更新频率
 - 分析内存使用情况
+- 监控日志输出
+
+**SDK兼容性测试：**
+- 测试新旧两种数据格式
+- 验证 statusDetails 数组处理
+- 确认向后兼容性
+- 性能基准测试
 
 ## 结论
 
@@ -547,6 +671,13 @@ L --> F
 - 群组状态管理的字段兼容性
 - 双重缓存机制提升性能
 - 增强的 getter 逻辑优化用户体验
+- SDK数据结构兼容性处理（statusDetails数组支持）
+- 调试模式增强和日志系统改进
+
+**兼容性保证：**
+- 支持新旧两种SDK数据格式
+- 向后兼容性确保系统稳定性
+- 平滑升级路径避免功能中断
 
 该模块为即时通讯应用提供了可靠的基础功能，能够满足大多数应用场景的需求，并具有良好的扩展性和维护性。
 
@@ -554,3 +685,4 @@ L --> F
 - [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue:126-144](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue#L126-L144)
 - [ChatUIKit/stores/group.ts:68-95](file://ChatUIKit/stores/group.ts#L68-L95)
 - [ChatUIKit/stores/appUser.ts:30-79](file://ChatUIKit/stores/appUser.ts#L30-L79)
+- [ChatUIKit/log.ts:18-74](file://ChatUIKit/log.ts#L18-L74)
