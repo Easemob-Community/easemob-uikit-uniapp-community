@@ -70,7 +70,7 @@
           :id="'group-' + group.letter"
           class="contact-group"
         >
-          <view class="group-title">{{ group.letter }}</view>
+          <view :class="['group-title', { active: activeLetter === group.letter }]">{{ group.letter }}</view>
           <view
             v-for="(item, idx) in group.data"
             :key="idx"
@@ -409,6 +409,13 @@ export default {
   background: #f5f5f5;
   font-size: 14px;
   color: #666;
+  transition: all 0.3s ease;
+  
+  &.active {
+    background: #e6f7ff;
+    color: #009dff;
+    font-weight: 600;
+  }
 }
 
 .contact-item {
