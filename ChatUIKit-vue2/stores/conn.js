@@ -68,20 +68,12 @@ export default {
         
         const res = await state.chatConn.open(loginParams)
         
-        console.log('[ConnStore] Login success:', res)
-        
         commit('SET_USER', { userId: user })
         commit('SET_LOGIN_STATUS', true)
         commit('SET_CONNECTED', true)
         
-        console.log('[ConnStore] Dispatching getSelfUserInfoFromServer and getSelfPresenceFromServer...')
-        // 登录成功后获取当前用户信息和在线状态
+        // 登录成功后获取当前用户信息
         dispatch('appUser/getSelfUserInfoFromServer', null, { root: true })
-        dispatch('appUser/getSelfPresenceFromServer', null, { root: true }).then(() => {
-          console.log('[ConnStore] getSelfPresenceFromServer dispatched successfully')
-        }).catch(err => {
-          console.error('[ConnStore] getSelfPresenceFromServer dispatch failed:', err)
-        })
         
         return res
       } catch (error) {

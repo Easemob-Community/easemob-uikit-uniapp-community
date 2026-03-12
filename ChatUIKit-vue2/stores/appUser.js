@@ -36,28 +36,20 @@ export default {
     // 获取当前用户信息（从 userMap 中获取，兼容 TS 版本）
     getSelfUserInfo: (state, getters, rootState) => () => {
       const userId = rootState.conn.chatConn?.user
-      console.log('[AppUserStore] getSelfUserInfo called, userId:', userId)
       if (!userId) {
-        console.warn('[AppUserStore] No userId, returning default')
         return { name: '', nickname: '', avatar: '', sign: '', presenceExt: '', isOnline: false }
       }
       const userInfo = state.userMap[userId]
       const presenceInfo = state.userPresenceMap[userId]
-      console.log('[AppUserStore] userInfo:', userInfo)
-      console.log('[AppUserStore] presenceInfo from userPresenceMap:', presenceInfo)
-      console.log('[AppUserStore] userPresenceMap keys:', Object.keys(state.userPresenceMap))
-      console.log('[AppUserStore] selfUserInfo:', state.selfUserInfo)
       // 合并 userMap 中的用户信息和 userPresenceMap 中的 presence 状态
-      const result = {
+      return {
         name: userInfo?.nickname || userId,
         nickname: userInfo?.nickname || '',
         avatar: userInfo?.avatarurl || userInfo?.avatar || '',
         sign: userInfo?.sign || '',
-        presenceExt: presenceInfo?.presenceExt || state.selfUserInfo?.presenceExt || '',
-        isOnline: presenceInfo?.isOnline || state.selfUserInfo?.isOnline || false
+        presenceExt: presenceInfo?.presenceExt || '',
+        isOnline: presenceInfo?.isOnline || false
       }
-      console.log('[AppUserStore] getSelfUserInfo returning:', result)
-      return result
     }
   },
 
@@ -67,10 +59,7 @@ export default {
     },
     
     SET_USER_PRESENCE(state, { userId, presence }) {
-      console.log('[AppUserStore] SET_USER_PRESENCE mutation:', { userId, presence })
-      console.log('[AppUserStore] Before - userPresenceMap:', JSON.stringify(state.userPresenceMap))
       Vue.set(state.userPresenceMap, userId, presence)
-      console.log('[AppUserStore] After - userPresenceMap:', JSON.stringify(state.userPresenceMap))
     },
     
     SET_SELF_USER_INFO(state, info) {
@@ -145,48 +134,28 @@ export default {
       }
     },
     
-    // 获取当前用户的在线状态
+    // 获取当前用户的在线状态（备用，通常由 onPresenceStatusChange 事件更新）
     async getSelfPresenceFromServer({ commit, rootState }) {
       const chatConn = rootState.conn.chatConn
-      console.log('[AppUserStore] getSelfPresenceFromServer called, chatConn:', chatConn?.user)
-      if (!chatConn || !chatConn.user) {
-        console.warn('[AppUserStore] chatConn or user is null, skipping')
-        return
-      }
+      if (!chatConn || !chatConn.user) return
       
       try {
-        console.log('[AppUserStore] Calling getPresenceStatus for:', [chatConn.user])
         const res = await chatConn.getPresenceStatus({
           usernames: [chatConn.user]
         })
         
-        console.log('[AppUserStore] getPresenceStatus response:', JSON.stringify(res))
-        
         if (res.data && res.data.result && res.data.result.length > 0) {
           const presenceData = res.data.result[0]
-          console.log('[AppUserStore] presenceData:', JSON.stringify(presenceData))
-          console.log('[AppUserStore] presenceData.uid:', presenceData.uid)
-          console.log('[AppUserStore] presenceData.ext:', presenceData.ext)
-          console.log('[AppUserStore] presenceData.status:', presenceData.status)
-          
           let isOnline = false
-          // 检查状态是否包含在线标记
           if (
             presenceData.status &&
             typeof presenceData.status === 'object' &&
-            !Array.isArray(presenceData.status)
+            !Array.isArray(presenceData.status) &&
+            Object.values(presenceData.status).indexOf('1') > -1
           ) {
-            const statusValues = Object.values(presenceData.status)
-            console.log('[AppUserStore] statusValues:', statusValues)
-            console.log('[AppUserStore] statusValues.indexOf("1"):', statusValues.indexOf('1'))
-            if (statusValues.indexOf('1') > -1) {
-              isOnline = true
-            }
+            isOnline = true
           }
           
-          console.log('[AppUserStore] Calculated isOnline:', isOnline)
-          
-          // 使用 SET_USER_PRESENCE 存储到 userPresenceMap
           commit('SET_USER_PRESENCE', {
             userId: chatConn.user,
             presence: {
@@ -194,42 +163,24 @@ export default {
               isOnline: isOnline
             }
           })
-          console.log('[AppUserStore] Self presence loaded:', { userId: chatConn.user, presenceExt: presenceData.ext, isOnline })
-        } else {
-          console.warn('[AppUserStore] No presence data in response')
         }
       } catch (error) {
         console.error('[AppUserStore] 获取在线状态失败:', error)
       }
     },
     
-    // 发布在线状态
+    // 发布在线状态（发布后会触发 onPresenceStatusChange 事件）
     async publishPresence({ commit, rootState }, { presenceExt }) {
       const chatConn = rootState.conn.chatConn
-      console.log('[AppUserStore] publishPresence called, chatConn:', chatConn?.user)
       if (!chatConn) {
         throw new Error('SDK not initialized')
       }
       
       try {
-        console.log('[AppUserStore] Publishing presence:', presenceExt)
         await chatConn.publishPresence({
           description: presenceExt
         })
-        // 更新本地状态（同步到 selfUserInfo 和 userPresenceMap）
-        console.log('[AppUserStore] Before commit - user:', chatConn.user)
-        commit('SET_SELF_USER_INFO', { presenceExt })
-        commit('SET_USER_PRESENCE', {
-          userId: chatConn.user,
-          presence: {
-            presenceExt: presenceExt,
-            isOnline: presenceExt !== 'Offline'
-          }
-        })
-        console.log('[AppUserStore] Presence published and local state updated:', presenceExt)
-        // #ifdef APP-PLUS
-        uni.showToast({ title: `状态已变更为:${presenceExt}`, icon: 'none', duration: 2000 })
-        // #endif
+        // 注：状态更新由 onPresenceStatusChange 事件回调处理，无需手动更新
         return { success: true }
       } catch (error) {
         console.error('发布在线状态失败:', error)

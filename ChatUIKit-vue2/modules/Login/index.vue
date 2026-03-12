@@ -146,22 +146,7 @@ export default {
         
         await this.login(loginParams)
         
-        // 设置当前用户信息
-        this.$store.commit('appUser/SET_SELF_USER_INFO', {
-          name: this.form.userId,
-          nickname: this.form.userId,
-          userId: this.form.userId,
-          presenceExt: 'Online',
-          isOnline: true
-        })
-        // 同步设置到 userPresenceMap（getSelfUserInfo getter 使用）
-        this.$store.commit('appUser/SET_USER_PRESENCE', {
-          userId: this.form.userId,
-          presence: {
-            presenceExt: 'Online',
-            isOnline: true
-          }
-        })
+        // 注：用户信息和在线状态由 SDK 事件回调自动更新
         
         uni.showToast({ title: this.$t('login.loginSuccess'), icon: 'success' })
         

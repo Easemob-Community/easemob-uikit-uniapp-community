@@ -87,23 +87,18 @@ export default {
     },
     
     userInfo() {
-      // getSelfUserInfo 现在是一个函数，需要调用
       const selfInfo = this.$store.getters['appUser/getSelfUserInfo']()
-      console.log('[MePage] userInfo getter, selfInfo:', selfInfo)
       if (!selfInfo) {
         return { name: '', avatar: '', presenceExt: 'Online', isOnline: true }
       }
-      // 根据 presenceExt 判断是否在线（Online/Away/Busy/Do Not Disturb 都算在线）
       const presenceExt = selfInfo.presenceExt || 'Online'
       const isOnline = presenceExt !== 'Offline'
-      const result = {
+      return {
         name: selfInfo.nickname || selfInfo.name || this.userId,
         avatar: selfInfo.avatar,
         presenceExt: presenceExt,
         isOnline: isOnline
       }
-      console.log('[MePage] userInfo returning:', result)
-      return result
     }
   },
   

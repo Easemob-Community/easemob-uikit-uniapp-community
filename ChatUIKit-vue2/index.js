@@ -86,13 +86,7 @@ class ChatUIKit {
         // 获取当前用户信息
         this.store.dispatch('appUser/getSelfUserInfoFromServer')
         
-        // 获取当前用户在线状态
-        console.log('[ChatUIKit] Dispatching getSelfPresenceFromServer...')
-        this.store.dispatch('appUser/getSelfPresenceFromServer').then(() => {
-          console.log('[ChatUIKit] getSelfPresenceFromServer completed')
-        }).catch((err) => {
-          console.error('[ChatUIKit] getSelfPresenceFromServer failed:', err)
-        })
+        // 注：在线状态由 onPresenceStatusChange 事件回调自动更新，无需主动获取
         
         // 加载初始数据
         this._loadInitialData()
@@ -266,29 +260,20 @@ class ChatUIKit {
         uni.$emit('chatError', error)
       },
 
-      // 在线状态变更
+      // 在线状态变更 - SDK 事件回调
       onPresenceStatusChange: (msg) => {
-        console.log('[ChatUIKit] onPresenceStatusChange received:', JSON.stringify(msg))
-        // 更新用户在线状态
+        // 更新用户在线状态到 stores
         if (msg && msg.length > 0) {
           msg.forEach((item) => {
-            console.log('[ChatUIKit] Processing presence item:', JSON.stringify(item))
-            console.log('[ChatUIKit] item.uid:', item.uid)
-            console.log('[ChatUIKit] item.ext:', item.ext)
-            console.log('[ChatUIKit] item.status:', item.status)
             let isOnline = false
             if (
               item.status &&
               typeof item.status === 'object' &&
-              !Array.isArray(item.status)
+              !Array.isArray(item.status) &&
+              Object.values(item.status).indexOf('1') > -1
             ) {
-              const statusValues = Object.values(item.status)
-              console.log('[ChatUIKit] statusValues:', statusValues)
-              if (statusValues.indexOf('1') > -1) {
-                isOnline = true
-              }
+              isOnline = true
             }
-            console.log('[ChatUIKit] Calculated isOnline:', isOnline)
             this.store.commit('appUser/SET_USER_PRESENCE', {
               userId: item.uid,
               presence: {
@@ -297,8 +282,6 @@ class ChatUIKit {
               }
             })
           })
-        } else {
-          console.warn('[ChatUIKit] onPresenceStatusChange: msg is empty or invalid')
         }
         uni.$emit('chatPresenceStatusChange', msg)
       },
