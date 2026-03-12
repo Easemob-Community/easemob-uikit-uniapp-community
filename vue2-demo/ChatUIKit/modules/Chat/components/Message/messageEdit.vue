@@ -1,7 +1,7 @@
 <template>
   <view style="width: 100%; position: relative; z-index: 9999;" v-if="editingMsg">
     <view class="mask" @tap.stop="onMaskTap" @click.stop="onMaskClick"></view>
-    <view class="msg-edit-wrap">
+    <view class="msg-edit-wrap" :style="{ bottom: keyboardHeight + 'px' }">
       <view class="title">{{ $t('message.messageEditing') }}</view>
       <view class="content">
         <textarea
@@ -11,8 +11,8 @@
           :auto-height="true"
           :focus="isFocus"
           :confirm-type="'send'"
-          :adjust-position="false"
           :show-confirm-bar="false"
+          @keyboardheightchange="onKeyboardHeightChange"
         />
 
         <view
@@ -33,7 +33,8 @@ export default {
   data() {
     return {
       txt: '',
-      isFocus: true
+      isFocus: true,
+      keyboardHeight: 0
     }
   },
 
@@ -78,6 +79,11 @@ export default {
         })
         this.$store.dispatch('message/setEditingMessage', null)
       }
+    },
+
+    onKeyboardHeightChange(e) {
+      const height = e.detail?.height || 0
+      this.keyboardHeight = height
     }
   }
 }
