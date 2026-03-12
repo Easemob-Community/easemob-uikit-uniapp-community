@@ -9,7 +9,7 @@
         class="operate-item"
         v-for="(menuItem, idx) in menuItems"
         :key="idx"
-        @click.stop="menuItem.action"
+        @click.stop="handleMenuClick(menuItem)"
       >
         <image
           :src="menuItem.icon"
@@ -261,6 +261,12 @@ export default {
     recallMessage() {
       this.$store.dispatch('message/recallMessage', this.msg)
       this.showActions = false
+    },
+
+    handleMenuClick(menuItem) {
+      if (typeof menuItem.action === 'function') {
+        menuItem.action()
+      }
     }
   }
 }
