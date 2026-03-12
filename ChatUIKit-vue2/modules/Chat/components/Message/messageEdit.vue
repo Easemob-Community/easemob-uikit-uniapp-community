@@ -35,7 +35,8 @@ export default {
     return {
       txt: '',
       isFocus: true,
-      keyboardHeight: 0
+      keyboardHeight: 0,
+      isSubmitting: false
     }
   },
 
@@ -69,7 +70,12 @@ export default {
 
     onEditButtonTap(e) {
       console.log('[MessageEdit] onEditButtonTap called')
+      this.isSubmitting = true
       this.editMessage()
+      // 延迟重置标志
+      setTimeout(() => {
+        this.isSubmitting = false
+      }, 300)
     },
 
     editMessage() {
@@ -85,8 +91,8 @@ export default {
     onKeyboardHeightChange(e) {
       const height = e.detail?.height || 0
       this.keyboardHeight = height
-      // 键盘收起时关闭编辑框
-      if (height === 0 && this.editingMsg) {
+      // 键盘收起时关闭编辑框（提交中不关闭）
+      if (height === 0 && this.editingMsg && !this.isSubmitting) {
         this.$store.dispatch('message/setEditingMessage', null)
       }
     }
