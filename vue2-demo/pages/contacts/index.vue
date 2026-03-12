@@ -3,8 +3,8 @@
     <view class="nav-bar">
       <text class="title">联系人</text>
     </view>
-    <!-- #ifndef MP -->
-    <!-- 非小程序平台：使用 IndexedList 组件 -->
+    <!-- #ifndef MP-WEIXIN -->
+    <!-- H5/App 平台：使用 IndexedList 组件 -->
     <view class="content">
       <IndexedList
         :options="contactList"
@@ -32,8 +32,8 @@
     </view>
     <!-- #endif -->
     
-    <!-- #ifdef MP -->
-    <!-- 小程序平台：直接渲染，避免作用域插槽兼容问题 -->
+    <!-- #ifdef MP-WEIXIN -->
+    <!-- 微信小程序：直接渲染，避免作用域插槽兼容问题 -->
     <view class="content">
       <!-- 新的朋友入口 -->
       <view class="special-item" @tap="goToRequests">
@@ -105,19 +105,19 @@
 </template>
 
 <script>
-// #ifndef MP
+// #ifndef MP-WEIXIN
 import IndexedList from '../../ChatUIKit/components/IndexedList/index.vue'
 // #endif
 import Avatar from '../../ChatUIKit/components/Avatar/index.vue'
 import { USER_AVATAR_URL } from '../../ChatUIKit/const/index'
-// #ifdef MP
+// #ifdef MP-WEIXIN
 import { groupByName } from '../../ChatUIKit/utils/index'
 // #endif
 
 export default {
   components: {
     Avatar
-    // #ifndef MP
+    // #ifndef MP-WEIXIN
     , IndexedList
     // #endif
   },
@@ -128,7 +128,7 @@ export default {
       contactList: [],
       contactRequests: [],
       groupList: []
-      // #ifdef MP
+      // #ifdef MP-WEIXIN
       , scrollIntoView: ''
       // #endif
     }
@@ -151,8 +151,8 @@ export default {
       return true
     }
     
-    // #ifdef MP
-    // 按字母分组的联系人列表（仅小程序平台需要）
+    // #ifdef MP-WEIXIN
+    // 按字母分组的联系人列表（仅微信小程序需要）
     , indexedContactList() {
       const groups = {}
       this.contactList.forEach(item => {
@@ -176,7 +176,7 @@ export default {
       }))
     },
     
-    // 索引字母列表（仅小程序平台需要）
+    // 索引字母列表（仅微信小程序需要）
     indexLetters() {
       return this.indexedContactList.map(g => g.letter)
     }
@@ -236,7 +236,7 @@ export default {
       })
     }
     
-    // #ifdef MP
+    // #ifdef MP-WEIXIN
     , scrollToLetter(letter) {
       this.scrollIntoView = 'group-' + letter
       setTimeout(() => {
@@ -281,8 +281,8 @@ export default {
   overflow: hidden;
 }
 
-/* #ifdef MP */
-/* 小程序平台专用样式 */
+/* #ifdef MP-WEIXIN */
+/* 微信小程序专用样式 */
 .contact-scroll {
   height: 100%;
 }
@@ -419,8 +419,8 @@ export default {
 }
 /* #endif */
 
-/* #ifndef MP */
-/* 非小程序平台：使用 IndexedList 组件时的样式 */
+/* #ifndef MP-WEIXIN */
+/* H5/App 平台：使用 IndexedList 组件时的样式 */
 .contact-item {
   display: flex;
   align-items: center;
