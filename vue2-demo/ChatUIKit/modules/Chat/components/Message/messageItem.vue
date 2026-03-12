@@ -62,7 +62,7 @@
       <MessageActions
         v-if="isSelected"
         ref="actionRef"
-        :msg="msg"
+        :msg="plainMsg"
         :is-selected="isSelected"
       />
     </view>
@@ -153,6 +153,26 @@ export default {
         }
       }
       return className
+    },
+
+    // 净化消息对象，排除 SDK 方法，避免 Vue 响应式警告
+    plainMsg() {
+      const msg = this.msg
+      return {
+        id: msg.id,
+        serverMsgId: msg.serverMsgId,
+        mid: msg.mid,
+        type: msg.type,
+        msg: msg.msg,
+        body: msg.body,
+        to: msg.to,
+        from: msg.from,
+        chatType: msg.chatType,
+        status: msg.status,
+        time: msg.time,
+        ext: msg.ext,
+        modifiedInfo: msg.modifiedInfo
+      }
     }
   },
 
