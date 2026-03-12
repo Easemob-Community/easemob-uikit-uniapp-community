@@ -38,11 +38,12 @@ export default {
   font-size: 16px;
   font-weight: 500;
   border-radius: 8px;
-  border: none !important;
-  outline: none !important;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
   
   &.disabled {
     background: #ccc;
@@ -53,11 +54,13 @@ export default {
     opacity: 0.8;
   }
 }
-
-/* #ifdef MP-WEIXIN */
-.uikit-button::after {
-  border: none !important;
-  content: none !important;
-}
-/* #endif */
 </style>
+
+<!-- #ifdef MP-WEIXIN -->
+<style lang="scss">
+.uikit-button::after {
+  display: none !important;
+  border: none !important;
+}
+</style>
+<!-- #endif -->

@@ -256,7 +256,7 @@ export default {
               groupName: params.groupname
             })
             uni.redirectTo({
-              url: `/ChatUIKit/modules/Chat/index?type=groupChat&id=${groupId}`
+              url: `/pages/chat/index?type=groupChat&id=${groupId}`
             })
           }
         })
