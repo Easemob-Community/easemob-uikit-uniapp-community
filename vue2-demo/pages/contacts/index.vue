@@ -127,6 +127,9 @@ export default {
   background: #fff;
   border-bottom: 1px solid #eee;
   flex-shrink: 0;
+  /* 避免被刘海屏遮挡 */
+  margin-top: max(var(--status-bar-height), constant(safe-area-inset-top));
+  margin-top: max(var(--status-bar-height), env(safe-area-inset-top));
   
   .title {
     font-size: 18px;
