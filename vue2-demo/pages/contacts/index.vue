@@ -20,6 +20,8 @@
               :src="slotProps.item.avatar" 
               :size="40" 
               :placeholder="USER_AVATAR_URL"
+              :withPresence="showPresenceIndicator"
+              :userId="slotProps.item.userId"
             />
             <text class="name">{{ slotProps.item.name || slotProps.item.userId }}</text>
           </view>
@@ -52,6 +54,18 @@ export default {
   computed: {
     unreadCount() {
       return this.contactRequests.filter(r => !r.isRead).length
+    },
+    
+    featureConfig() {
+      return this.$store.getters['config/getFeatureConfig'] || {}
+    },
+    
+    showPresenceIndicator() {
+      // 检查功能配置是否启用在线状态
+      if (this.featureConfig.usePresence === false) {
+        return false
+      }
+      return true
     }
   },
   

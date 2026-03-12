@@ -1,13 +1,11 @@
 <template>
   <view class="user-item-wrap" @tap="onTap">
-    <!-- 调试: userId={{user.userId}}, showPresence={{showPresenceIndicator}}, usePresence={{featureConfig.usePresence}} -->
     <Avatar 
       :src="userInfo.avatar" 
       :placeholder="userAvatarPlaceholder"
       :withPresence="showPresenceIndicator"
       :userId="user.userId"
     />
-    <view v-if="showPresenceIndicator" class="presence-debug">●</view>
     <view class="user-info">
       <view class="user-name">{{ userInfo.name }}</view>
     </view>
