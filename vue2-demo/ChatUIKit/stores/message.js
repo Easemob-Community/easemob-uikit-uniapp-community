@@ -658,7 +658,11 @@ export default {
       
       try {
         const chatConn = rootState.conn.chatConn
+        console.log('[MessageStore] rootState.conn:', rootState.conn)
         console.log('[MessageStore] chatConn:', chatConn ? 'exists' : 'null')
+        if (typeof alert !== 'undefined') {
+          alert('chatConn: ' + (chatConn ? 'exists' : 'null'))
+        }
         if (!chatConn) {
           throw new Error('SDK not initialized')
         }
@@ -673,15 +677,26 @@ export default {
         }
         
         console.log('[MessageStore] Using serverMsgId:', msgId)
+        console.log('[MessageStore] oldMsg.to:', oldMsg.to, 'oldMsg.chatType:', oldMsg.chatType)
         
-        const res = await chatConn.modifyMessage({
+        if (typeof alert !== 'undefined') {
+          alert('About to call modifyMessage with id=' + msgId + ', to=' + oldMsg.to + ', chatType=' + oldMsg.chatType)
+        }
+        
+        const modifyParams = {
           id: msgId,
           msg: newMsgText,
           to: oldMsg.to,
           chatType: oldMsg.chatType
-        })
+        }
+        console.log('[MessageStore] modifyParams:', modifyParams)
+        
+        const res = await chatConn.modifyMessage(modifyParams)
 
         console.log('[MessageStore] Message modified:', res)
+        if (typeof alert !== 'undefined') {
+          alert('Message modified successfully!')
+        }
 
         // 更新本地消息 - 使用本地消息ID
         const localMsgId = oldMsg.id || oldMsg.mid
