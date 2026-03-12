@@ -1,14 +1,13 @@
 <template>
   <view class="msg-text">
     <view class="msg">
-      <text
-        class="msg-content"
+      <block
         v-for="(item, idx) in data"
         :key="idx"
       >
         <text v-if="item.type === 'text'" class="text-part">{{ item.value }}</text>
         <image v-else class="msg-emoji" :src="item.value" mode="aspectFit" />
-      </text>
+      </block>
     </view>
     <view
       v-if="msg.modifiedInfo"
@@ -58,6 +57,7 @@ export default {
 
 .msg {
   display: inline;
+  font-size: 0;
 }
 
 .msg-content {
@@ -68,7 +68,7 @@ export default {
   display: inline;
   font-size: 16px;
   line-height: 22px;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .msg-emoji {
