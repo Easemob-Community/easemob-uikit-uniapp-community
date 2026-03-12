@@ -11,20 +11,40 @@ const MAX_MESSAGES_PER_CONVERSATION = 100
  * @returns {Object} - 纯数据对象
  */
 function cloneMessage(msg) {
-  if (!msg) return msg
-  try {
-    // 使用 JSON 序列化/反序列化进行深拷贝，处理循环引用和特殊类型
-    return JSON.parse(JSON.stringify(msg, (key, value) => {
-      // 跳过 SDK 内部的特殊对象（如包含 isZero 方法的对象）
-      if (value && typeof value === 'object' && typeof value.isZero === 'function') {
-        return value.toString ? value.toString() : String(value)
-      }
-      return value
-    }))
-  } catch (e) {
-    console.warn('[MessageStore] Failed to clone message, returning original:', e)
-    return msg
+  if (!msg || typeof msg !== 'object') return msg
+  
+  // 处理数组
+  if (Array.isArray(msg)) {
+    return msg.map(item => cloneMessage(item))
   }
+  
+  // 处理 SDK 特殊对象（Long 类型等）
+  // 检测特征：有 isZero 方法，或者有 low/high 属性
+  if (msg.isZero || msg.toNumber || (msg.low !== undefined && msg.high !== undefined)) {
+    try {
+      // 转换为字符串或数字
+      if (msg.toNumber) return msg.toNumber()
+      if (msg.toString) return msg.toString()
+      return Number(msg)
+    } catch (e) {
+      return String(msg)
+    }
+  }
+  
+  // 普通对象，递归克隆
+  const result = {}
+  for (const key in msg) {
+    if (msg.hasOwnProperty(key)) {
+      const value = msg[key]
+      
+      // 跳过函数
+      if (typeof value === 'function') continue
+      
+      // 递归克隆
+      result[key] = cloneMessage(value)
+    }
+  }
+  return result
 }
 
 export default {
@@ -297,6 +317,44 @@ export default {
       commit('ADD_MESSAGE_ID_TO_CONVERSATION', { convId, msgId: msg.id })
     },
 
+    // 提取消息的纯数据字段，避免存储 SDK 特殊对象
+    extractPlainMessage(msg, currentUserId) {
+      // 基础字段
+      const plainMsg = {
+        id: typeof msg.id === 'string' ? msg.id : String(msg.id || ''),
+        type: msg.type,
+        chatType: msg.chatType,
+        from: msg.from || currentUserId || '',
+        to: msg.to || '',
+        msg: msg.msg || '',
+        time: typeof msg.time === 'number' ? msg.time : Date.now(),
+        status: msg.status || 'sending',
+        ext: msg.ext || {}
+      }
+      
+      // 处理 body 字段
+      if (msg.body) {
+        plainMsg.body = {
+          type: msg.body.type,
+          msg: msg.body.msg
+        }
+        
+        // 复制附件相关字段
+        if (msg.body.length !== undefined) plainMsg.body.length = msg.body.length
+        if (msg.body.url !== undefined) plainMsg.body.url = msg.body.url
+        if (msg.body.filename !== undefined) plainMsg.body.filename = msg.body.filename
+        if (msg.body.file_length !== undefined) plainMsg.body.file_length = msg.body.file_length
+        if (msg.body.thumb !== undefined) plainMsg.body.thumb = msg.body.thumb
+      }
+      
+      // 复制其他可选字段
+      if (msg.serverMsgId !== undefined) plainMsg.serverMsgId = msg.serverMsgId
+      if (msg.localMsgId !== undefined) plainMsg.localMsgId = msg.localMsgId
+      if (msg.mid !== undefined) plainMsg.mid = msg.mid
+      
+      return plainMsg
+    },
+
     // 发送消息
     async sendMessage({ commit, state, rootState, dispatch }, { msg, uploadFileFunc }) {
       if (msg.type === 'delivery' || msg.type === 'read' || msg.type === 'channel') {
@@ -307,25 +365,21 @@ export default {
       const currentUserId = chatConn && chatConn.user
 
       try {
-        // 准备本地消息
-        let msgCopy = {
-          ...msg,
-          from: msg.from || currentUserId,
-          status: 'sending'
-        }
+        // 准备本地消息 - 提取纯数据，避免 SDK 特殊对象
+        let msgCopy = dispatch('extractPlainMessage', msg, currentUserId)
 
         // 同步附件消息格式
         if (msgCopy.type === 'audio') {
-          msgCopy.length = msgCopy.body && msgCopy.body.length
-          msgCopy.url = msgCopy.body && msgCopy.body.url
+          msgCopy.length = msgCopy.body?.length
+          msgCopy.url = msgCopy.body?.url
         }
         if (msgCopy.type === 'file') {
-          msgCopy.file_length = msgCopy.body && msgCopy.body.file_length
-          msgCopy.url = msgCopy.body && msgCopy.body.url
-          msgCopy.filename = msgCopy.body && msgCopy.body.filename
+          msgCopy.file_length = msgCopy.body?.file_length
+          msgCopy.url = msgCopy.body?.url
+          msgCopy.filename = msgCopy.body?.filename
         }
         if (msgCopy.type === 'video') {
-          msgCopy.url = msgCopy.body && msgCopy.body.url
+          msgCopy.url = msgCopy.body?.url
         }
         if (msgCopy.type === 'img') {
           msgCopy.thumb = msgCopy.url
@@ -361,17 +415,24 @@ export default {
         const serverMsgId = res.serverMsgId || res.mid || (res.message && res.message.id)
         console.log('[MessageStore] Extracted serverMsgId:', serverMsgId, 'from fields:', Object.keys(res))
 
+        // 构建纯数据的新本地消息，避免存储 SDK 特殊对象
         const newLocalMsg = {
           ...msgCopy,
-          ...res.message,
           status: 'sent',
           serverMsgId: serverMsgId,
           id: msgCopy.id
         }
+        
+        // 从 res.message 中提取纯数据字段
+        if (res.message) {
+          if (res.message.time !== undefined) newLocalMsg.time = res.message.time
+          if (res.message.onlineState !== undefined) newLocalMsg.onlineState = res.message.onlineState
+          if (res.message.msg !== undefined) newLocalMsg.msg = res.message.msg
+        }
 
         // 特殊处理视频和图片消息
         if (msg.type === 'video') {
-          newLocalMsg.thumb = res.message && res.message.thumb
+          newLocalMsg.thumb = res.message?.thumb
           newLocalMsg.url = msgCopy.url
         }
         if (msg.type === 'img') {
@@ -381,13 +442,13 @@ export default {
 
         commit('UPDATE_MESSAGE_IN_MAP', { msgId: msgCopy.id, updates: newLocalMsg })
         
-        // 同时存储服务器消息
+        // 同时存储服务器消息（提取纯数据）
         if (res.message) {
-          commit('ADD_MESSAGE_TO_MAP', {
-            ...res.message,
-            status: 'sent',
-            id: res.serverMsgId
-          })
+          const plainServerMsg = dispatch('extractPlainMessage', res.message, currentUserId)
+          plainServerMsg.status = 'sent'
+          plainServerMsg.id = res.serverMsgId
+          plainServerMsg.serverMsgId = res.serverMsgId
+          commit('ADD_MESSAGE_TO_MAP', plainServerMsg)
         }
 
         // 更新会话
@@ -395,11 +456,13 @@ export default {
           const conv = rootState.conversation.conversationList.find(
             c => c.conversationId === convId
           )
+          // 提取纯数据用于 lastMessage
+          const lastMsgPlain = dispatch('extractPlainMessage', msgCopy, currentUserId)
           if (conv) {
             commit('conversation/UPDATE_CONVERSATION', {
               conversationId: convId,
               updates: {
-                lastMessage: msg,
+                lastMessage: lastMsgPlain,
                 unReadCount: conv.unReadCount
               }
             }, { root: true })
@@ -410,7 +473,7 @@ export default {
             const newConv = {
               conversationId: convId,
               conversationType: msg.chatType,
-              lastMessage: msg,
+              lastMessage: lastMsgPlain,
               unReadCount: 0
             }
             commit('conversation/ADD_CONVERSATION', newConv, { root: true })
@@ -431,33 +494,37 @@ export default {
 
     // 处理接收到的消息
     onMessage({ commit, state, rootState, dispatch }, msg) {
-      // 确保 serverMsgId 被保存（接收到的消息 id 通常是服务器消息ID）
-      const msgWithServerId = {
-        ...msg,
-        serverMsgId: msg.serverMsgId || msg.id
-      }
+      const chatConn = rootState.conn.chatConn
+      const currentUserId = chatConn && chatConn.user
+      
+      // 提取纯数据，避免存储 SDK 特殊对象
+      const plainMsg = dispatch('extractPlainMessage', msg, currentUserId)
+      plainMsg.serverMsgId = msg.serverMsgId || msg.id
+      
       // 添加到消息映射
-      if (!state.messageMap[msg.id]) {
-        commit('ADD_MESSAGE_TO_MAP', msgWithServerId)
-        dispatch('insertMessage', msgWithServerId)
+      if (!state.messageMap[plainMsg.id]) {
+        commit('ADD_MESSAGE_TO_MAP', plainMsg)
+        dispatch('insertMessage', plainMsg)
       }
 
       // 获取会话ID
-      const convId = msg.chatType === 'groupChat' ? msg.to : 
-        (msg.from === rootState.conn.chatConn && chatConn.user ? msg.to : msg.from)
+      const chatConn = rootState.conn.chatConn
+      const currentUserId = chatConn && chatConn.user
+      const convId = plainMsg.chatType === 'groupChat' ? plainMsg.to : 
+        (plainMsg.from === currentUserId ? plainMsg.to : plainMsg.from)
 
-      if (msg.chatType === 'chatRoom') return
+      if (plainMsg.chatType === 'chatRoom') return
 
       const conv = rootState.conversation.conversationList.find(
         c => c.conversationId === convId
       )
-      const isSelf = msg.from === rootState.conn.chatConn && chatConn.user
+      const isSelf = plainMsg.from === currentUserId
 
       if (conv) {
         commit('conversation/UPDATE_CONVERSATION', {
           conversationId: convId,
           updates: {
-            lastMessage: msg,
+            lastMessage: plainMsg,
             unReadCount: isSelf ? conv.unReadCount : conv.unReadCount + 1
           }
         }, { root: true })
@@ -467,15 +534,15 @@ export default {
         if (rootState.conversation.currentConversation && rootState.conversation.currentConversation.conversationId === convId) {
           dispatch('conversation/markConversationAsRead', {
             conversationId: convId,
-            conversationType: msg.chatType
+            conversationType: plainMsg.chatType
           }, { root: true })
         }
       } else {
         // 创建新会话
         const newConv = {
           conversationId: convId,
-          conversationType: msg.chatType,
-          lastMessage: msg,
+          conversationType: plainMsg.chatType,
+          lastMessage: plainMsg,
           unReadCount: isSelf ? 0 : 1
         }
         commit('conversation/ADD_CONVERSATION', newConv, { root: true })

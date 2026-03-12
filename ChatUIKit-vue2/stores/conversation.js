@@ -7,19 +7,40 @@ import Vue from 'vue'
  * @returns {Object} - 纯数据对象
  */
 function cloneObject(obj) {
-  if (!obj) return obj
-  try {
-    return JSON.parse(JSON.stringify(obj, (key, value) => {
-      // 跳过 SDK 内部的特殊对象（如包含 isZero 方法的对象）
-      if (value && typeof value === 'object' && typeof value.isZero === 'function') {
-        return value.toString ? value.toString() : String(value)
-      }
-      return value
-    }))
-  } catch (e) {
-    console.warn('[ConversationStore] Failed to clone object, returning original:', e)
-    return obj
+  if (!obj || typeof obj !== 'object') return obj
+  
+  // 处理数组
+  if (Array.isArray(obj)) {
+    return obj.map(item => cloneObject(item))
   }
+  
+  // 处理 SDK 特殊对象（Long 类型等）
+  // 检测特征：有 isZero 方法，或者有 low/high 属性
+  if (obj.isZero || obj.toNumber || (obj.low !== undefined && obj.high !== undefined)) {
+    try {
+      // 转换为字符串或数字
+      if (obj.toNumber) return obj.toNumber()
+      if (obj.toString) return obj.toString()
+      return Number(obj)
+    } catch (e) {
+      return String(obj)
+    }
+  }
+  
+  // 普通对象，递归克隆
+  const result = {}
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      const value = obj[key]
+      
+      // 跳过函数
+      if (typeof value === 'function') continue
+      
+      // 递归克隆
+      result[key] = cloneObject(value)
+    }
+  }
+  return result
 }
 
 // 会话列表管理
