@@ -372,6 +372,7 @@ export default {
   // Message
   message: {
     editTitle: 'Edit Message',
+    messageEditing: 'Editing',
     send: 'Send',
     reply: 'Reply',
     userCard: 'Contact Card',

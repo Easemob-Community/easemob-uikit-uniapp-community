@@ -377,6 +377,7 @@ export default {
   // 消息相关
   message: {
     editTitle: '编辑消息',
+    messageEditing: '编辑中',
     send: '发送',
     reply: '回复',
     userCard: '个人名片',

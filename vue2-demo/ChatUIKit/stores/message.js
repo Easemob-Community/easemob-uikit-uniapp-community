@@ -607,7 +607,7 @@ export default {
     },
 
     // 修改消息（编辑消息）
-    async modifyServerMessage({ commit, state, rootState }, { oldMsg, modifiedMsg }) {
+    async modifyServerMessage({ commit, state, rootState }, { oldMsg, newMsgText }) {
       console.log('[MessageStore] Modifying message:', oldMsg)
       
       try {
@@ -627,9 +627,6 @@ export default {
         
         console.log('[MessageStore] Using serverMsgId:', msgId)
         
-        // 从 modifiedMsg 中获取新的消息文本
-        const newMsgText = modifiedMsg.msg || modifiedMsg.body?.msg || ''
-        
         const res = await chatConn.modifyMessage({
           id: msgId,
           msg: newMsgText,
@@ -646,8 +643,10 @@ export default {
             msgId: localMsgId,
             updates: {
               msg: newMsgText,
-              isModified: true,
-              modifiedTime: Date.now()
+              modifiedInfo: {
+                isModified: true,
+                modifiedTime: Date.now()
+              }
             }
           })
         }
@@ -658,8 +657,10 @@ export default {
             msgId: oldMsg.serverMsgId,
             updates: {
               msg: newMsgText,
-              isModified: true,
-              modifiedTime: Date.now()
+              modifiedInfo: {
+                isModified: true,
+                modifiedTime: Date.now()
+              }
             }
           })
         }

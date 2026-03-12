@@ -64,26 +64,10 @@ export default {
 
     editMessage() {
       if (this.editAble && this.editingMsg) {
-        const chatSDK = this.$store.state.conn.chatSDK
-        
-        if (!chatSDK || !chatSDK.message) {
-          console.error('[MessageEdit] SDK not initialized')
-          uni.showToast({ title: this.$t('errors.sdkNotInit') || 'SDK未初始化', icon: 'none' })
-          return
-        }
-
-        // 使用 chatSDK.message.create 创建修改后的消息对象（贴近 Vue3 原版）
-        const modifiedMsg = chatSDK.message.create({
-          to: this.editingMsg.to,
-          type: this.editingMsg.type,
-          chatType: this.editingMsg.chatType,
-          msg: this.txt
-        })
-
-        // 调用 store action 修改消息
+        // 调用 store action 修改消息 - 只传递必要的文本，避免 Vue2 响应式警告
         this.$store.dispatch('message/modifyServerMessage', {
           oldMsg: this.editingMsg,
-          modifiedMsg: modifiedMsg
+          newMsgText: this.txt.trim()
         })
         
         this.$store.dispatch('message/setEditingMessage', null)
