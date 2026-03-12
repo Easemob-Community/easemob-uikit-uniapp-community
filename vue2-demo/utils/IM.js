@@ -5,11 +5,21 @@
  * 已复制自 node_modules/easemob-websdk/uniApp/Easemob-chat.js
  */
 
+// #ifdef MP
+// 小程序环境：确保 global 和 console 存在
+if (typeof global === 'undefined') {
+  var global = {}
+}
+if (!global.console) {
+  global.console = console
+}
+// #endif
+
 import websdk from '../js_sdk/Easemob-chat'
 // import websdk from '../js_sdk/Easemob-chat (1).js'
-import {
-	logger
-} from 'easemob-uniapp-logger-plugin'
+// import {
+// 	logger
+// } from 'easemob-uniapp-logger-plugin'
 // SDK 配置
 const SDK_CONFIG = {
 	// 请替换为您的 AppKey，格式：appkey@im-appkey
@@ -29,16 +39,16 @@ const EMClient = new websdk.connection({
 	apiUrl:'https://a1.easemob.com'
 })
 console.log('>>>>>SDK version',EMClient.version)
-logger.init({
-	conn: EMClient
-});
+// logger.init({
+// 	conn: EMClient
+// });
 
 // 禁用控制台输出（避免 hbuilderx 等 IDE 控制台日志过多）
-logger.setConsoleOutput(false);
+// logger.setConsoleOutput(false);
 
-websdk.logger.onLog = (data) => {
-	logger.handleSDKLog(data);
-}
+// websdk.logger.onLog = (data) => {
+// 	logger.handleSDKLog(data);
+// }
 // 导出 SDK 实例和 SDK 本身
 export {
 	EMClient,
