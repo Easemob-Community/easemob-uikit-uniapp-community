@@ -8,6 +8,8 @@ export default {
   state: {
     // 用户信息映射
     userMap: {},
+    // 用户在线状态映射（类似 TS 版本的 userPresenceMap）
+    userPresenceMap: {},
     // 当前用户信息
     selfUserInfo: {
       avatar: '',
@@ -38,14 +40,15 @@ export default {
         return { name: '', nickname: '', avatar: '', sign: '', presenceExt: '', isOnline: false }
       }
       const userInfo = state.userMap[userId]
-      // 合并 userMap 中的用户信息和 selfUserInfo 中的 presence 状态
+      const presenceInfo = state.userPresenceMap[userId]
+      // 合并 userMap 中的用户信息和 userPresenceMap 中的 presence 状态
       return {
         name: userInfo?.nickname || userId,
         nickname: userInfo?.nickname || '',
         avatar: userInfo?.avatarurl || userInfo?.avatar || '',
         sign: userInfo?.sign || '',
-        presenceExt: state.selfUserInfo?.presenceExt || '',
-        isOnline: state.selfUserInfo?.isOnline || false
+        presenceExt: presenceInfo?.presenceExt || '',
+        isOnline: presenceInfo?.isOnline || false
       }
     }
   },
@@ -53,6 +56,10 @@ export default {
   mutations: {
     SET_USER_INFO(state, { userId, info }) {
       Vue.set(state.userMap, userId, info)
+    },
+    
+    SET_USER_PRESENCE(state, { userId, presence }) {
+      Vue.set(state.userPresenceMap, userId, presence)
     },
     
     SET_SELF_USER_INFO(state, info) {
@@ -137,6 +144,8 @@ export default {
           usernames: [chatConn.user]
         })
         
+        console.log('[AppUserStore] getPresenceStatus response:', res)
+        
         if (res.data && res.data.result && res.data.result.length > 0) {
           const presenceData = res.data.result[0]
           let isOnline = false
@@ -150,11 +159,15 @@ export default {
             isOnline = true
           }
           
-          commit('SET_SELF_USER_INFO', {
-            presenceExt: presenceData.ext || '',
-            isOnline: isOnline
+          // 使用 SET_USER_PRESENCE 存储到 userPresenceMap
+          commit('SET_USER_PRESENCE', {
+            userId: chatConn.user,
+            presence: {
+              presenceExt: presenceData.ext || '',
+              isOnline: isOnline
+            }
           })
-          console.log('[AppUserStore] Self presence loaded:', { presenceExt: presenceData.ext, isOnline })
+          console.log('[AppUserStore] Self presence loaded:', { userId: chatConn.user, presenceExt: presenceData.ext, isOnline })
         }
       } catch (error) {
         console.error('[AppUserStore] 获取在线状态失败:', error)

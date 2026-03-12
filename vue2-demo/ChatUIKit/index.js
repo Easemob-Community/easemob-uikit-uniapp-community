@@ -86,6 +86,9 @@ class ChatUIKit {
         // 获取当前用户信息
         this.store.dispatch('appUser/getSelfUserInfoFromServer')
         
+        // 获取当前用户在线状态
+        this.store.dispatch('appUser/getSelfPresenceFromServer')
+        
         // 加载初始数据
         this._loadInitialData()
         
@@ -256,6 +259,33 @@ class ChatUIKit {
       onError: (error) => {
         console.error('[ChatUIKit] SDK error:', error)
         uni.$emit('chatError', error)
+      },
+
+      // 在线状态变更
+      onPresenceStatusChange: (msg) => {
+        console.log('[ChatUIKit] Presence status changed:', msg)
+        // 更新用户在线状态
+        if (msg && msg.length > 0) {
+          msg.forEach((item) => {
+            let isOnline = false
+            if (
+              item.status &&
+              typeof item.status === 'object' &&
+              !Array.isArray(item.status) &&
+              Object.values(item.status).indexOf('1') > -1
+            ) {
+              isOnline = true
+            }
+            this.store.commit('appUser/SET_USER_PRESENCE', {
+              userId: item.uid,
+              presence: {
+                presenceExt: item.ext || '',
+                isOnline: isOnline
+              }
+            })
+          })
+        }
+        uni.$emit('chatPresenceStatusChange', msg)
       },
 
       // 在线状态
