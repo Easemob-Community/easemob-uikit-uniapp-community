@@ -1,11 +1,13 @@
 <template>
   <view class="user-item-wrap" @tap="onTap">
+    <!-- 调试: userId={{user.userId}}, showPresence={{showPresenceIndicator}}, usePresence={{featureConfig.usePresence}} -->
     <Avatar 
       :src="userInfo.avatar" 
       :placeholder="userAvatarPlaceholder"
       :withPresence="showPresenceIndicator"
       :userId="user.userId"
     />
+    <view v-if="showPresenceIndicator" class="presence-debug">●</view>
     <view class="user-info">
       <view class="user-name">{{ userInfo.name }}</view>
     </view>
@@ -75,6 +77,7 @@ export default {
   padding: 10px;
   background: #fff;
   border-bottom: 0.5px solid #e3e6e8;
+  position: relative;
 }
 
 .user-info {
@@ -85,5 +88,20 @@ export default {
 .user-name {
   font-size: 16px;
   color: #171a1c;
+}
+
+.presence-debug {
+  position: absolute;
+  left: 45px;
+  top: 5px;
+  width: 16px;
+  height: 16px;
+  background: #ff0000;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

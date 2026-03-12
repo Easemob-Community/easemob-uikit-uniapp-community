@@ -69,6 +69,7 @@ export default {
         return {
           ...contact,
           ...userInfo,
+          userId: contact.userId,  // 确保 userId 字段存在
           id: contact.userId,
           name: userInfo.nickname || userInfo.name || contact.name || contact.userId
         }
