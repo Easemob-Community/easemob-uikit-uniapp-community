@@ -156,17 +156,25 @@ export default {
         // 支持两种参数格式：
         // 1. { data: { groupname, members, desc, public, ... } } - 原始实现格式
         // 2. { name, description, type, members, ... } - 新格式
-        const groupParams = params.data || {
-          data: {
-            groupname: params.name,
-            desc: params.description || '',
-            public: params.type === 'public',
-            approval: params.needConfirm !== false,
-            inviteNeedConfirm: params.needConfirm !== false,
-            members: params.members || []
+        let groupParams
+        if (params.data) {
+          // 格式 1: { data: {...} }
+          groupParams = { data: params.data }
+        } else {
+          // 格式 2: 展开参数
+          groupParams = {
+            data: {
+              groupname: params.name,
+              desc: params.description || '',
+              public: params.type === 'public',
+              approval: params.needConfirm !== false,
+              inviteNeedConfirm: params.needConfirm !== false,
+              members: params.members || []
+            }
           }
         }
         
+        console.log('[GroupStore] Creating group with params:', JSON.stringify(groupParams))
         const res = await chatConn.createGroup(groupParams)
         
         // 添加到本地群组列表

@@ -123,6 +123,21 @@ export default {
     }
   },
 
+  mounted() {
+    // 获取联系人列表
+    this.fetchContacts()
+  },
+
+  onShow() {
+    // 页面显示时刷新联系人列表
+    this.fetchContacts()
+  },
+
+  onLoad() {
+    // 页面加载时刷新联系人列表
+    this.fetchContacts()
+  },
+
   computed: {
     contactList() {
       const contacts = this.$store.state.contact.contacts || []
@@ -185,6 +200,13 @@ export default {
 
     onCheckboxChange(values) {
       this.selectedUserIds = values
+    },
+
+    fetchContacts() {
+      // 如果联系人列表为空，则从服务器获取
+      if (!this.contactList.length) {
+        this.$store.dispatch('contact/getContactsFromServer')
+      }
     },
 
     createGroup() {

@@ -38,7 +38,8 @@ export default {
   font-size: 16px;
   font-weight: 500;
   border-radius: 8px;
-  border: none;
+  border: none !important;
+  outline: none !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -55,7 +56,8 @@ export default {
 
 /* #ifdef MP-WEIXIN */
 .uikit-button::after {
-  border: none;
+  border: none !important;
+  content: none !important;
 }
 /* #endif */
 </style>
