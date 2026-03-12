@@ -104,8 +104,8 @@ export default {
     popMenuStyle() {
       if (this.isWXProgram) {
         return {
-          right: '40px',
-          bottom: 'calc(120px - var(--safe-area-inset-bottom))'
+          right: '20px',
+          bottom: 'calc(65px + 48px + 8px + var(--safe-area-inset-bottom))'
         }
       }
       return {
