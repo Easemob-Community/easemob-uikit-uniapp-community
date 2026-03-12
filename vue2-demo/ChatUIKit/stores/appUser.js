@@ -46,14 +46,15 @@ export default {
       console.log('[AppUserStore] userInfo:', userInfo)
       console.log('[AppUserStore] presenceInfo from userPresenceMap:', presenceInfo)
       console.log('[AppUserStore] userPresenceMap keys:', Object.keys(state.userPresenceMap))
+      console.log('[AppUserStore] selfUserInfo:', state.selfUserInfo)
       // 合并 userMap 中的用户信息和 userPresenceMap 中的 presence 状态
       const result = {
         name: userInfo?.nickname || userId,
         nickname: userInfo?.nickname || '',
         avatar: userInfo?.avatarurl || userInfo?.avatar || '',
         sign: userInfo?.sign || '',
-        presenceExt: presenceInfo?.presenceExt || '',
-        isOnline: presenceInfo?.isOnline || false
+        presenceExt: presenceInfo?.presenceExt || state.selfUserInfo?.presenceExt || '',
+        isOnline: presenceInfo?.isOnline || state.selfUserInfo?.isOnline || false
       }
       console.log('[AppUserStore] getSelfUserInfo returning:', result)
       return result
@@ -205,6 +206,7 @@ export default {
     // 发布在线状态
     async publishPresence({ commit, rootState }, { presenceExt }) {
       const chatConn = rootState.conn.chatConn
+      console.log('[AppUserStore] publishPresence called, chatConn:', chatConn?.user)
       if (!chatConn) {
         throw new Error('SDK not initialized')
       }
@@ -215,6 +217,7 @@ export default {
           description: presenceExt
         })
         // 更新本地状态（同步到 selfUserInfo 和 userPresenceMap）
+        console.log('[AppUserStore] Before commit - user:', chatConn.user)
         commit('SET_SELF_USER_INFO', { presenceExt })
         commit('SET_USER_PRESENCE', {
           userId: chatConn.user,
@@ -224,6 +227,9 @@ export default {
           }
         })
         console.log('[AppUserStore] Presence published and local state updated:', presenceExt)
+        // #ifdef APP-PLUS
+        uni.showToast({ title: `状态已变更为:${presenceExt}`, icon: 'none', duration: 2000 })
+        // #endif
         return { success: true }
       } catch (error) {
         console.error('发布在线状态失败:', error)
