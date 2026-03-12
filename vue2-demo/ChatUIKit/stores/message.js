@@ -644,10 +644,14 @@ export default {
 
     // 修改消息（编辑消息）
     async modifyServerMessage({ commit, state, rootState }, { oldMsg, newMsgText }) {
-      console.log('[MessageStore] Modifying message:', oldMsg)
+      console.log('=========================================')
+      console.log('[MessageStore] modifyServerMessage called')
+      console.log('[MessageStore] oldMsg:', oldMsg ? oldMsg.id : 'null')
+      console.log('[MessageStore] newMsgText:', newMsgText)
       
       try {
         const chatConn = rootState.conn.chatConn
+        console.log('[MessageStore] chatConn:', chatConn ? 'exists' : 'null')
         if (!chatConn) {
           throw new Error('SDK not initialized')
         }

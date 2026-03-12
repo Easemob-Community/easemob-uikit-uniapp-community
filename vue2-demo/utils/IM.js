@@ -34,7 +34,6 @@ logger.init({
 });
 
 websdk.logger.onLog = (data) => {
-	console.log('>>>>>SDK输出的日志', data)
 	logger.handleSDKLog(data);
 }
 // 导出 SDK 实例和 SDK 本身

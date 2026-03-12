@@ -21,7 +21,10 @@
         <view
           @tap="onEditButtonTap"
           :class="editAble ? 'edit' : 'edit-disabled'"
-        ></view>
+          style="border: 1px solid red;"
+        >
+          <text style="font-size: 10px; color: red;">点击发送</text>
+        </view>
       </view>
     </view>
   </view>
@@ -67,29 +70,40 @@ export default {
     },
 
     onEditButtonTap() {
+      console.log('[MessageEdit] ===============================')
       console.log('[MessageEdit] onEditButtonTap called')
+      console.log('[MessageEdit] this.editAble:', this.editAble)
+      console.log('[MessageEdit] this.editingMsg:', this.editingMsg)
       this.editMessage()
     },
 
     editMessage() {
+      console.log('[MessageEdit] ===============================')
       console.log('[MessageEdit] editMessage called')
-      console.log('[MessageEdit] editAble:', this.editAble, 'editingMsg:', this.editingMsg?.id)
-      if (this.editAble && this.editingMsg) {
-        console.log('[MessageEdit] Editing msg:', this.editingMsg.id, 'old text:', this.editingMsg.msg?.substring(0, 20))
-        console.log('[MessageEdit] New text:', this.txt.trim()?.substring(0, 20))
-        // 调用 store action 修改消息 - 只传递必要的文本，避免 Vue2 响应式警告
-        this.$store.dispatch('message/modifyServerMessage', {
+      console.log('[MessageEdit] editAble:', this.editAble)
+      console.log('[MessageEdit] editingMsg:', JSON.stringify(this.editingMsg))
+      
+      // 强制执行，不检查 editAble
+      if (this.editingMsg) {
+        const params = {
           oldMsg: this.editingMsg,
           newMsgText: this.txt.trim()
-        }).then(() => {
-          console.log('[MessageEdit] Message modified successfully')
-        }).catch(err => {
-          console.error('[MessageEdit] Failed to modify message:', err)
-        })
+        }
+        console.log('[MessageEdit] Dispatching with params:', JSON.stringify(params))
+        
+        try {
+          this.$store.dispatch('message/modifyServerMessage', params).then(() => {
+            console.log('[MessageEdit] Message modified successfully')
+          }).catch(err => {
+            console.error('[MessageEdit] Failed to modify message:', err)
+          })
+        } catch (e) {
+          console.error('[MessageEdit] Exception during dispatch:', e)
+        }
         
         this.$store.dispatch('message/setEditingMessage', null)
       } else {
-        console.log('[MessageEdit] Cannot edit - editAble:', this.editAble, 'editingMsg:', !!this.editingMsg)
+        console.log('[MessageEdit] Cannot edit - editingMsg is null')
       }
     }
   }
@@ -149,17 +163,19 @@ export default {
   max-height: 60px;
 }
 
+.edit, .edit-disabled {
+  width: 60px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .edit {
-  width: 30px;
-  height: 30px;
-  background: url("../../../../assets/icon/checked.png") no-repeat;
-  background-size: 100% 100%;
+  background: #009dff;
 }
 
 .edit-disabled {
-  width: 30px;
-  height: 30px;
-  background: url("../../../../assets/icon/unchecked.png") no-repeat;
-  background-size: 100% 100%;
+  background: #ccc;
 }
 </style>
