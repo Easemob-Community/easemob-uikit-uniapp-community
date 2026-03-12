@@ -1,3 +1,13 @@
+// 小程序环境 polyfill（必须在最开始）
+// #ifdef MP
+if (typeof global === 'undefined') {
+  var global = getApp() || {}
+}
+if (!global.console) {
+  global.console = console
+}
+// #endif
+
 import App from './App'
 
 // #ifndef VUE3
