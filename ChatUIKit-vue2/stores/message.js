@@ -643,9 +643,16 @@ export default {
     },
 
     // 修改消息（编辑消息）
-    async modifyServerMessage({ commit, state, rootState }, { oldMsg, newMsgText }) {
+    async modifyServerMessage({ commit, state, rootState }, payload) {
+      // 使用 alert 确保在 H5 中可见
+      if (typeof alert !== 'undefined') {
+        alert('modifyServerMessage called, payload: ' + JSON.stringify(payload ? { hasOldMsg: !!payload.oldMsg, newMsgText: payload.newMsgText } : null))
+      }
       console.log('=========================================')
       console.log('[MessageStore] modifyServerMessage called')
+      console.log('[MessageStore] payload:', payload)
+      
+      const { oldMsg, newMsgText } = payload || {}
       console.log('[MessageStore] oldMsg:', oldMsg ? oldMsg.id : 'null')
       console.log('[MessageStore] newMsgText:', newMsgText)
       

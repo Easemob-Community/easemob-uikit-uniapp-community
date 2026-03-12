@@ -19,8 +19,7 @@
           editAble: {{ editAble }}
         </view>
         <button
-          @click="onEditButtonTap"
-          @tap="onEditButtonTap"
+          @click="() => { alert('按钮点击'); this.onEditButtonTap(); }"
           style="background: #009dff; color: #fff; padding: 8px 16px; border: 2px solid red; font-size: 14px; z-index: 10000; position: relative;"
         >
           发送
