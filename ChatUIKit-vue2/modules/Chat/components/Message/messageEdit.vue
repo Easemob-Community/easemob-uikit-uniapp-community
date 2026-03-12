@@ -1,6 +1,6 @@
 <template>
-  <view style="width: 100%" v-if="editingMsg">
-    <view class="mask" @tap.stop="cancelEdit" @click.stop="cancelEdit"></view>
+  <view style="width: 100%; position: relative; z-index: 9999;" v-if="editingMsg">
+    <view class="mask" @tap.stop="onMaskTap" @click.stop="onMaskClick"></view>
     <view class="msg-edit-wrap">
       <view class="title">{{ $t('message.messageEditing') }}</view>
       <view class="content">
@@ -18,12 +18,12 @@
         <view style="font-size: 10px; color: red; position: absolute; top: -20px; right: 10px;">
           editAble: {{ editAble }}
         </view>
-        <button
-          @click="() => { alert('按钮点击'); this.onEditButtonTap(); }"
-          style="background: #009dff; color: #fff; padding: 8px 16px; border: 2px solid red; font-size: 14px; z-index: 10000; position: relative;"
+        <view
+          @tap="onEditButtonTap"
+          style="background: #009dff; color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 14px; margin-left: 8px;"
         >
           发送
-        </button>
+        </view>
       </view>
     </view>
   </view>
@@ -76,14 +76,20 @@ export default {
       this.$store.dispatch('message/setEditingMessage', null)
     },
 
+    onMaskTap(e) {
+      console.log('[MessageEdit] mask tapped')
+      this.cancelEdit(e)
+    },
+    
+    onMaskClick(e) {
+      console.log('[MessageEdit] mask clicked')
+      this.cancelEdit(e)
+    },
+
     onEditButtonTap(e) {
       console.log('=========================================')
       console.log('[MessageEdit] onEditButtonTap called')
-      console.log('[MessageEdit] event:', e)
-      // 防止冒泡
-      if (e && e.stopPropagation) {
-        e.stopPropagation()
-      }
+      // 不阻止冒泡，只执行逻辑
       this.editMessage()
     },
 
@@ -122,19 +128,20 @@ export default {
 
 <style lang="scss" scoped>
 .mask {
-  position: absolute;
+  position: fixed;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.4);
-  z-index: 999;
+  z-index: 9998;
 }
 .msg-edit-wrap {
   width: 100vw;
-  position: absolute;
-  z-index: 999;
+  position: fixed;
+  z-index: 9999;
   bottom: 0;
+  left: 0;
   background: #f9fafa;
 }
 
