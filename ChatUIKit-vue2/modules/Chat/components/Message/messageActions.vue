@@ -2,11 +2,7 @@
   <view
     v-if="showActions && menuItems.length"
     :class="['message-popup-box', popupClassName]"
-    :style="
-      elementPosition == 'overstep'
-        ? computedRightMenuStyle
-        : { '--arrowPosition': arrowPosition, right: isSelf ? '0' : 'auto' }
-    "
+    :style="popupStyle"
   >
     <view class="message-operate">
       <view
@@ -81,6 +77,14 @@ export default {
         }
       }
       return ''
+    },
+
+    popupStyle() {
+      if (this.elementPosition === 'overstep') {
+        return this.computedRightMenuStyle
+      }
+      // 使用字符串形式避免小程序 WXML 解析问题
+      return `--arrowPosition:${this.arrowPosition};right:${this.isSelf ? '0' : 'auto'}`
     },
 
     popupClassName() {
