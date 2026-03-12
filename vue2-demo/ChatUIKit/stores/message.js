@@ -674,7 +674,6 @@ export default {
         console.log('[MessageStore] oldMsg.to:', oldMsg.to, 'oldMsg.chatType:', oldMsg.chatType)
         
         // 官网 API 格式: messageId + modifiedMessage
-        const chatSDK = rootState.conn.chatSDK
         const modifiedMessage = chatSDK.message.create({
           to: oldMsg.to,
           type: oldMsg.type,
