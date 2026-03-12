@@ -137,19 +137,17 @@ export default {
   max-height: 60px;
 }
 
-.edit, .edit-disabled {
-  width: 60px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .edit {
-  background: #009dff;
+  width: 30px;
+  height: 30px;
+  background: url("../../../../assets/icon/checked.png") no-repeat;
+  background-size: 100% 100%;
 }
 
 .edit-disabled {
-  background: #ccc;
+  width: 30px;
+  height: 30px;
+  background: url("../../../../assets/icon/unchecked.png") no-repeat;
+  background-size: 100% 100%;
 }
 </style>
