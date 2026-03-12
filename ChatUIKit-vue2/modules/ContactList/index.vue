@@ -1,6 +1,9 @@
 <template>
   <view class="contact-list-wrap">
-    <ContactNav />
+    <view class="header-wrap">
+      <ContactNav />
+    </view>
+    <!-- nav占位 -->
     <view :class="isWXProgram ? 'wx-block' : 'block'"></view>
     <view class="contact-list">
       <IndexedList
@@ -137,10 +140,19 @@ export default {
 .contact-list-wrap {
   height: 100%;
   background: #f9fafa;
+  position: relative;
+  overflow: hidden;
 }
 
 .contact-list {
   height: 100%;
+}
+
+.header-wrap {
+  position: fixed;
+  z-index: 999;
+  width: 100%;
+  background: #f9fafa;
 }
 
 .block {
