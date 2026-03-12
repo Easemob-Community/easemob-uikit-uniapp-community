@@ -6,9 +6,12 @@
 - [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts)
 - [ChatUIKit/stores/conn.ts](file://ChatUIKit/stores/conn.ts)
 - [ChatUIKit/stores/config.ts](file://ChatUIKit/stores/config.ts)
+- [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts)
 - [ChatUIKit/types/index.ts](file://ChatUIKit/types/index.ts)
 - [ChatUIKit/const/index.ts](file://ChatUIKit/const/index.ts)
 - [ChatUIKit/components/Avatar/index.vue](file://ChatUIKit/components/Avatar/index.vue)
+- [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue)
+- [ChatUIKit/modules/Conversation/components/ConversationItem/style.scss](file://ChatUIKit/modules/Conversation/components/ConversationItem/style.scss)
 - [ChatUIKit/modules/ContactList/index.vue](file://ChatUIKit/modules/ContactList/index.vue)
 - [ChatUIKit/modules/ContactList/components/UserItem/index.vue](file://ChatUIKit/modules/ContactList/components/UserItem/index.vue)
 - [demo/pages/PresenceSetting/index.vue](file://demo/pages/PresenceSetting/index.vue)
@@ -16,6 +19,13 @@
 - [demo/pages/Profile/index.vue](file://demo/pages/Profile/index.vue)
 - [ChatUIKit/configType.ts](file://ChatUIKit/configType.ts)
 </cite>
+
+## 更新摘要
+**所做更改**
+- 新增会话项组件ConversationItem的增强头像显示逻辑分析
+- 更新群组状态管理getter的字段兼容性和双重缓存机制说明
+- 完善用户状态管理从userPresenceMap获取presence信息的getter逻辑
+- 增强自动用户信息获取功能的实现细节
 
 ## 目录
 1. [简介](#简介)
@@ -34,6 +44,8 @@
 
 系统采用 Pinia 状态管理库，通过 Store 模式实现状态的集中管理和响应式更新。用户状态信息包括在线状态、自定义状态描述、头像等，支持实时更新和持久化存储。
 
+**更新** 本次更新重点关注会话项组件的增强功能，包括智能头像回退机制、自动用户信息获取功能，以及群组状态管理的字段兼容性和双重缓存机制。
+
 ## 项目结构
 
 用户状态管理功能主要分布在以下目录结构中：
@@ -49,32 +61,38 @@ end
 subgraph "状态存储层"
 F[conn.ts] --> G[IM 连接管理]
 H[config.ts] --> I[配置管理]
+J[group.ts] --> K[群组状态管理]
 end
 subgraph "UI 展示层"
-J[Avatar 组件] --> K[状态图标显示]
-L[ContactList] --> M[联系人列表状态]
-N[PresenceSetting] --> O[状态设置界面]
+L[Avatar 组件] --> M[状态图标显示]
+N[ConversationItem] --> O[智能头像显示]
+P[ContactList] --> Q[联系人列表状态]
+R[PresenceSetting] --> S[状态设置界面]
 end
 subgraph "数据类型定义"
-P[index.ts] --> Q[UserInfoWithPresence]
-P --> R[PresenceInfo]
-P --> S[Chat 类型]
+T[index.ts] --> U[UserInfoWithPresence]
+T --> V[PresenceInfo]
+T --> W[Chat 类型]
 end
 B --> F
 B --> H
-J --> B
 L --> B
 N --> B
+N --> J
+P --> B
+R --> B
 ```
 
 **图表来源**
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L18-L132)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L24-L241)
-- [ChatUIKit/components/Avatar/index.vue](file://ChatUIKit/components/Avatar/index.vue#L1-L188)
+- [ChatUIKit/index.ts:18-132](file://ChatUIKit/index.ts#L18-L132)
+- [ChatUIKit/stores/appUser.ts:24-241](file://ChatUIKit/stores/appUser.ts#L24-L241)
+- [ChatUIKit/stores/group.ts:27-96](file://ChatUIKit/stores/group.ts#L27-L96)
+- [ChatUIKit/components/Avatar/index.vue:1-188](file://ChatUIKit/components/Avatar/index.vue#L1-L188)
 
 **章节来源**
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L1-L139)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L1-L242)
+- [ChatUIKit/index.ts:1-139](file://ChatUIKit/index.ts#L1-L139)
+- [ChatUIKit/stores/appUser.ts:1-242](file://ChatUIKit/stores/appUser.ts#L1-L242)
+- [ChatUIKit/stores/group.ts:1-317](file://ChatUIKit/stores/group.ts#L1-L317)
 
 ## 核心组件
 
@@ -92,8 +110,28 @@ AppUserStore 是用户状态管理的核心组件，负责管理用户信息和�
 - `userInfoMap`: 用户信息映射表
 - `userPresenceMap`: 用户在线状态映射表
 
+**更新** getter逻辑得到增强，现在提供更完善的用户信息合并功能，包括presence信息的自动获取和默认值处理。
+
 **章节来源**
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L17-L28)
+- [ChatUIKit/stores/appUser.ts:17-28](file://ChatUIKit/stores/appUser.ts#L17-L28)
+
+### GroupStore - 群组状态管理
+
+GroupStore 提供群组信息的管理功能，特别增强了头像和名称的获取逻辑。
+
+**主要功能特性：**
+- 群组列表和详细信息分离管理
+- 头像获取的字段兼容性支持
+- 名称获取的驼峰和下划线字段兼容
+- 双重缓存机制
+
+**增强功能：**
+- `getGroupAvatar`: 支持 `avatarUrl` 和 `avatarurl` 字段
+- `getGroupName`: 支持 `groupName` 和 `groupname` 字段
+- 双重查找机制：先从 `groupInfoMap` 查找，再从 `groupList` 查找
+
+**章节来源**
+- [ChatUIKit/stores/group.ts:68-95](file://ChatUIKit/stores/group.ts#L68-L95)
 
 ### ChatUIKit - 应用入口管理器
 
@@ -106,7 +144,7 @@ ChatUIKit 作为应用的统一入口，提供全局状态管理和组件初始�
 - 主题和功能配置管理
 
 **章节来源**
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L18-L132)
+- [ChatUIKit/index.ts:18-132](file://ChatUIKit/index.ts#L18-L132)
 
 ### 类型定义系统
 
@@ -118,7 +156,7 @@ ChatUIKit 作为应用的统一入口，提供全局状态管理和组件初始�
 - `Chat.UpdateOwnUserInfoParams`: 用户信息更新参数
 
 **章节来源**
-- [ChatUIKit/types/index.ts](file://ChatUIKit/types/index.ts#L67-L80)
+- [ChatUIKit/types/index.ts:67-80](file://ChatUIKit/types/index.ts#L67-L80)
 
 ## 架构概览
 
@@ -128,43 +166,98 @@ ChatUIKit 作为应用的统一入口，提供全局状态管理和组件初始�
 graph TD
 subgraph "表现层"
 A[Avatar 组件]
-B[ContactList]
-C[PresenceSetting 页面]
-D[Me 页面]
+B[ConversationItem]
+C[ContactList]
+D[PresenceSetting 页面]
+E[Me 页面]
 end
 subgraph "业务逻辑层"
-E[AppUserStore]
-F[ContactStore]
-G[ConfigStore]
+F[AppUserStore]
+G[GroupStore]
+H[ContactStore]
+I[ConfigStore]
 end
 subgraph "数据访问层"
-H[ConnStore]
-I[IM SDK]
+J[ConnStore]
+K[IM SDK]
 end
 subgraph "状态管理层"
-J[Pinia Store]
-K[响应式状态]
+L[Pinia Store]
+M[响应式状态]
 end
-A --> E
-B --> E
-C --> E
-D --> E
+A --> F
+B --> F
+B --> G
+C --> F
+D --> F
 E --> F
-E --> G
-E --> H
-H --> I
-E --> J
+F --> G
+F --> H
+F --> I
+G --> J
 J --> K
+F --> L
+G --> L
+L --> M
 ```
 
 **图表来源**
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L24-L241)
-- [ChatUIKit/stores/conn.ts](file://ChatUIKit/stores/conn.ts#L20-L83)
-- [ChatUIKit/stores/config.ts](file://ChatUIKit/stores/config.ts#L59-L123)
+- [ChatUIKit/stores/appUser.ts:24-241](file://ChatUIKit/stores/appUser.ts#L24-L241)
+- [ChatUIKit/stores/group.ts:27-96](file://ChatUIKit/stores/group.ts#L27-L96)
+- [ChatUIKit/stores/conn.ts:20-83](file://ChatUIKit/stores/conn.ts#L20-L83)
+- [ChatUIKit/stores/config.ts:59-123](file://ChatUIKit/stores/config.ts#L59-L123)
 
 ## 详细组件分析
 
-### 用户状态显示组件
+### 会话项组件 - 智能头像显示
+
+#### ConversationItem 组件 - 增强的头像显示逻辑
+
+ConversationItem 组件是会话列表的核心组件，最近增加了智能头像显示逻辑和自动用户信息获取功能。
+
+**主要增强功能：**
+
+**智能头像回退机制：**
+- 群聊：优先使用群组头像，不存在时使用默认群组头像
+- 单聊：优先使用用户头像，不存在时触发服务器获取
+
+**自动用户信息获取：**
+- 检测到用户信息缺失时自动触发服务器同步
+- 支持条件性状态更新，避免不必要的网络请求
+
+**增强的群组状态管理：**
+- 使用 `getGroupAvatar` 和 `getGroupName` getter
+- 支持字段兼容性（驼峰和下划线命名）
+- 双重缓存机制确保数据一致性
+
+```mermaid
+classDiagram
+class ConversationItem {
++computed conversationInfo()
++method fetchUserInfoIfNeeded()
++method getAvatarPlaceholder()
++computed isMute()
+}
+class GroupStore {
++getter getGroupAvatar()
++getter getGroupName()
+}
+class AppUserStore {
++getter getUserInfo()
++action getUsersInfoFromServer()
+}
+ConversationItem --> GroupStore : "获取群组信息"
+ConversationItem --> AppUserStore : "获取用户信息"
+```
+
+**图表来源**
+- [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue:134-160](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue#L134-L160)
+- [ChatUIKit/stores/group.ts:68-95](file://ChatUIKit/stores/group.ts#L68-L95)
+- [ChatUIKit/stores/appUser.ts:30-79](file://ChatUIKit/stores/appUser.ts#L30-L79)
+
+**章节来源**
+- [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue:1-260](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue#L1-L260)
+- [ChatUIKit/modules/Conversation/components/ConversationItem/style.scss:1-152](file://ChatUIKit/modules/Conversation/components/ConversationItem/style.scss#L1-L152)
 
 #### Avatar 组件 - 状态图标显示
 
@@ -209,10 +302,10 @@ Avatar --> PresenceStatus : "使用"
 ```
 
 **图表来源**
-- [ChatUIKit/components/Avatar/index.vue](file://ChatUIKit/components/Avatar/index.vue#L29-L78)
+- [ChatUIKit/components/Avatar/index.vue:29-78](file://ChatUIKit/components/Avatar/index.vue#L29-L78)
 
 **章节来源**
-- [ChatUIKit/components/Avatar/index.vue](file://ChatUIKit/components/Avatar/index.vue#L1-L188)
+- [ChatUIKit/components/Avatar/index.vue:1-188](file://ChatUIKit/components/Avatar/index.vue#L1-L188)
 
 #### UserItem 组件 - 联系人状态显示
 
@@ -225,7 +318,7 @@ UserItem 组件在联系人列表中显示用户信息和状态：
 - 动态状态更新
 
 **章节来源**
-- [ChatUIKit/modules/ContactList/components/UserItem/index.vue](file://ChatUIKit/modules/ContactList/components/UserItem/index.vue#L1-L165)
+- [ChatUIKit/modules/ContactList/components/UserItem/index.vue:1-165](file://ChatUIKit/modules/ContactList/components/UserItem/index.vue#L1-L165)
 
 ### 状态管理流程
 
@@ -251,11 +344,11 @@ Avatar-->>User : 显示新状态
 ```
 
 **图表来源**
-- [demo/pages/PresenceSetting/index.vue](file://demo/pages/PresenceSetting/index.vue#L136-L147)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L187-L193)
+- [demo/pages/PresenceSetting/index.vue:136-147](file://demo/pages/PresenceSetting/index.vue#L136-L147)
+- [ChatUIKit/stores/appUser.ts:187-193](file://ChatUIKit/stores/appUser.ts#L187-L193)
 
 **章节来源**
-- [demo/pages/PresenceSetting/index.vue](file://demo/pages/PresenceSetting/index.vue#L1-L231)
+- [demo/pages/PresenceSetting/index.vue:1-231](file://demo/pages/PresenceSetting/index.vue#L1-L231)
 
 ### 数据流分析
 
@@ -274,14 +367,19 @@ H --> I[用户界面显示]
 J[定时刷新] --> K[AppUserStore.getUsersPresenceFromServer]
 K --> L[批量状态获取]
 L --> F
+M[ConversationItem] --> N[fetchUserInfoIfNeeded]
+N --> O[AppUserStore.getUserInfo]
+O --> P[自动服务器获取]
 ```
 
 **图表来源**
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L130-L159)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L164-L182)
+- [ChatUIKit/stores/appUser.ts:130-159](file://ChatUIKit/stores/appUser.ts#L130-L159)
+- [ChatUIKit/stores/appUser.ts:164-182](file://ChatUIKit/stores/appUser.ts#L164-L182)
+- [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue:216-225](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue#L216-L225)
 
 **章节来源**
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L127-L182)
+- [ChatUIKit/stores/appUser.ts:127-182](file://ChatUIKit/stores/appUser.ts#L127-L182)
+- [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue:1-260](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue#L1-L260)
 
 ## 依赖关系分析
 
@@ -293,30 +391,39 @@ subgraph "外部依赖"
 A[Pinia]
 B[Vue 3]
 C[Easemob IM SDK]
+D[SCSS]
 end
 subgraph "内部模块"
-D[ChatUIKit 核心]
-E[AppUserStore]
-F[ConnStore]
-G[ConfigStore]
-H[Avatar 组件]
-I[ContactList]
+E[ChatUIKit 核心]
+F[AppUserStore]
+G[GroupStore]
+H[ConnStore]
+I[ConfigStore]
+J[Avatar 组件]
+K[ConversationItem]
+L[ContactList]
 end
-A --> D
-B --> D
-C --> F
-D --> E
-D --> F
-D --> G
+A --> E
+B --> E
+C --> H
+D --> K
 E --> F
 E --> G
-H --> E
-I --> E
+E --> H
+E --> I
+F --> H
+F --> I
+G --> H
+J --> F
+K --> F
+K --> G
+L --> F
 ```
 
 **图表来源**
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L1-L139)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L1-L242)
+- [ChatUIKit/index.ts:1-139](file://ChatUIKit/index.ts#L1-L139)
+- [ChatUIKit/stores/appUser.ts:1-242](file://ChatUIKit/stores/appUser.ts#L1-L242)
+- [ChatUIKit/stores/group.ts:1-317](file://ChatUIKit/stores/group.ts#L1-L317)
 
 ### 状态管理依赖
 
@@ -329,11 +436,13 @@ I --> E
 
 **Store 间依赖：**
 - AppUserStore 依赖 ConnStore 和 ConfigStore
-- UI 组件依赖 AppUserStore 获取状态信息
+- GroupStore 依赖 ConnStore 和 AppUserStore
+- UI 组件依赖相关 Store 获取状态信息
 
 **章节来源**
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L11-L15)
-- [ChatUIKit/stores/conn.ts](file://ChatUIKit/stores/conn.ts#L10-L13)
+- [ChatUIKit/stores/appUser.ts:11-15](file://ChatUIKit/stores/appUser.ts#L11-L15)
+- [ChatUIKit/stores/group.ts:10-14](file://ChatUIKit/stores/group.ts#L10-L14)
+- [ChatUIKit/stores/conn.ts:10-13](file://ChatUIKit/stores/conn.ts#L10-L13)
 
 ## 性能考虑
 
@@ -344,14 +453,16 @@ I --> E
 **本地缓存：**
 - 用户信息缓存在 userInfoMap 中
 - 在线状态缓存在 userPresenceMap 中
+- 群组信息缓存在 groupInfoMap 和 groupList 中
 - 避免重复的网络请求
 
 **智能刷新：**
 - 支持批量用户状态获取
 - 定时刷新机制
 - 条件性状态更新
+- 双重查找机制减少重复查询
 
-### 响应式优化
+**响应式优化：**
 
 **计算属性使用：**
 - 使用 computed 优化状态计算
@@ -362,6 +473,11 @@ I --> E
 - Promise 链式调用
 - 错误处理和超时机制
 - 并发请求控制
+
+**更新** ConversationItem 组件使用 computed 替代 autorun，自动追踪依赖，无需手动管理订阅。
+
+**章节来源**
+- [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue:126-132](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue#L126-L132)
 
 ## 故障排除指南
 
@@ -382,9 +498,20 @@ I --> E
 2. 检查 CSS 样式文件
 3. 确认状态枚举值正确
 
+**群组头像获取失败：**
+1. 检查群组 ID 是否正确
+2. 验证字段命名兼容性
+3. 确认双重缓存机制正常工作
+
+**自动用户信息获取问题：**
+1. 检查用户 ID 格式
+2. 验证服务器连接状态
+3. 确认配置开关启用
+
 **章节来源**
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L110-L125)
-- [ChatUIKit/components/Avatar/index.vue](file://ChatUIKit/components/Avatar/index.vue#L89-L95)
+- [ChatUIKit/stores/appUser.ts:110-125](file://ChatUIKit/stores/appUser.ts#L110-L125)
+- [ChatUIKit/stores/group.ts:71-80](file://ChatUIKit/stores/group.ts#L71-L80)
+- [ChatUIKit/components/Avatar/index.vue:89-95](file://ChatUIKit/components/Avatar/index.vue#L89-L95)
 
 ### 调试建议
 
@@ -414,4 +541,16 @@ I --> E
 - 用户友好的状态设置界面
 - 完善的错误处理和恢复机制
 
+**更新亮点：**
+- ConversationItem 组件的智能头像显示逻辑
+- 自动用户信息获取功能
+- 群组状态管理的字段兼容性
+- 双重缓存机制提升性能
+- 增强的 getter 逻辑优化用户体验
+
 该模块为即时通讯应用提供了可靠的基础功能，能够满足大多数应用场景的需求，并具有良好的扩展性和维护性。
+
+**章节来源**
+- [ChatUIKit/modules/Conversation/components/ConversationItem/index.vue:126-144](file://ChatUIKit/modules/Conversation/components/ConversationItem/index.vue#L126-L144)
+- [ChatUIKit/stores/group.ts:68-95](file://ChatUIKit/stores/group.ts#L68-L95)
+- [ChatUIKit/stores/appUser.ts:30-79](file://ChatUIKit/stores/appUser.ts#L30-L79)
