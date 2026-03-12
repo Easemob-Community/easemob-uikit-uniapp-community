@@ -114,6 +114,14 @@ export default {
 
     isEditingMessage() {
       return !!this.$store.state.message.editingMessage
+    },
+    
+    currentConversation() {
+      return this.$store.getters['conversation/getConversationById'](this.conversationId)
+    },
+    
+    unReadCount() {
+      return this.currentConversation?.unReadCount || 0
     }
   },
 
@@ -133,8 +141,8 @@ export default {
       uni.onKeyboardHeightChange(this.onKeyboardHeightChange)
     }
     
-    // 标记会话已读
-    if (this.conversationId) {
+    // 标记会话已读（有未读消息时才发送 channel ack）
+    if (this.conversationId && this.unReadCount > 0) {
       this.$store.dispatch('conversation/markConversationAsRead', {
         conversationId: this.conversationId,
         conversationType: this.conversationType

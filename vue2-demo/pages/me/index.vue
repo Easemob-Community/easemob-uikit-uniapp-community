@@ -121,11 +121,17 @@ export default {
         content: '确定要退出登录吗？',
         success: (res) => {
           if (res.confirm) {
-            // 执行登出
-            this.$store.dispatch('conn/closeConn')
-            uni.removeStorageSync(CHAT_STORE)
-            uni.reLaunch({
-              url: '/pages/login/index'
+            // 先跳转页面，再执行登出（避免登出阻塞跳转）
+            uni.navigateTo({
+              url: '/pages/login/index',
+              success: () => {
+                // 页面跳转成功后执行登出
+                this.$store.dispatch('conn/logout')
+                uni.removeStorageSync(CHAT_STORE)
+              },
+              fail: () => {
+                uni.showToast({ title: '跳转失败', icon: 'none' })
+              }
             })
           }
         }
