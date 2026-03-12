@@ -1,6 +1,6 @@
 <template>
   <view
-    :class="['msg-list-wrap', { opacity: isOpacity }]"
+    :class="['msg-list-wrap', isOpacity ? 'opacity' : '']"
     @tap="resetMessageState"
   >
     <scroll-view
@@ -106,9 +106,14 @@ export default {
   watch: {
     msgs: {
       handler(newVal, oldVal) {
-        if (this.isLoading || this.currentViewMsgId || (oldVal && newVal.length === oldVal.length)) {
+        if (this.isLoading || this.currentViewMsgId) {
           return
         }
+        // #ifndef MP-WEIXIN
+        if (oldVal && newVal.length === oldVal.length) {
+          return
+        }
+        // #endif
         this.$nextTick(() => {
           this.scrollToBottom()
           setTimeout(() => {
