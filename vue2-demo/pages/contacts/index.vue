@@ -62,6 +62,7 @@
         scroll-y 
         class="contact-scroll" 
         :scroll-into-view="scrollIntoView"
+        @scroll="onScroll"
       >
         <view
           v-for="(group, gIndex) in indexedContactList"
@@ -93,7 +94,7 @@
         <view
           v-for="letter in indexLetters"
           :key="letter"
-          class="index-letter"
+          :class="['index-letter', { active: activeLetter === letter }]"
           @tap="scrollToLetter(letter)"
         >
           {{ letter }}
@@ -129,7 +130,8 @@ export default {
       contactRequests: [],
       groupList: []
       // #ifdef MP-WEIXIN
-      , scrollIntoView: ''
+      , scrollIntoView: '',
+      activeLetter: ''
       // #endif
     }
   },
@@ -182,6 +184,20 @@ export default {
     }
     // #endif
   },
+  
+  // #ifdef MP-WEIXIN
+  watch: {
+    indexedContactList: {
+      immediate: true,
+      handler(data) {
+        // 默认高亮第一个字母
+        if (data.length > 0 && !this.activeLetter) {
+          this.activeLetter = data[0].letter
+        }
+      }
+    }
+  },
+  // #endif
   
   async onShow() {
     // 从服务器加载联系人数据
@@ -238,10 +254,28 @@ export default {
     
     // #ifdef MP-WEIXIN
     , scrollToLetter(letter) {
+      this.activeLetter = letter
       this.scrollIntoView = 'group-' + letter
       setTimeout(() => {
         this.scrollIntoView = ''
       }, 300)
+    },
+    
+    // 根据滚动位置更新当前高亮字母
+    onScroll(e) {
+      const scrollTop = e.detail.scrollTop
+      const groups = this.indexedContactList
+      
+      // 估算每个分组的高度（标题32px + 每个item约60px）
+      let currentHeight = 0
+      for (const group of groups) {
+        const groupHeight = 32 + (group.data.length * 60)
+        if (scrollTop >= currentHeight && scrollTop < currentHeight + groupHeight) {
+          this.activeLetter = group.letter
+          break
+        }
+        currentHeight += groupHeight
+      }
     }
     // #endif
   }
@@ -416,6 +450,12 @@ export default {
   min-width: 16px;
   text-align: center;
   border-radius: 50%;
+  
+  &.active {
+    background: #e6f7ff;
+    color: #009dff;
+    font-weight: 600;
+  }
 }
 /* #endif */
 
