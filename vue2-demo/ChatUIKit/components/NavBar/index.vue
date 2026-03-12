@@ -55,7 +55,9 @@ export default {
   justify-content: space-between;
   padding: 0 8px;
   box-sizing: border-box;
-  margin-top: var(--status-bar-height);
+  /* 同时支持 status-bar-height 和 safe-area-inset-top */
+  margin-top: max(var(--status-bar-height), constant(safe-area-inset-top));
+  margin-top: max(var(--status-bar-height), env(safe-area-inset-top));
 }
 
 .nav-bar-weixin {

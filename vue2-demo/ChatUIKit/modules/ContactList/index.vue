@@ -1,12 +1,13 @@
 <template>
   <view class="contact-list-wrap">
-    <view class="header-wrap">
-      <ContactNav />
-    </view>
-    <!-- nav占位 -->
-    <view :class="isWXProgram ? 'wx-block' : 'block'"></view>
-    <view class="contact-list">
-      <IndexedList
+    <view class="contact-list-content">
+      <view class="header-wrap">
+        <ContactNav />
+      </view>
+      <!-- nav占位 -->
+      <view :class="isWXProgram ? 'wx-block' : 'block'"></view>
+      <view class="contact-list">
+        <IndexedList
         :options="contactList"
         :hasGroupItem="true"
         :hasNewRequestItem="true"
@@ -25,7 +26,8 @@
             @onSwipe="handleSwipe"
           />
         </template>
-      </IndexedList>
+        </IndexedList>
+      </view>
     </view>
   </view>
 </template>
@@ -144,8 +146,16 @@ export default {
   overflow: hidden;
 }
 
-.contact-list {
+.contact-list-content {
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  overflow: hidden;
+}
+
+.contact-list {
+  flex: 1;
+  overflow: hidden;
 }
 
 .header-wrap {
@@ -153,6 +163,11 @@ export default {
   z-index: 999;
   width: 100%;
   background: #f9fafa;
+}
+
+.block,
+.wx-block {
+  flex-shrink: 0;
 }
 
 .block {
