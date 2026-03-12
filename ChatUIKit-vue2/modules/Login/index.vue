@@ -154,6 +154,14 @@ export default {
           presenceExt: 'Online',
           isOnline: true
         })
+        // 同步设置到 userPresenceMap（getSelfUserInfo getter 使用）
+        this.$store.commit('appUser/SET_USER_PRESENCE', {
+          userId: this.form.userId,
+          presence: {
+            presenceExt: 'Online',
+            isOnline: true
+          }
+        })
         
         uni.showToast({ title: this.$t('login.loginSuccess'), icon: 'success' })
         

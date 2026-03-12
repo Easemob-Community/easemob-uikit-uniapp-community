@@ -210,11 +210,20 @@ export default {
       }
       
       try {
+        console.log('[AppUserStore] Publishing presence:', presenceExt)
         await chatConn.publishPresence({
           description: presenceExt
         })
-        // 更新本地状态
+        // 更新本地状态（同步到 selfUserInfo 和 userPresenceMap）
         commit('SET_SELF_USER_INFO', { presenceExt })
+        commit('SET_USER_PRESENCE', {
+          userId: chatConn.user,
+          presence: {
+            presenceExt: presenceExt,
+            isOnline: presenceExt !== 'Offline'
+          }
+        })
+        console.log('[AppUserStore] Presence published and local state updated:', presenceExt)
         return { success: true }
       } catch (error) {
         console.error('发布在线状态失败:', error)
