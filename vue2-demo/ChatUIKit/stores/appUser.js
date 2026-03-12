@@ -35,14 +35,17 @@ export default {
     getSelfUserInfo: (state, getters, rootState) => () => {
       const userId = rootState.conn.chatConn?.user
       if (!userId) {
-        return { name: '', nickname: '', avatar: '', sign: '' }
+        return { name: '', nickname: '', avatar: '', sign: '', presenceExt: '', isOnline: false }
       }
       const userInfo = state.userMap[userId]
+      // 合并 userMap 中的用户信息和 selfUserInfo 中的 presence 状态
       return {
         name: userInfo?.nickname || userId,
         nickname: userInfo?.nickname || '',
         avatar: userInfo?.avatarurl || userInfo?.avatar || '',
-        sign: userInfo?.sign || ''
+        sign: userInfo?.sign || '',
+        presenceExt: state.selfUserInfo?.presenceExt || '',
+        isOnline: state.selfUserInfo?.isOnline || false
       }
     }
   },
@@ -121,6 +124,40 @@ export default {
       } finally {
         // 移除正在获取标记
         fetchUserIds.forEach(userId => commit('REMOVE_FETCHING_USER', userId))
+      }
+    },
+    
+    // 获取当前用户的在线状态
+    async getSelfPresenceFromServer({ commit, rootState }) {
+      const chatConn = rootState.conn.chatConn
+      if (!chatConn || !chatConn.user) return
+      
+      try {
+        const res = await chatConn.getPresenceStatus({
+          usernames: [chatConn.user]
+        })
+        
+        if (res.data && res.data.result && res.data.result.length > 0) {
+          const presenceData = res.data.result[0]
+          let isOnline = false
+          // 检查状态是否包含在线标记
+          if (
+            presenceData.status &&
+            typeof presenceData.status === 'object' &&
+            !Array.isArray(presenceData.status) &&
+            Object.values(presenceData.status).indexOf('1') > -1
+          ) {
+            isOnline = true
+          }
+          
+          commit('SET_SELF_USER_INFO', {
+            presenceExt: presenceData.ext || '',
+            isOnline: isOnline
+          })
+          console.log('[AppUserStore] Self presence loaded:', { presenceExt: presenceData.ext, isOnline })
+        }
+      } catch (error) {
+        console.error('[AppUserStore] 获取在线状态失败:', error)
       }
     },
     

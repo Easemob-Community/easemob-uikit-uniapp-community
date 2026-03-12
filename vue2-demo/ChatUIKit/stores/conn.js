@@ -74,8 +74,9 @@ export default {
         commit('SET_LOGIN_STATUS', true)
         commit('SET_CONNECTED', true)
         
-        // 登录成功后获取当前用户信息
+        // 登录成功后获取当前用户信息和在线状态
         dispatch('appUser/getSelfUserInfoFromServer', null, { root: true })
+        dispatch('appUser/getSelfPresenceFromServer', null, { root: true })
         
         return res
       } catch (error) {
