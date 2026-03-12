@@ -3,11 +3,11 @@
     <view class="group-create-content" v-if="!isSearch">
       <NavBar class="nav-bar" @onLeftTap="onBack">
         <template v-slot:left>
-          <view class="title">{{ $t('createGroup') }}</view>
+          <view class="title">{{ $t('nav.createGroup') }}</view>
         </template>
       </NavBar>
       <view class="search-wrap" @tap="isSearch = true">
-        <SearchButton :placeholder="$t('searchContact')" />
+        <SearchButton :placeholder="$t('nav.searchContact')" />
       </view>
       <!-- #ifndef MP-WEIXIN -->
       <IndexedList
@@ -72,7 +72,7 @@
           :disabled="!selectedUserIds.length"
           @tap="createGroup"
         >
-          {{ $t('createGroupBtn') + '(' + selectedUserIds.length + ')' }}
+          {{ $t('groupCreate.create') + '(' + selectedUserIds.length + ')' }}
         </Button>
       </view>
     </view>
@@ -244,8 +244,8 @@ export default {
     },
 
     onBack() {
-      uni.redirectTo({
-        url: '/ChatUIKit/modules/Conversation/index'
+      uni.navigateBack({
+        delta: 1
       })
     }
   }

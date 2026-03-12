@@ -5,7 +5,7 @@
         <view class="input-wrap">
           <SearchInput
             ref="searchRef"
-            :placeholder="$t('searchContact')"
+            :placeholder="$t('nav.searchContact')"
             @input="onInput"
             @cancel="cancelSearch"
           />
