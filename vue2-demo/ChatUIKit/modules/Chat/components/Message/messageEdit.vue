@@ -17,7 +17,7 @@
         />
 
         <view
-          @tap="onEditButtonTap"
+          @touchstart.prevent="onEditButtonTap"
           :class="editAble ? 'edit' : 'edit-disabled'"
         ></view>
       </view>
