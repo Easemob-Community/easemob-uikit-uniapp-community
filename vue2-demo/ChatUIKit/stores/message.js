@@ -508,8 +508,6 @@ export default {
       }
 
       // 获取会话ID
-      const chatConn = rootState.conn.chatConn
-      const currentUserId = chatConn && chatConn.user
       const convId = plainMsg.chatType === 'groupChat' ? plainMsg.to : 
         (plainMsg.from === currentUserId ? plainMsg.to : plainMsg.from)
 
