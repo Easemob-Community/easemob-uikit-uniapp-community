@@ -1,20 +1,22 @@
 <template>
   <view
-    :class="['avatar', avatarShape]"
+    class="avatar"
     :style="{ width: size + 'px', height: size + 'px' }"
   >
-    <image
-      class="image"
-      :src="imageSrc"
-      :alt="alt"
-      @error="handleImageError"
-      @load="handleImageLoad"
-    />
-    <image
-      v-if="isLoading"
-      class="image loading-avatar"
-      :src="placeholder"
-    />
+    <view :class="['image-wrap', avatarShape]">
+      <image
+        class="image"
+        :src="imageSrc"
+        :alt="alt"
+        @error="handleImageError"
+        @load="handleImageLoad"
+      />
+      <image
+        v-if="isLoading"
+        class="image loading-avatar"
+        :src="placeholder"
+      />
+    </view>
     <view v-if="showPresence" class="presence-wrap">
       <view :class="['status', presenceClass]"></view>
     </view>
@@ -128,8 +130,13 @@ export default {
 <style lang="scss" scoped>
 .avatar {
   position: relative;
-  overflow: hidden;
   display: inline-block;
+}
+
+.avatar .image-wrap {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 .avatar .image {
@@ -138,7 +145,7 @@ export default {
   object-fit: cover;
 }
 
-.image cover-view {
+.image-wrap.cover-view {
   width: 100%;
   text-align: center;
   color: #fff;
@@ -149,13 +156,14 @@ export default {
   transform: translate(-50%, 0);
 }
 
-.avatar.circle {
+.image-wrap.circle {
+  border-radius: 50%;
   .image {
     border-radius: 50%;
   }
 }
 
-.avatar.square {
+.image-wrap.square {
   border-radius: 4px;
 }
 
