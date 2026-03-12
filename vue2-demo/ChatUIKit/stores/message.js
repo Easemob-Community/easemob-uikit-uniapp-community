@@ -683,13 +683,17 @@ export default {
           alert('About to call modifyMessage with id=' + msgId + ', to=' + oldMsg.to + ', chatType=' + oldMsg.chatType)
         }
         
+        // SDK 可能需要 mid 而不是 id
         const modifyParams = {
-          id: msgId,
+          mid: msgId,
           msg: newMsgText,
           to: oldMsg.to,
           chatType: oldMsg.chatType
         }
         console.log('[MessageStore] modifyParams:', modifyParams)
+        if (typeof alert !== 'undefined') {
+          alert('modifyParams: ' + JSON.stringify(modifyParams))
+        }
         
         let res
         try {
