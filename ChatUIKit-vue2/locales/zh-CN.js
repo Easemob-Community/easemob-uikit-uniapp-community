@@ -299,7 +299,8 @@ export default {
     alreadyFriend: '已经是好友',
     inBlackList: '对方已将你加入黑名单',
     groupFull: '群人数已满',
-    banned: '你已被禁言'
+    banned: '你已被禁言',
+    sdkNotInit: 'SDK 未初始化'
   },
 
   // 导航栏标题
@@ -388,7 +389,5 @@ export default {
   },
 
   // 错误信息补充
-  errors: {
-    sdkNotInit: 'SDK 未初始化'
-  }
+  // sdkNotInit 已合并到上面的 errors 中
 }

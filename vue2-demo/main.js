@@ -7,7 +7,10 @@ Vue.config.productionTip = false
 
 // 引入 ChatUIKit
 import ChatUIKit, { store } from './ChatUIKit'
-import { t } from './ChatUIKit/locales'
+import { t, i18n } from './ChatUIKit/locales'
+
+// 提前初始化 i18n（登录页等需要在 ChatUIKit 初始化前使用 $t）
+i18n.init()
 
 // 将 ChatUIKit 挂载到 Vue 原型
 Vue.prototype.$ChatUIKit = ChatUIKit
