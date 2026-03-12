@@ -3,6 +3,37 @@
     <view class="nav-bar">
       <text class="title">联系人</text>
     </view>
+    <!-- #ifndef MP -->
+    <!-- 非小程序平台：使用 IndexedList 组件 -->
+    <view class="content">
+      <IndexedList
+        :options="contactList"
+        :hasGroupItem="true"
+        :hasNewRequestItem="true"
+        @onGroupTap="goToGroups"
+        @onContactTap="goToChat"
+        @onNewRequestTap="goToRequests"
+        :requestCount="unreadCount"
+        :groupCount="groupList.length"
+      >
+        <template v-slot:indexedItem="{ item }">
+          <view class="contact-item" @tap.stop="goToChat(item.userId)">
+            <Avatar 
+              :src="item.avatar" 
+              :size="40" 
+              :placeholder="USER_AVATAR_URL"
+              :withPresence="showPresenceIndicator"
+              :userId="item.userId"
+            />
+            <text class="name">{{ item.name || item.userId }}</text>
+          </view>
+        </template>
+      </IndexedList>
+    </view>
+    <!-- #endif -->
+    
+    <!-- #ifdef MP -->
+    <!-- 小程序平台：直接渲染，避免作用域插槽兼容问题 -->
     <view class="content">
       <!-- 新的朋友入口 -->
       <view class="special-item" @tap="goToRequests">
@@ -26,7 +57,7 @@
         </view>
       </view>
       
-      <!-- 联系人列表 - 不使用插槽，直接渲染 -->
+      <!-- 联系人列表 -->
       <scroll-view 
         scroll-y 
         class="contact-scroll" 
@@ -69,17 +100,26 @@
         </view>
       </view>
     </view>
+    <!-- #endif -->
   </view>
 </template>
 
 <script>
+// #ifndef MP
+import IndexedList from '../../ChatUIKit/components/IndexedList/index.vue'
+// #endif
 import Avatar from '../../ChatUIKit/components/Avatar/index.vue'
 import { USER_AVATAR_URL } from '../../ChatUIKit/const/index'
+// #ifdef MP
 import { groupByName } from '../../ChatUIKit/utils/index'
+// #endif
 
 export default {
   components: {
     Avatar
+    // #ifndef MP
+    , IndexedList
+    // #endif
   },
   
   data() {
@@ -87,8 +127,10 @@ export default {
       USER_AVATAR_URL,
       contactList: [],
       contactRequests: [],
-      groupList: [],
-      scrollIntoView: ''
+      groupList: []
+      // #ifdef MP
+      , scrollIntoView: ''
+      // #endif
     }
   },
   
@@ -107,10 +149,11 @@ export default {
         return false
       }
       return true
-    },
+    }
     
-    // 按字母分组的联系人列表
-    indexedContactList() {
+    // #ifdef MP
+    // 按字母分组的联系人列表（仅小程序平台需要）
+    , indexedContactList() {
       const groups = {}
       this.contactList.forEach(item => {
         const firstLetter = groupByName(item.name || item.userId || '#')
@@ -133,10 +176,11 @@ export default {
       }))
     },
     
-    // 索引字母列表
+    // 索引字母列表（仅小程序平台需要）
     indexLetters() {
       return this.indexedContactList.map(g => g.letter)
     }
+    // #endif
   },
   
   async onShow() {
@@ -190,14 +234,16 @@ export default {
       uni.navigateTo({
         url: '/ChatUIKit/modules/GroupList/index'
       })
-    },
+    }
     
-    scrollToLetter(letter) {
+    // #ifdef MP
+    , scrollToLetter(letter) {
       this.scrollIntoView = 'group-' + letter
       setTimeout(() => {
         this.scrollIntoView = ''
       }, 300)
     }
+    // #endif
   }
 }
 </script>
@@ -235,6 +281,8 @@ export default {
   overflow: hidden;
 }
 
+/* #ifdef MP */
+/* 小程序平台专用样式 */
 .contact-scroll {
   height: 100%;
 }
@@ -369,4 +417,26 @@ export default {
   text-align: center;
   border-radius: 50%;
 }
+/* #endif */
+
+/* #ifndef MP */
+/* 非小程序平台：使用 IndexedList 组件时的样式 */
+.contact-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 0.5px solid #e3e6e8;
+  
+  &:active {
+    background: #f5f5f5;
+  }
+  
+  .name {
+    margin-left: 12px;
+    font-size: 16px;
+    color: #171a1c;
+  }
+}
+/* #endif */
 </style>

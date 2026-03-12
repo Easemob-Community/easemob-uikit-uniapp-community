@@ -2,22 +2,20 @@
 
 <cite>
 **本文档引用的文件**
-- [ChatUIKit/modules/ContactList/index.vue](file://ChatUIKit/modules/ContactList/index.vue)
-- [ChatUIKit/modules/ContactList/style.scss](file://ChatUIKit/modules/ContactList/style.scss)
-- [ChatUIKit/modules/ContactList/components/UserItem/index.vue](file://ChatUIKit/modules/ContactList/components/UserItem/index.vue)
-- [ChatUIKit/modules/ContactList/components/ContactNav/index.vue](file://ChatUIKit/modules/ContactList/components/ContactNav/index.vue)
-- [ChatUIKit/components/IndexedList/index.vue](file://ChatUIKit/components/IndexedList/index.vue)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts)
-- [ChatUIKit/stores/config.ts](file://ChatUIKit/stores/config.ts)
-- [ChatUIKit/utils/index.ts](file://ChatUIKit/utils/index.ts)
-- [ChatUIKit/components/Avatar/index.vue](file://ChatUIKit/components/Avatar/index.vue)
-- [ChatUIKit/components/NavBar/index.vue](file://ChatUIKit/components/NavBar/index.vue)
-- [ChatUIKit/const/index.ts](file://ChatUIKit/const/index.ts)
-- [ChatUIKit/modules/ContactAdd/index.vue](file://ChatUIKit/modules/ContactAdd/index.vue)
-- [ChatUIKit/modules/ContactRequestList/index.vue](file://ChatUIKit/modules/ContactRequestList/index.vue)
-- [ChatUIKit/modules/ContactRequestList/components/RequestItem/index.vue](file://ChatUIKit/modules/ContactRequestList/components/RequestItem/index.vue)
+- [vue2-demo/pages/contacts/index.vue](file://vue2-demo/pages/contacts/index.vue)
+- [vue2-demo/ChatUIKit/components/Avatar/index.vue](file://vue2-demo/ChatUIKit/components/Avatar/index.vue)
+- [vue2-demo/ChatUIKit/utils/index.js](file://vue2-demo/ChatUIKit/utils/index.js)
+- [vue2-demo/ChatUIKit/const/index.js](file://vue2-demo/ChatUIKit/const/index.js)
+- [vue2-demo/ChatUIKit/stores/contact.js](file://vue2-demo/ChatUIKit/stores/contact.js)
+- [vue2-demo/ChatUIKit/stores/group.js](file://vue2-demo/ChatUIKit/stores/group.js)
 </cite>
+
+## 更新摘要
+**变更内容**
+- 完全重写了联系人页面实现，移除了Mini Program不兼容的scoped slot
+- 新增了侧边索引导航功能，提升联系人浏览效率
+- 采用原生Vue 2实现方式，新增约200行代码
+- 优化了联系人列表渲染性能和用户体验
 
 ## 目录
 1. [简介](#简介)
@@ -25,14 +23,17 @@
 3. [核心组件](#核心组件)
 4. [架构概览](#架构概览)
 5. [详细组件分析](#详细组件分析)
-6. [依赖关系分析](#依赖关系分析)
-7. [性能考虑](#性能考虑)
-8. [故障排除指南](#故障排除指南)
-9. [结论](#结论)
+6. [侧边索引导航系统](#侧边索引导航系统)
+7. [性能优化策略](#性能优化策略)
+8. [平台兼容性](#平台兼容性)
+9. [故障排除指南](#故障排除指南)
+10. [结论](#结论)
 
 ## 简介
 
-联系人页面是Easemob UIKIT项目中的核心功能模块之一，提供了完整的联系人管理界面。该页面实现了联系人列表展示、好友申请处理、联系人搜索、滑动删除等核心功能，采用Vue 3 Composition API和Pinia状态管理，结合UniApp跨平台框架，支持微信小程序、H5等多种运行环境。
+联系人页面是Easemob UIKIT项目中的核心功能模块之一，经过重大重构后提供了完整的联系人管理界面。该页面实现了联系人列表展示、好友申请处理、联系人搜索、滑动删除等核心功能，采用Vue 2 + Vuex架构，结合UniApp跨平台框架，支持微信小程序、H5等多种运行环境。
+
+**更新** 页面完全重写，移除了不兼容的scoped slot，新增了侧边索引导航功能，提升了用户体验和性能表现。
 
 ## 项目结构
 
@@ -41,78 +42,68 @@
 ```mermaid
 graph TB
 subgraph "联系人页面模块"
-ContactList[ContactList/index.vue<br/>联系人列表主页面]
-ContactNav[ContactNav/index.vue<br/>联系人导航栏]
-UserItem[UserItem/index.vue<br/>用户项组件]
-IndexedList[IndexedList/index.vue<br/>索引列表组件]
-end
-subgraph "功能页面"
-ContactAdd[ContactAdd/index.vue<br/>添加联系人]
-ContactRequestList[ContactRequestList/index.vue<br/>申请列表]
-RequestItem[RequestItem/index.vue<br/>申请项组件]
+ContactsPage[contacts/index.vue<br/>联系人页面主组件]
+Avatar[Avatar/index.vue<br/>头像组件]
+Utils[utils/index.js<br/>工具函数库]
+Const[const/index.js<br/>常量定义]
 end
 subgraph "状态管理"
-ContactStore[contact.ts<br/>联系人状态管理]
-AppUserStore[appUser.ts<br/>用户信息管理]
-ConfigStore[config.ts<br/>配置管理]
+ContactStore[contact.js<br/>联系人状态管理]
+GroupStore[group.js<br/>群组状态管理]
 end
-subgraph "通用组件"
-Avatar[Avatar/index.vue<br/>头像组件]
-NavBar[NavBar/index.vue<br/>导航栏组件]
+subgraph "功能页面"
+ContactRequestList[ContactRequestList/index.vue<br/>申请列表]
+GroupList[GroupList/index.vue<br/>群组列表]
 end
-ContactList --> ContactNav
-ContactList --> IndexedList
-ContactList --> UserItem
-ContactList --> ContactStore
-ContactList --> AppUserStore
-ContactList --> ConfigStore
-ContactAdd --> ContactStore
-ContactRequestList --> RequestItem
-UserItem --> Avatar
-ContactNav --> NavBar
+ContactsPage --> Avatar
+ContactsPage --> ContactStore
+ContactsPage --> GroupStore
+ContactStore --> Utils
+GroupStore --> Const
+ContactRequestList --> ContactStore
+GroupList --> GroupStore
 ```
 
 **图表来源**
-- [ChatUIKit/modules/ContactList/index.vue](file://ChatUIKit/modules/ContactList/index.vue#L1-L115)
-- [ChatUIKit/modules/ContactList/components/ContactNav/index.vue](file://ChatUIKit/modules/ContactList/components/ContactNav/index.vue#L1-L99)
-- [ChatUIKit/modules/ContactList/components/UserItem/index.vue](file://ChatUIKit/modules/ContactList/components/UserItem/index.vue#L1-L165)
+- [vue2-demo/pages/contacts/index.vue:1-373](file://vue2-demo/pages/contacts/index.vue#L1-L373)
+- [vue2-demo/ChatUIKit/components/Avatar/index.vue:1-267](file://vue2-demo/ChatUIKit/components/Avatar/index.vue#L1-L267)
+- [vue2-demo/ChatUIKit/stores/contact.js:1-222](file://vue2-demo/ChatUIKit/stores/contact.js#L1-L222)
 
 **章节来源**
-- [ChatUIKit/modules/ContactList/index.vue](file://ChatUIKit/modules/ContactList/index.vue#L1-L115)
-- [ChatUIKit/modules/ContactList/style.scss](file://ChatUIKit/modules/ContactList/style.scss#L1-L53)
+- [vue2-demo/pages/contacts/index.vue:1-373](file://vue2-demo/pages/contacts/index.vue#L1-L373)
 
 ## 核心组件
 
-### 联系人列表主组件
+### 联系人页面主组件
 
-联系人列表主组件负责整个联系人页面的布局和功能协调，主要特性包括：
+联系人页面主组件负责整个联系人页面的布局和功能协调，主要特性包括：
 
 - **响应式联系人列表**：通过computed属性动态合并联系人信息和用户信息
-- **滑动删除功能**：支持联系人项的滑动删除操作
-- **导航功能**：跳转到群组列表、聊天页面、申请列表
-- **平台适配**：针对微信小程序和H5平台的不同UI适配
+- **侧边索引导航**：支持按字母快速跳转到对应分组
+- **特殊入口项**：包含新朋友和群组入口
+- **在线状态显示**：支持用户在线状态徽标显示
+- **平台适配**：针对不同平台的UI适配
 
-### 用户项组件
+### 头像组件
 
-用户项组件提供单个联系人的展示和交互功能：
+头像组件提供用户头像展示和在线状态显示功能：
 
-- **滑动手势**：实现左滑显示删除菜单
-- **头像展示**：支持在线状态显示
-- **用户信息**：显示用户名、头像、在线状态
-- **交互反馈**：点击、删除等操作的视觉反馈
+- **在线状态徽标**：支持多种在线状态显示
+- **错误处理**：头像加载失败时的占位符处理
+- **形状配置**：支持圆形和方形头像
+- **尺寸自适应**：可配置的头像尺寸
 
-### 索引列表组件
+### 工具函数库
 
-索引列表组件提供高效的联系人浏览体验：
+工具函数库提供联系人分组和国际化支持：
 
-- **字母索引**：支持按拼音首字母分组
-- **快速定位**：点击右侧字母快速跳转到对应分组
-- **特殊入口**：包含群组入口和新朋友入口
-- **性能优化**：使用虚拟滚动和懒加载
+- **按名称分组**：支持中文拼音首字母和英文首字母分组
+- **国际化支持**：多语言文本显示
+- **平台检测**：不同运行环境的适配
 
 **章节来源**
-- [ChatUIKit/modules/ContactList/components/UserItem/index.vue](file://ChatUIKit/modules/ContactList/components/UserItem/index.vue#L1-L165)
-- [ChatUIKit/components/IndexedList/index.vue](file://ChatUIKit/components/IndexedList/index.vue#L1-L341)
+- [vue2-demo/ChatUIKit/components/Avatar/index.vue:1-267](file://vue2-demo/ChatUIKit/components/Avatar/index.vue#L1-L267)
+- [vue2-demo/ChatUIKit/utils/index.js:752-776](file://vue2-demo/ChatUIKit/utils/index.js#L752-L776)
 
 ## 架构概览
 
@@ -121,257 +112,257 @@ ContactNav --> NavBar
 ```mermaid
 graph TB
 subgraph "视图层(View)"
-ContactList[联系人列表页面]
-UserItem[用户项组件]
-ContactNav[导航栏组件]
+ContactsPage[联系人页面]
+Avatar[头像组件]
 end
 subgraph "业务逻辑层(Business Logic)"
 ContactStore[联系人状态管理]
-AppUserStore[用户信息管理]
-ConfigStore[配置管理]
+GroupStore[群组状态管理]
+Utils[工具函数库]
+Const[常量定义]
 end
 subgraph "数据访问层(Data Access)"
-SDK[聊天SDK接口]
+SDK[Easemob SDK]
 LocalStorage[本地存储]
 end
-subgraph "工具层(Utilities)"
-Utils[工具函数库]
-Constants[常量定义]
+subgraph "导航层(Navigation)"
+ContactRequestList[申请列表]
+GroupList[群组列表]
 end
-ContactList --> ContactStore
-ContactList --> AppUserStore
-ContactList --> ConfigStore
+ContactsPage --> Avatar
+ContactsPage --> ContactStore
+ContactsPage --> GroupStore
 ContactStore --> SDK
-AppUserStore --> SDK
-ContactStore --> LocalStorage
-UserItem --> Avatar[Avatar组件]
-ContactNav --> NavBar[NavBar组件]
+GroupStore --> SDK
 ContactStore --> Utils
-AppUserStore --> Utils
-ConfigStore --> Constants
+GroupStore --> Const
+ContactRequestList --> ContactStore
+GroupList --> GroupStore
 ```
 
 **图表来源**
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L1-L282)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L1-L242)
-- [ChatUIKit/stores/config.ts](file://ChatUIKit/stores/config.ts#L1-L124)
+- [vue2-demo/ChatUIKit/stores/contact.js:116-200](file://vue2-demo/ChatUIKit/stores/contact.js#L116-L200)
+- [vue2-demo/ChatUIKit/stores/group.js:73-149](file://vue2-demo/ChatUIKit/stores/group.js#L73-L149)
 
 ## 详细组件分析
 
-### 联系人列表组件分析
+### 联系人页面组件分析
 
-联系人列表组件是整个联系人页面的核心，实现了复杂的状态管理和用户交互：
+联系人页面组件是整个联系人页面的核心，实现了复杂的状态管理和用户交互：
 
 ```mermaid
 classDiagram
-class ContactList {
-+contactList : ComputedRef
-+contactRequestCount : ComputedRef
-+joinedGroupCount : ComputedRef
-+selectedUserId : Ref
-+onGroupTap() void
-+onContactTap(userId) void
-+onNewRequestTap() void
-+handleSwipe(userId) void
-+onDeleteContact(userId) Promise
+class ContactsPage {
++contactList : Array
++contactRequests : Array
++groupList : Array
++scrollIntoView : String
++unreadCount : Computed
++showPresenceIndicator : Computed
++indexedContactList : Computed
++indexLetters : Computed
++onShow() void
++loadData() void
++goToChat(userId) void
++goToRequests() void
++goToGroups() void
++scrollToLetter(letter) void
 }
-class UserItem {
-+userInfo : ComputedRef
-+showPresence : ComputedRef
-+showDeleteMenu : Ref
-+onTap() void
-+onDelete() void
-+touchStartHandler(e) void
-+touchMoveHandler(e) void
-+setShowMenu(show) void
+class Avatar {
++src : String
++size : Number
++shape : String
++placeholder : String
++withPresence : Boolean
++userId : String
++showPresence : Computed
++handleImageError() void
++handleImageLoad() void
 }
-class ContactNav {
-+userInfo : ComputedRef
-+toAddContact() void
+class ContactStore {
++contacts : Array
++contactsNoticeInfo : Object
++getContacts() Array
++getContactsFromServer() Promise
++addContact(userId) Promise
++deleteContact(userId) Promise
 }
-class IndexedList {
-+indexedData : ComputedRef
-+initialData : ComputedRef
-+scrollInToView(id) void
-+onGroupTap() void
-+onNewRequestTap() void
+class GroupStore {
++groupList : Array
++groupMap : Object
++getGroupList() Array
++getJoinedGroupList() Promise
++getGroupDetails(groupIds) Promise
 }
-ContactList --> UserItem : "包含"
-ContactList --> ContactNav : "包含"
-ContactList --> IndexedList : "包含"
-UserItem --> Avatar : "使用"
-ContactNav --> NavBar : "使用"
+ContactsPage --> Avatar : "使用"
+ContactsPage --> ContactStore : "使用"
+ContactsPage --> GroupStore : "使用"
+ContactStore --> Utils : "使用"
+GroupStore --> Const : "使用"
 ```
 
 **图表来源**
-- [ChatUIKit/modules/ContactList/index.vue](file://ChatUIKit/modules/ContactList/index.vue#L30-L94)
-- [ChatUIKit/modules/ContactList/components/UserItem/index.vue](file://ChatUIKit/modules/ContactList/components/UserItem/index.vue#L23-L108)
-- [ChatUIKit/modules/ContactList/components/ContactNav/index.vue](file://ChatUIKit/modules/ContactList/components/ContactNav/index.vue#L33-L53)
+- [vue2-demo/pages/contacts/index.vue:80-202](file://vue2-demo/pages/contacts/index.vue#L80-L202)
+- [vue2-demo/ChatUIKit/components/Avatar/index.vue:26-168](file://vue2-demo/ChatUIKit/components/Avatar/index.vue#L26-L168)
+- [vue2-demo/ChatUIKit/stores/contact.js:19-200](file://vue2-demo/ChatUIKit/stores/contact.js#L19-L200)
+- [vue2-demo/ChatUIKit/stores/group.js:14-200](file://vue2-demo/ChatUIKit/stores/group.js#L14-L200)
 
-#### 滑动删除功能流程
+#### 联系人列表渲染流程
 
-滑动删除功能通过手势识别和状态管理实现：
+联系人列表渲染通过分组算法和模板渲染实现：
 
 ```mermaid
 sequenceDiagram
-participant U as 用户
-participant UI as UserItem组件
+participant CP as 联系人页面
 participant CS as 联系人状态
-participant AS as 应用用户状态
-U->>UI : 左滑手势
-UI->>UI : touchStartHandler记录起点
-UI->>UI : touchMoveHandler计算位移
-UI->>UI : 判断滑动方向和距离
-UI->>UI : 显示删除菜单
-UI->>CS : emit onSwipe(userId)
-U->>UI : 点击删除按钮
-UI->>UI : showModal确认对话框
-UI->>U : 显示删除确认
-U->>UI : 确认删除
-UI->>CS : emit onDelete(userId)
-CS->>CS : deleteContact(userId)
-CS->>AS : 更新用户信息
-CS->>U : 显示删除成功提示
-CS->>UI : 重置选中状态
+participant GS as 群组状态
+participant AV as 头像组件
+CP->>CS : dispatch getContactsFromServer
+CS->>CS : 获取联系人列表
+CS->>CP : 返回联系人数据
+CP->>GS : dispatch getJoinedGroupList
+GS->>GS : 获取群组列表
+GS->>CP : 返回群组数据
+CP->>CP : 计算 indexedContactList
+loop 每个联系人分组
+CP->>AV : 渲染头像组件
+AV->>AV : 检查在线状态
+AV->>CP : 返回头像渲染完成
+end
+CP->>CP : 渲染侧边索引
 ```
 
 **图表来源**
-- [ChatUIKit/modules/ContactList/components/UserItem/index.vue](file://ChatUIKit/modules/ContactList/components/UserItem/index.vue#L82-L101)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L150-L165)
+- [vue2-demo/pages/contacts/index.vue:142-175](file://vue2-demo/pages/contacts/index.vue#L142-L175)
+- [vue2-demo/ChatUIKit/stores/contact.js:116-134](file://vue2-demo/ChatUIKit/stores/contact.js#L116-L134)
+- [vue2-demo/ChatUIKit/stores/group.js:73-97](file://vue2-demo/ChatUIKit/stores/group.js#L73-L97)
 
 **章节来源**
-- [ChatUIKit/modules/ContactList/index.vue](file://ChatUIKit/modules/ContactList/index.vue#L30-L94)
-- [ChatUIKit/modules/ContactList/components/UserItem/index.vue](file://ChatUIKit/modules/ContactList/components/UserItem/index.vue#L23-L108)
+- [vue2-demo/pages/contacts/index.vue:80-202](file://vue2-demo/pages/contacts/index.vue#L80-L202)
+- [vue2-demo/ChatUIKit/stores/contact.js:116-200](file://vue2-demo/ChatUIKit/stores/contact.js#L116-L200)
 
 ### 状态管理系统
 
-联系人页面采用Pinia状态管理，实现了高效的数据流管理：
+联系人页面采用Vuex状态管理，实现了高效的数据流管理：
 
 ```mermaid
 stateDiagram-v2
 [*] --> 初始化
-初始化 --> 获取联系人 : getContacts()
-获取联系人 --> 数据加载中 : 请求SDK
+初始化 --> 获取联系人 : getContactsFromServer()
+获取联系人 --> 数据加载中 : 调用SDK
 数据加载中 --> 联系人列表 : 成功响应
 数据加载中 --> 错误状态 : 请求失败
 联系人列表 --> 添加好友 : addContact()
-添加好友 --> 数据加载中 : 请求SDK
+添加好友 --> 数据加载中 : 调用SDK
 数据加载中 --> 联系人列表 : 成功响应
 联系人列表 --> 删除好友 : deleteContact()
-删除好友 --> 数据加载中 : 请求SDK
+删除好友 --> 数据加载中 : 调用SDK
 数据加载中 --> 联系人列表 : 成功响应
-联系人列表 --> 接受申请 : acceptContactInvite()
-接受申请 --> 数据加载中 : 请求SDK
-数据加载中 --> 联系人列表 : 成功响应
-联系人列表 --> 拒绝申请 : declineContactInvite()
-拒绝申请 --> 数据加载中 : 请求SDK
-数据加载中 --> 联系人列表 : 成功响应
+联系人列表 --> 获取群组 : getJoinedGroupList()
+获取群组 --> 数据加载中 : 调用SDK
+数据加载中 --> 群组列表 : 成功响应
 错误状态 --> 初始化 : 重试
 ```
 
 **图表来源**
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L112-L130)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L135-L147)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L152-L165)
+- [vue2-demo/ChatUIKit/stores/contact.js:116-134](file://vue2-demo/ChatUIKit/stores/contact.js#L116-L134)
+- [vue2-demo/ChatUIKit/stores/contact.js:150-162](file://vue2-demo/ChatUIKit/stores/contact.js#L150-L162)
+- [vue2-demo/ChatUIKit/stores/group.js:73-97](file://vue2-demo/ChatUIKit/stores/group.js#L73-L97)
 
-### 用户信息管理
+## 侧边索引导航系统
 
-用户信息管理通过AppUserStore实现，提供了完整的用户数据缓存和同步机制：
+### 索引字母生成流程
+
+侧边索引导航系统通过智能分组算法生成索引字母：
 
 ```mermaid
 flowchart TD
-Start([开始]) --> CheckCache{检查缓存}
-CheckCache --> |有缓存| ReturnCached[返回缓存数据]
-CheckCache --> |无缓存| FilterUsers[过滤未缓存用户]
-FilterUsers --> HasUsers{是否有待获取用户?}
-HasUsers --> |否| ReturnEmpty[返回空结果]
-HasUsers --> |是| CallSDK[调用SDK获取用户信息]
-CallSDK --> ProcessResponse[处理响应数据]
-ProcessResponse --> UpdateCache[更新缓存]
-UpdateCache --> ReturnData[返回完整数据]
-ReturnCached --> End([结束])
-ReturnEmpty --> End
-ReturnData --> End
+Start([开始]) --> GetNames[获取联系人姓名列表]
+GetNames --> CheckChar{检查首字符类型}
+CheckChar --> |中文| Pinyin[转换为拼音首字母]
+CheckChar --> |英文| Upper[转换为大写字母]
+CheckChar --> |其他| Hash[使用 # 符号]
+Pinyin --> Sort[按字母顺序排序]
+Upper --> Sort
+Hash --> Sort
+Sort --> RemoveHash{检查 # 符号位置}
+RemoveHash --> |在末尾| Final[最终索引字母]
+RemoveHash --> |在前面| MoveHash[移动 # 到末尾]
+MoveHash --> Final
+Final --> End([结束])
 ```
 
 **图表来源**
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L86-L125)
+- [vue2-demo/ChatUIKit/utils/index.js:752-776](file://vue2-demo/ChatUIKit/utils/index.js#L752-L776)
 
-**章节来源**
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L1-L282)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L1-L242)
+### 索引导航交互流程
 
-## 依赖关系分析
-
-联系人页面的依赖关系体现了清晰的分层架构：
+索引导航支持点击跳转到对应分组：
 
 ```mermaid
-graph TD
-subgraph "外部依赖"
-UniApp[UniApp框架]
-Vue3[Vue 3 Composition API]
-Pinia[Pinia状态管理]
-SDK[Easemob SDK]
-end
-subgraph "内部模块"
-ContactList[ContactList模块]
-Components[通用组件库]
-Stores[状态管理层]
-Utils[工具函数库]
-end
-subgraph "核心功能"
-ContactManagement[联系人管理]
-UserInteraction[用户交互]
-DataSync[数据同步]
-UIComponents[界面组件]
-end
-ContactList --> Components
-ContactList --> Stores
-ContactList --> Utils
-Components --> UIComponents
-Stores --> ContactManagement
-Stores --> UserInteraction
-Stores --> DataSync
-ContactManagement --> SDK
-DataSync --> SDK
-UserInteraction --> UniApp
-UIComponents --> Vue3
-Stores --> Pinia
+sequenceDiagram
+participant U as 用户
+participant IS as 侧边索引
+participant CS as 联系人列表
+U->>IS : 点击索引字母
+IS->>IS : 计算目标分组ID
+IS->>CS : 设置 scrollIntoView
+CS->>CS : 触发滚动动画
+CS->>U : 显示目标分组
+IS->>IS : 300ms后清除滚动状态
 ```
 
 **图表来源**
-- [ChatUIKit/stores/index.ts](file://ChatUIKit/stores/index.ts#L1-L31)
-- [ChatUIKit/utils/index.ts](file://ChatUIKit/utils/index.ts#L1-L344)
-
-### 关键依赖关系
-
-1. **状态管理依赖**：所有组件都依赖于Pinia状态管理
-2. **SDK集成**：通过ConnStore间接依赖Easemob SDK
-3. **平台适配**：通过工具函数适配不同运行环境
-4. **组件复用**：通用组件被多个页面复用
+- [vue2-demo/pages/contacts/index.vue:195-200](file://vue2-demo/pages/contacts/index.vue#L195-L200)
 
 **章节来源**
-- [ChatUIKit/stores/index.ts](file://ChatUIKit/stores/index.ts#L1-L31)
-- [ChatUIKit/utils/index.ts](file://ChatUIKit/utils/index.ts#L94-L103)
+- [vue2-demo/pages/contacts/index.vue:60-71](file://vue2-demo/pages/contacts/index.vue#L60-L71)
+- [vue2-demo/pages/contacts/index.vue:136-139](file://vue2-demo/pages/contacts/index.vue#L136-L139)
+- [vue2-demo/pages/contacts/index.vue:195-200](file://vue2-demo/pages/contacts/index.vue#L195-L200)
 
-## 性能考虑
+## 性能优化策略
 
-联系人页面在设计时充分考虑了性能优化：
+### 渲染优化
 
-### 内存管理
-- 使用computed替代autorun，避免不必要的重新计算
-- 采用懒加载策略，只在需要时获取用户信息
-- 合理使用响应式数据，避免深层嵌套
+联系人页面采用了多项性能优化策略：
+
+- **原生模板渲染**：移除scoped slot，使用原生Vue模板提高渲染性能
+- **分组算法优化**：使用对象分组而非数组过滤，提升大数据量处理效率
+- **懒加载策略**：头像组件支持错误处理和加载状态管理
+- **内存管理**：合理使用响应式数据，避免深层嵌套
 
 ### 网络优化
-- 分页获取用户信息，避免一次性请求大量数据
-- 缓存用户信息，减少重复网络请求
-- 批量处理联系人操作
+
+- **批量数据获取**：群组详情采用批量获取策略
+- **缓存机制**：利用Vuex状态管理进行数据缓存
+- **错误处理**：完善的网络请求错误处理机制
 
 ### UI渲染优化
-- 使用虚拟滚动技术处理大量联系人列表
-- 滑动删除功能使用CSS变换而非DOM操作
-- 图片懒加载和错误处理
+
+- **滚动优化**：使用scroll-view组件优化长列表滚动
+- **状态管理**：通过data属性管理滚动状态，避免复杂计算
+- **样式优化**：使用SCSS变量和混合器提升样式维护性
+
+## 平台兼容性
+
+### Mini Program兼容性
+
+**更新** 完全移除了不兼容的scoped slot，采用原生Vue模板语法：
+
+- **模板语法**：使用标准Vue模板而非scoped slot
+- **样式作用域**：通过scoped属性和命名空间解决样式冲突
+- **事件处理**：统一使用原生事件处理机制
+- **组件通信**：通过props和events实现组件间通信
+
+### 多平台适配
+
+- **微信小程序**：针对小程序平台的特殊适配
+- **H5平台**：桌面浏览器的响应式设计
+- **App平台**：移动端设备的触摸优化
+- **条件编译**：使用条件编译指令适配不同平台
+
+**章节来源**
+- [vue2-demo/pages/contacts/index.vue:1-373](file://vue2-demo/pages/contacts/index.vue#L1-L373)
 
 ## 故障排除指南
 
@@ -382,34 +373,45 @@ Stores --> Pinia
    - 验证用户登录状态
    - 查看控制台错误信息
 
-2. **滑动删除功能失效**
-   - 确认触摸事件绑定正常
-   - 检查CSS样式冲突
-   - 验证手势识别逻辑
+2. **侧边索引不工作**
+   - 确认索引字母计算逻辑
+   - 检查scroll-view组件配置
+   - 验证分组数据结构
 
-3. **用户信息显示异常**
-   - 检查用户信息缓存状态
-   - 验证SDK接口调用
-   - 确认权限设置
+3. **头像加载失败**
+   - 检查头像URL有效性
+   - 验证占位符图片资源
+   - 确认网络请求权限
 
-4. **平台兼容性问题**
+4. **在线状态显示异常**
+   - 检查用户状态配置
+   - 验证presence状态映射
+   - 确认store数据同步
+
+5. **平台兼容性问题**
    - 检查条件编译指令
    - 验证平台特定样式
    - 测试不同平台表现
 
 **章节来源**
-- [ChatUIKit/modules/ContactList/index.vue](file://ChatUIKit/modules/ContactList/index.vue#L79-L93)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L152-L165)
+- [vue2-demo/pages/contacts/index.vue:142-175](file://vue2-demo/pages/contacts/index.vue#L142-L175)
+- [vue2-demo/ChatUIKit/components/Avatar/index.vue:159-167](file://vue2-demo/ChatUIKit/components/Avatar/index.vue#L159-L167)
 
 ## 结论
 
-联系人页面作为Easemob UIKIT的核心功能模块，展现了现代前端开发的最佳实践。通过采用Vue 3 Composition API、Pinia状态管理、UniApp跨平台框架，实现了高性能、可维护、用户体验优秀的联系人管理功能。
+联系人页面经过重大重构后，展现了现代前端开发的最佳实践。通过采用Vue 2 + Vuex架构、原生模板渲染、侧边索引导航等技术，实现了高性能、可维护、用户体验优秀的联系人管理功能。
 
-该页面的主要优势包括：
-- **模块化设计**：清晰的组件分离和职责划分
-- **响应式架构**：基于computed的自动状态管理
+**更新后的优势包括**：
+- **架构优化**：移除了不兼容的scoped slot，采用原生Vue模板
+- **性能提升**：新增侧边索引导航，提升大数据量浏览效率
+- **用户体验**：改进的交互设计和状态管理
+- **平台兼容**：更好的多平台适配能力
+- **代码质量**：更清晰的代码结构和注释
+
+主要技术特点：
+- **响应式设计**：基于computed的自动状态管理
+- **模块化架构**：清晰的组件分离和职责划分
 - **性能优化**：合理的缓存策略和渲染优化
-- **平台适配**：良好的多平台兼容性
 - **扩展性强**：易于添加新功能和定制化需求
 
 未来可以进一步优化的方向包括：
