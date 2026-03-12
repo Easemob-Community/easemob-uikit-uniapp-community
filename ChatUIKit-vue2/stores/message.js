@@ -564,9 +564,30 @@ export default {
       commit('SET_QUOTE_MESSAGE', msg)
     },
 
-    // 设置编辑消息
+    // 设置编辑消息 - 只保存纯数据，避免 SDK 方法导致 Vue 响应式警告
     setEditingMessage({ commit }, msg) {
-      commit('SET_EDITING_MESSAGE', msg)
+      if (!msg) {
+        commit('SET_EDITING_MESSAGE', null)
+        return
+      }
+      // 提取纯数据，排除 SDK 方法
+      const plainMsg = {
+        id: msg.id,
+        serverMsgId: msg.serverMsgId,
+        mid: msg.mid,
+        type: msg.type,
+        msg: msg.msg,
+        body: msg.body ? { ...msg.body } : undefined,
+        to: msg.to,
+        from: msg.from,
+        chatType: msg.chatType,
+        status: msg.status,
+        time: msg.time,
+        ext: msg.ext ? { ...msg.ext } : undefined,
+        modifiedInfo: msg.modifiedInfo
+      }
+      console.log('[MessageStore] setEditingMessage plain:', plainMsg)
+      commit('SET_EDITING_MESSAGE', plainMsg)
     },
 
     // 设置播放的语音消息
@@ -638,7 +659,8 @@ export default {
 
         // 更新本地消息 - 使用本地消息ID
         const localMsgId = oldMsg.id || oldMsg.mid
-        if (localMsgId) {
+        console.log('[MessageStore] Updating local msg:', localMsgId, 'exists:', !!state.messageMap[localMsgId])
+        if (localMsgId && state.messageMap[localMsgId]) {
           commit('UPDATE_MESSAGE_IN_MAP', {
             msgId: localMsgId,
             updates: {
@@ -649,10 +671,11 @@ export default {
               }
             }
           })
+          console.log('[MessageStore] Local msg updated:', localMsgId)
         }
 
         // 同时更新 serverMsgId 对应的记录
-        if (oldMsg.serverMsgId) {
+        if (oldMsg.serverMsgId && state.messageMap[oldMsg.serverMsgId]) {
           commit('UPDATE_MESSAGE_IN_MAP', {
             msgId: oldMsg.serverMsgId,
             updates: {
@@ -663,8 +686,10 @@ export default {
               }
             }
           })
+          console.log('[MessageStore] Server msg updated:', oldMsg.serverMsgId)
         }
 
+        console.log('[MessageStore] Message update completed')
         return res
       } catch (error) {
         console.error('[MessageStore] Failed to modify message:', error)
@@ -685,8 +710,10 @@ export default {
           msgId: mid,
           updates: {
             msg: msg,
-            isModified: true,
-            modifiedTime: Date.now()
+            modifiedInfo: {
+              isModified: true,
+              modifiedTime: Date.now()
+            }
           }
         })
         found = true
@@ -699,8 +726,10 @@ export default {
             msgId: message.id,
             updates: {
               msg: msg,
-              isModified: true,
-              modifiedTime: Date.now()
+              modifiedInfo: {
+                isModified: true,
+                modifiedTime: Date.now()
+              }
             }
           })
           found = true
