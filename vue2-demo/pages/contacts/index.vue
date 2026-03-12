@@ -14,18 +14,16 @@
         :requestCount="unreadCount"
         :groupCount="groupList.length"
       >
-        <template v-slot:indexedItem="slotProps">
-          <view class="contact-item" @tap.stop="goToChat(slotProps.item.userId)">
-            <Avatar 
-              :src="slotProps.item.avatar" 
-              :size="40" 
-              :placeholder="USER_AVATAR_URL"
-              :withPresence="showPresenceIndicator"
-              :userId="slotProps.item.userId"
-            />
-            <text class="name">{{ slotProps.item.name || slotProps.item.userId }}</text>
-          </view>
-        </template>
+        <view class="contact-item" slot="indexedItem" slot-scope="{ item }" @tap.stop="goToChat(item.userId)">
+          <Avatar 
+            :src="item.avatar" 
+            :size="40" 
+            :placeholder="USER_AVATAR_URL"
+            :withPresence="showPresenceIndicator"
+            :userId="item.userId"
+          />
+          <text class="name">{{ item.name || item.userId }}</text>
+        </view>
       </IndexedList>
     </view>
   </view>
