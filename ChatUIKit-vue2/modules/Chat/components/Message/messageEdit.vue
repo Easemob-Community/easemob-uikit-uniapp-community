@@ -14,8 +14,12 @@
           :adjust-position="false"
           :show-confirm-bar="false"
         />
+        <!-- 调试信息 -->
+        <view style="font-size: 10px; color: red; position: absolute; top: -20px; right: 10px;">
+          editAble: {{ editAble }}
+        </view>
         <view
-          @tap="editMessage"
+          @tap="onEditButtonTap"
           :class="editAble ? 'edit' : 'edit-disabled'"
         ></view>
       </view>
@@ -62,8 +66,14 @@ export default {
       this.$store.dispatch('message/setEditingMessage', null)
     },
 
+    onEditButtonTap() {
+      console.log('[MessageEdit] onEditButtonTap called')
+      this.editMessage()
+    },
+
     editMessage() {
       console.log('[MessageEdit] editMessage called')
+      console.log('[MessageEdit] editAble:', this.editAble, 'editingMsg:', this.editingMsg?.id)
       if (this.editAble && this.editingMsg) {
         console.log('[MessageEdit] Editing msg:', this.editingMsg.id, 'old text:', this.editingMsg.msg?.substring(0, 20))
         console.log('[MessageEdit] New text:', this.txt.trim()?.substring(0, 20))
