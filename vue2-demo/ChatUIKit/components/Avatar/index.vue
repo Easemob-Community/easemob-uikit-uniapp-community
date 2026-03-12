@@ -83,10 +83,12 @@ export default {
       if (featureConfig?.usePresence === false) {
         return false
       }
+      console.log('[Avatar] showPresence:', this.withPresence, 'isOnline:', this.isOnline, 'presenceExt:', this.presenceExt)
       return this.withPresence
     },
     
     presenceClass() {
+      console.log('[Avatar] presenceClass - isOnline:', this.isOnline, 'presenceExt:', this.presenceExt)
       if (this.isOnline) {
         switch (this.presenceExt) {
           case 'Online':

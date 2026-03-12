@@ -118,7 +118,9 @@ export default {
     userInfo() {
       // 使用 getSelfUserInfo getter 获取当前用户信息
       const info = this.$store.getters['appUser/getSelfUserInfo']
-      return info ? info() : { name: '', avatar: '', presenceExt: '', isOnline: false }
+      const result = info ? info() : { name: '', avatar: '', presenceExt: '', isOnline: false }
+      console.log('[ConversationNav] userInfo:', result)
+      return result
     }
   },
   
