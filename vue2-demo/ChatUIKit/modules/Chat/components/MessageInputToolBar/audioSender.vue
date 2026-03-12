@@ -29,7 +29,8 @@ export default {
       showPopup: false,
       recording: false,
       recordStartTime: 0,
-      tempFilePath: ''
+      tempFilePath: '',
+      shouldSendOnStop: false
     }
   },
 
@@ -49,15 +50,19 @@ export default {
   },
 
   mounted() {
+    // 使用箭头函数保持 this 上下文
     recorderManager.onStop((res) => {
-      if (this.recording) {
+      console.log('[AudioSender] onStop fired, shouldSendOnStop:', this.shouldSendOnStop, 'recording:', this.recording)
+      if (this.shouldSendOnStop) {
+        this.shouldSendOnStop = false
         this.sendAudioMessage(res)
       }
     })
 
     recorderManager.onError((err) => {
-      console.error('录音错误:', err)
+      console.error('[AudioSender] 录音错误:', err)
       this.recording = false
+      this.shouldSendOnStop = false
       uni.showToast({ title: '录音失败', icon: 'none' })
     })
   },
@@ -74,8 +79,31 @@ export default {
     },
 
     startRecord() {
+      console.log('[AudioSender] startRecord')
       this.recording = true
+      this.shouldSendOnStop = true
       this.recordStartTime = Date.now()
+      // #ifdef MP-WEIXIN
+      // 微信小程序需要先检查权限
+      uni.authorize({
+        scope: 'scope.record',
+        success: () => {
+          recorderManager.start({
+            duration: 60000,
+            sampleRate: 44100,
+            numberOfChannels: 1,
+            encodeBitRate: 192000,
+            format: 'mp3'
+          })
+        },
+        fail: () => {
+          this.recording = false
+          this.shouldSendOnStop = false
+          uni.showToast({ title: '请授权麦克风权限', icon: 'none' })
+        }
+      })
+      // #endif
+      // #ifndef MP-WEIXIN
       recorderManager.start({
         duration: 60000,
         sampleRate: 44100,
@@ -83,22 +111,28 @@ export default {
         encodeBitRate: 192000,
         format: 'mp3'
       })
+      // #endif
     },
 
     stopRecord() {
+      console.log('[AudioSender] stopRecord')
       const duration = Math.floor((Date.now() - this.recordStartTime) / 1000)
       if (duration < 1) {
+        this.shouldSendOnStop = false
         this.recording = false
         uni.showToast({ title: '录音时间太短', icon: 'none' })
         recorderManager.stop()
         return
       }
-      recorderManager.stop()
+      // 标记应该发送，等待 onStop 回调
       this.recording = false
       this.showPopup = false
+      recorderManager.stop()
     },
 
     cancelRecord() {
+      console.log('[AudioSender] cancelRecord')
+      this.shouldSendOnStop = false
       this.recording = false
       recorderManager.stop()
     },
