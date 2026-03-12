@@ -266,16 +266,21 @@ class ChatUIKit {
         if (msg && msg.length > 0) {
           msg.forEach((item) => {
             let isOnline = false
-            if (
+            // SDK 返回的是 statusDetails 数组
+            if (item.statusDetails && Array.isArray(item.statusDetails)) {
+              // 检查是否有任一设备状态为 1（在线）
+              isOnline = item.statusDetails.some(detail => detail.status === 1)
+            } else if (
               item.status &&
               typeof item.status === 'object' &&
-              !Array.isArray(item.status) &&
-              Object.values(item.status).indexOf('1') > -1
+              !Array.isArray(item.status)
             ) {
-              isOnline = true
+              // 兼容旧版格式
+              const statusValues = Object.values(item.status)
+              if (statusValues.indexOf('1') > -1) isOnline = true
             }
             this.store.commit('appUser/SET_USER_PRESENCE', {
-              userId: item.uid,
+              userId: item.uid || item.userId,
               presence: {
                 presenceExt: item.ext || '',
                 isOnline: isOnline

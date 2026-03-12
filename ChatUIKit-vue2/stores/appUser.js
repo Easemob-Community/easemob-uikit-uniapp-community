@@ -150,13 +150,17 @@ export default {
         if (res.data && res.data.result && res.data.result.length > 0) {
           const presenceData = res.data.result[0]
           let isOnline = false
-          if (
+          // SDK 返回的是 statusDetails 数组
+          if (presenceData.statusDetails && Array.isArray(presenceData.statusDetails)) {
+            isOnline = presenceData.statusDetails.some(detail => detail.status === 1)
+          } else if (
             presenceData.status &&
             typeof presenceData.status === 'object' &&
-            !Array.isArray(presenceData.status) &&
-            Object.values(presenceData.status).indexOf('1') > -1
+            !Array.isArray(presenceData.status)
           ) {
-            isOnline = true
+            // 兼容旧版格式
+            const statusValues = Object.values(presenceData.status)
+            if (statusValues.indexOf('1') > -1) isOnline = true
           }
           
           commit('SET_USER_PRESENCE', {
