@@ -1,5 +1,8 @@
 // 常量定义
 
+// 本地存储 key
+export const CHAT_STORE = 'chat'
+
 // 获取群组成员列表的每页数量
 export const GET_GROUP_MEMBERS_PAGESIZE = 100
 
