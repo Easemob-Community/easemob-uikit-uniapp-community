@@ -51,14 +51,13 @@
                 "
               >{{ getLastMsgFrom(conversation.lastMessage) }}:</span>
               <span class="msg-content">
-                <text
+                <block
                   v-for="(item, idx) in renderMessageContent(conversation.lastMessage.msg)"
                   :key="idx"
-                  :class="[{ 'emoji-wrap': item.type !== 'text' }]"
                 >
                   <text v-if="item.type === 'text'">{{ item.value }}</text>
                   <image v-else class="msg-emoji" :src="item.value" mode="aspectFit" />
-                </text>
+                </block>
               </span>
             </view>
             <view v-else class="last-msg ellipsis">
