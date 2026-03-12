@@ -644,10 +644,6 @@ export default {
 
     // 修改消息（编辑消息）
     async modifyServerMessage({ commit, state, rootState }, payload) {
-      // 使用 alert 确保在 H5 中可见
-      if (typeof alert !== 'undefined') {
-        alert('modifyServerMessage called, payload: ' + JSON.stringify(payload ? { hasOldMsg: !!payload.oldMsg, newMsgText: payload.newMsgText } : null))
-      }
       console.log('=========================================')
       console.log('[MessageStore] modifyServerMessage called')
       console.log('[MessageStore] payload:', payload)
@@ -658,12 +654,10 @@ export default {
       
       try {
         const chatConn = rootState.conn.chatConn
-        console.log('[MessageStore] rootState.conn:', rootState.conn)
+        const chatSDK = rootState.conn.chatSDK
         console.log('[MessageStore] chatConn:', chatConn ? 'exists' : 'null')
-        if (typeof alert !== 'undefined') {
-          alert('chatConn: ' + (chatConn ? 'exists' : 'null'))
-        }
-        if (!chatConn) {
+        console.log('[MessageStore] chatSDK:', chatSDK ? 'exists' : 'null')
+        if (!chatConn || !chatSDK) {
           throw new Error('SDK not initialized')
         }
 
@@ -679,59 +673,44 @@ export default {
         console.log('[MessageStore] Using serverMsgId:', msgId)
         console.log('[MessageStore] oldMsg.to:', oldMsg.to, 'oldMsg.chatType:', oldMsg.chatType)
         
-        if (typeof alert !== 'undefined') {
-          alert('About to call modifyMessage with id=' + msgId + ', to=' + oldMsg.to + ', chatType=' + oldMsg.chatType)
-        }
-        
-        // SDK 可能需要 mid 而不是 id
-        const modifyParams = {
-          mid: msgId,
-          msg: newMsgText,
+        // 官网 API 格式: messageId + modifiedMessage
+        const chatSDK = rootState.conn.chatSDK
+        const modifiedMessage = chatSDK.message.create({
           to: oldMsg.to,
-          chatType: oldMsg.chatType
+          type: oldMsg.type,
+          chatType: oldMsg.chatType,
+          msg: newMsgText
+        })
+        
+        const modifyParams = {
+          messageId: msgId,
+          modifiedMessage: modifiedMessage
         }
         console.log('[MessageStore] modifyParams:', modifyParams)
-        if (typeof alert !== 'undefined') {
-          alert('modifyParams: ' + JSON.stringify(modifyParams))
-        }
         
         let res
         try {
           res = await chatConn.modifyMessage(modifyParams)
         } catch (sdkError) {
-          if (typeof alert !== 'undefined') {
-            alert('modifyMessage SDK error: ' + (sdkError.message || sdkError))
-          }
+          console.error('[MessageStore] modifyMessage SDK error:', sdkError)
           throw sdkError
         }
 
         console.log('[MessageStore] Message modified:', res)
-        if (typeof alert !== 'undefined') {
-          alert('Message modified successfully! res=' + JSON.stringify(res ? { id: res.id } : null))
-        }
 
         // 更新本地消息 - 使用本地消息ID
         const localMsgId = oldMsg.id || oldMsg.mid
         console.log('[MessageStore] Updating local msg:', localMsgId, 'exists:', !!state.messageMap[localMsgId])
-        if (typeof alert !== 'undefined') {
-          alert('localMsgId=' + localMsgId + ', exists=' + !!state.messageMap[localMsgId] + ', serverMsgId=' + oldMsg.serverMsgId)
-        }
         
         if (localMsgId && state.messageMap[localMsgId]) {
           commit('UPDATE_MESSAGE_IN_MAP', {
             msgId: localMsgId,
             updates: {
               msg: newMsgText,
-              modifiedInfo: {
-                isModified: true,
-                modifiedTime: Date.now()
-              }
+              modifiedInfo: res?.modifiedInfo || { isModified: true, modifiedTime: Date.now() }
             }
           })
           console.log('[MessageStore] Local msg updated:', localMsgId)
-          if (typeof alert !== 'undefined') {
-            alert('Local msg updated: ' + localMsgId)
-          }
         }
 
         // 同时更新 serverMsgId 对应的记录
@@ -740,25 +719,16 @@ export default {
             msgId: oldMsg.serverMsgId,
             updates: {
               msg: newMsgText,
-              modifiedInfo: {
-                isModified: true,
-                modifiedTime: Date.now()
-              }
+              modifiedInfo: res?.modifiedInfo || { isModified: true, modifiedTime: Date.now() }
             }
           })
           console.log('[MessageStore] Server msg updated:', oldMsg.serverMsgId)
-          if (typeof alert !== 'undefined') {
-            alert('Server msg updated: ' + oldMsg.serverMsgId)
-          }
         }
 
         console.log('[MessageStore] Message update completed')
         return res
       } catch (error) {
         console.error('[MessageStore] Failed to modify message:', error)
-        if (typeof alert !== 'undefined') {
-          alert('Failed to modify message: ' + (error.message || error))
-        }
         throw error
       }
     },

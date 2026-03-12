@@ -14,16 +14,11 @@
           :adjust-position="false"
           :show-confirm-bar="false"
         />
-        <!-- 调试信息 -->
-        <view style="font-size: 10px; color: red; position: absolute; top: -20px; right: 10px;">
-          editAble: {{ editAble }}
-        </view>
+
         <view
           @tap="onEditButtonTap"
-          style="background: #009dff; color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 14px; margin-left: 8px;"
-        >
-          发送
-        </view>
+          :class="editAble ? 'edit' : 'edit-disabled'"
+        ></view>
       </view>
     </view>
   </view>
@@ -44,20 +39,14 @@ export default {
 
   computed: {
     editingMsg() {
-      const msg = this.$store.state.message.editingMessage
-      console.log('[MessageEdit] editingMsg computed, id:', msg?.id)
-      return msg
+      return this.$store.state.message.editingMessage
     },
 
     editAble() {
-      const result = this.txt !== this.editingMsg?.msg && !!formatTextMessage(this.txt).trim()
-      console.log('[MessageEdit] editAble computed:', result)
-      return result
+      return (
+        this.txt !== this.editingMsg?.msg && formatTextMessage(this.txt).trim()
+      )
     }
-  },
-
-  mounted() {
-    console.log('[MessageEdit] mounted')
   },
 
   watch: {
@@ -76,50 +65,18 @@ export default {
       this.$store.dispatch('message/setEditingMessage', null)
     },
 
-    onMaskTap(e) {
-      console.log('[MessageEdit] mask tapped')
-      this.cancelEdit(e)
-    },
-    
-    onMaskClick(e) {
-      console.log('[MessageEdit] mask clicked')
-      this.cancelEdit(e)
-    },
-
     onEditButtonTap(e) {
-      console.log('=========================================')
       console.log('[MessageEdit] onEditButtonTap called')
-      // 不阻止冒泡，只执行逻辑
       this.editMessage()
     },
 
     editMessage() {
-      console.log('[MessageEdit] ===============================')
-      console.log('[MessageEdit] editMessage called')
-      console.log('[MessageEdit] editAble:', this.editAble)
-      console.log('[MessageEdit] editingMsg:', JSON.stringify(this.editingMsg))
-      
-      // 强制执行，不检查 editAble
-      if (this.editingMsg) {
-        const params = {
+      if (this.editAble && this.editingMsg) {
+        this.$store.dispatch('message/modifyServerMessage', {
           oldMsg: this.editingMsg,
           newMsgText: this.txt.trim()
-        }
-        console.log('[MessageEdit] Dispatching with params:', JSON.stringify(params))
-        
-        try {
-          this.$store.dispatch('message/modifyServerMessage', params).then(() => {
-            console.log('[MessageEdit] Message modified successfully')
-          }).catch(err => {
-            console.error('[MessageEdit] Failed to modify message:', err)
-          })
-        } catch (e) {
-          console.error('[MessageEdit] Exception during dispatch:', e)
-        }
-        
+        })
         this.$store.dispatch('message/setEditingMessage', null)
-      } else {
-        console.log('[MessageEdit] Cannot edit - editingMsg is null')
       }
     }
   }
