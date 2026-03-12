@@ -26,6 +26,19 @@ if (!global.util) {
     },
     isObject: function(obj) {
       return typeof obj === 'object' && obj !== null
+    },
+    toObject: function(obj) {
+      if (obj === null || obj === undefined) {
+        return {}
+      }
+      if (typeof obj === 'object') {
+        return obj
+      }
+      try {
+        return JSON.parse(obj)
+      } catch (e) {
+        return {}
+      }
     }
   }
 }
