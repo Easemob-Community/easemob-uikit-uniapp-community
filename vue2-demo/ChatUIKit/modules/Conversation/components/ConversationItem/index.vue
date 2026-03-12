@@ -17,6 +17,8 @@
           :src="conversationInfo.avatar"
           :placeholder="getAvatarPlaceholder()"
           :size="50"
+          :withPresence="showPresenceIndicator"
+          :userId="showPresenceIndicator ? conversation.conversationId : ''"
         />
       </view>
       <view class="content-wrap">
@@ -119,6 +121,10 @@ export default {
   },
   
   computed: {
+    featureConfig() {
+      return this.$store.getters['config/getFeatureConfig'] || {}
+    },
+    
     isMute() {
       return this.$store.getters['conversation/getConversationMuteStatus'](
         this.conversation.conversationId
@@ -145,9 +151,19 @@ export default {
         }
         return {
           name: userInfo?.name || userInfo?.nickname || convId,
-          avatar: userInfo?.avatar || USER_AVATAR_URL
+          avatar: userInfo?.avatar || USER_AVATAR_URL,
+          presenceExt: userInfo?.presenceExt || '',
+          isOnline: userInfo?.isOnline || false
         }
       }
+    },
+    
+    showPresenceIndicator() {
+      // 检查功能配置是否启用在线状态
+      if (this.featureConfig.usePresence === false) {
+        return false
+      }
+      return this.conversation.conversationType !== 'groupChat'
     },
     
     menuList() {

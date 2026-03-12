@@ -9,8 +9,7 @@
             :src="info.avatar"
             :placeholder="isSingleChat ? USER_AVATAR_URL : GROUP_AVATAR_URL"
             :withPresence="showPresenceIndicator"
-            :presenceExt="info.presenceExt"
-            :isOnline="info.isOnline"
+            :userId="showPresenceIndicator ? info.id : ''"
           />
           <view class="name ellipsis">{{ info.name }}</view>
         </view>

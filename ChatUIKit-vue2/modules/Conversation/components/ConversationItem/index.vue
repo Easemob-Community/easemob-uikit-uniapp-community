@@ -18,22 +18,14 @@
           :placeholder="getAvatarPlaceholder()"
           :size="50"
           :withPresence="showPresenceIndicator"
-          :presenceExt="conversationInfo.presenceExt"
-          :isOnline="conversationInfo.isOnline"
+          :userId="showPresenceIndicator ? conversation.conversationId : ''"
         />
-        <!-- 调试标识 -->
-        <view v-if="showPresenceIndicator" class="presence-debug">
-          {{ conversationInfo.isOnline ? '●' : '○' }}
-        </view>
       </view>
       <view class="content-wrap">
         <view class="user-info-wrap">
           <view class="info-wrap">
             <view class="user-nick-name ellipsis">
               {{ conversationInfo.name }}
-              <text v-if="showPresenceIndicator" class="presence-text">
-                [{{ conversationInfo.isOnline ? '在线' : '离线' }}|{{ conversationInfo.presenceExt || '无' }}]
-              </text>
             </view>
             <image
               v-if="isMute"
@@ -352,22 +344,6 @@ export default {
   position: relative;
 }
 
-.presence-debug {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  width: 20px;
-  height: 20px;
-  background: #ff0000;
-  color: #fff;
-  border-radius: 50%;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-
 .unread-mute {
   display: inline-block;
   width: 8px;
@@ -411,12 +387,6 @@ export default {
   line-height: 22px;
   flex-shrink: 0;
   flex-grow: 0;
-}
-
-.presence-text {
-  font-size: 12px;
-  color: #009DFF;
-  margin-left: 5px;
 }
 
 .msg-wrap {

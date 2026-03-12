@@ -25,11 +25,14 @@ export default {
     // 获取用户信息（兼容 TS 版本格式）
     getUserInfo: state => userId => {
       const userInfo = state.userMap[userId]
+      const presenceInfo = state.userPresenceMap[userId]
       return {
         name: userInfo?.nickname || userId,
         nickname: userInfo?.nickname || '',
         avatar: userInfo?.avatarurl || userInfo?.avatar || '',
-        sign: userInfo?.sign || ''
+        sign: userInfo?.sign || '',
+        presenceExt: presenceInfo?.presenceExt || '',
+        isOnline: presenceInfo?.isOnline || false
       }
     },
     

@@ -7,8 +7,7 @@
           :src="userInfo.avatar"
           :withPresence="showPresenceIndicator"
           :placeholder="USER_AVATAR_URL"
-          :presenceExt="userInfo.presenceExt"
-          :isOnline="userInfo.isOnline"
+          :userId="showPresenceIndicator ? selfUserId : ''"
         />
       </template>
       <template v-slot:center>
@@ -117,7 +116,11 @@ export default {
     
     userInfo() {
       const info = this.$store.getters['appUser/getSelfUserInfo']
-      return info ? info() : { name: '', avatar: '', presenceExt: '', isOnline: false }
+      return info ? info() : { name: '', avatar: '' }
+    },
+    
+    selfUserId() {
+      return this.$store.state.conn.chatConn?.user || ''
     }
   },
   

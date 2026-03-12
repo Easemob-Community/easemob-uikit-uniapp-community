@@ -48,14 +48,22 @@ export default {
       type: String,
       default: ''
     },
+    // 是否显示在线状态徽标（需配合 userId 或手动传入 isOnline/presenceExt）
     withPresence: {
       type: Boolean,
       default: false
     },
+    // 用户ID，传入后自动从 store 获取 presence 信息（推荐方式）
+    userId: {
+      type: String,
+      default: ''
+    },
+    // 手动传入在线状态（优先级高于 store，用于特定场景覆盖）
     isOnline: {
       type: Boolean,
       default: false
     },
+    // 手动传入状态扩展信息（优先级高于 store，用于特定场景覆盖）
     presenceExt: {
       type: String,
       default: ''
@@ -79,17 +87,50 @@ export default {
       return themeConfig?.avatarShape || 'circle'
     },
     
+    // 全局功能配置
+    featureConfig() {
+      return this.$store.getters['config/getFeatureConfig'] || {}
+    },
+    
+    // 是否显示在线状态徽标
     showPresence() {
-      const featureConfig = this.$store.getters['config/getFeatureConfig']
-      if (featureConfig?.usePresence === false) {
+      // 优先检查全局配置，如果 usePresence 为 false 则不显示
+      if (this.featureConfig.usePresence === false) {
         return false
       }
       return this.withPresence
     },
     
+    // 从 store 自动获取的 presence 信息（当传入 userId 时）
+    storePresence() {
+      if (!this.userId) return null
+      return this.$store.state.appUser.userPresenceMap[this.userId]
+    },
+    
+    // 最终使用的在线状态（store 优先级高于手动传入的 props，确保同步）
+    finalIsOnline() {
+      // 如果传入了 userId，优先从 store 获取（确保多页面同步）
+      if (this.userId && this.storePresence) {
+        return this.storePresence.isOnline || false
+      }
+      // 否则使用手动传入的值
+      return this.isOnline
+    },
+    
+    // 最终使用的状态扩展信息（store 优先级高于手动传入的 props）
+    finalPresenceExt() {
+      // 如果传入了 userId，优先从 store 获取
+      if (this.userId && this.storePresence) {
+        return this.storePresence.presenceExt || ''
+      }
+      // 否则使用手动传入的值
+      return this.presenceExt
+    },
+    
+    // 在线状态徽标样式类
     presenceClass() {
-      if (this.isOnline) {
-        switch (this.presenceExt) {
+      if (this.finalIsOnline) {
+        switch (this.finalPresenceExt) {
           case 'Online':
             return 'online'
           case 'Offline':
