@@ -1,6 +1,6 @@
 <template>
   <view style="width: 100%" v-if="editingMsg">
-    <view class="mask" @tap="cancelEdit"></view>
+    <view class="mask" @tap.stop="cancelEdit" @click.stop="cancelEdit"></view>
     <view class="msg-edit-wrap">
       <view class="title">{{ $t('message.messageEditing') }}</view>
       <view class="content">
@@ -18,13 +18,13 @@
         <view style="font-size: 10px; color: red; position: absolute; top: -20px; right: 10px;">
           editAble: {{ editAble }}
         </view>
-        <view
+        <button
+          @click="onEditButtonTap"
           @tap="onEditButtonTap"
-          :class="editAble ? 'edit' : 'edit-disabled'"
-          style="border: 1px solid red;"
+          style="background: #009dff; color: #fff; padding: 8px 16px; border: 2px solid red; font-size: 14px; z-index: 10000; position: relative;"
         >
-          <text style="font-size: 10px; color: red;">点击发送</text>
-        </view>
+          发送
+        </button>
       </view>
     </view>
   </view>
@@ -45,14 +45,20 @@ export default {
 
   computed: {
     editingMsg() {
-      return this.$store.state.message.editingMessage
+      const msg = this.$store.state.message.editingMessage
+      console.log('[MessageEdit] editingMsg computed, id:', msg?.id)
+      return msg
     },
 
     editAble() {
-      return (
-        this.txt !== this.editingMsg?.msg && formatTextMessage(this.txt).trim()
-      )
+      const result = this.txt !== this.editingMsg?.msg && !!formatTextMessage(this.txt).trim()
+      console.log('[MessageEdit] editAble computed:', result)
+      return result
     }
+  },
+
+  mounted() {
+    console.log('[MessageEdit] mounted')
   },
 
   watch: {
@@ -65,15 +71,20 @@ export default {
   },
 
   methods: {
-    cancelEdit() {
+    cancelEdit(e) {
+      console.log('[MessageEdit] cancelEdit called')
+      if (e) e.stopPropagation()
       this.$store.dispatch('message/setEditingMessage', null)
     },
 
-    onEditButtonTap() {
-      console.log('[MessageEdit] ===============================')
+    onEditButtonTap(e) {
+      console.log('=========================================')
       console.log('[MessageEdit] onEditButtonTap called')
-      console.log('[MessageEdit] this.editAble:', this.editAble)
-      console.log('[MessageEdit] this.editingMsg:', this.editingMsg)
+      console.log('[MessageEdit] event:', e)
+      // 防止冒泡
+      if (e && e.stopPropagation) {
+        e.stopPropagation()
+      }
       this.editMessage()
     },
 
