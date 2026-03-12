@@ -22,8 +22,8 @@
       </template>
     </NavBar>
     <!-- #ifdef MP-WEIXIN-->
-    <view class="wx-btn-wrap">
-      <view class="wx-btn" @tap="isShowPopMenu = true"></view>
+    <view class="wx-btn-wrap" @tap="isShowPopMenu = true">
+      <view class="wx-btn"></view>
     </view>
     <!-- #endif -->
 
@@ -103,15 +103,9 @@ export default {
     
     popMenuStyle() {
       if (this.isWXProgram) {
-        return {
-          right: '20px',
-          bottom: 'calc(65px + 48px + 8px + var(--safe-area-inset-bottom))'
-        }
+        return 'right: 20px; bottom: calc(65px + 48px + 8px + var(--safe-area-inset-bottom));'
       }
-      return {
-        right: '25px',
-        top: 'calc(var(--status-bar-height) + 50px)'
-      }
+      return 'right: 25px; top: calc(var(--status-bar-height) + 50px);'
     },
     
     userInfo() {

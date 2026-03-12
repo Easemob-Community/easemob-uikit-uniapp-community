@@ -23,7 +23,7 @@ export default {
   
   props: {
     popStyle: {
-      type: Object,
+      type: [Object, String],
       default: () => ({})
     },
     options: {
