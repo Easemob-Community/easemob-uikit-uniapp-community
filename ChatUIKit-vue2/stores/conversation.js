@@ -1,5 +1,27 @@
 import Vue from 'vue'
 
+/**
+ * 深克隆对象，移除 SDK 添加的特殊原型方法
+ * 解决微信小程序中 JSON.stringify 无法序列化 SDK 自定义对象（如 Long 类型）的问题
+ * @param {Object} obj - 原始对象
+ * @returns {Object} - 纯数据对象
+ */
+function cloneObject(obj) {
+  if (!obj) return obj
+  try {
+    return JSON.parse(JSON.stringify(obj, (key, value) => {
+      // 跳过 SDK 内部的特殊对象（如包含 isZero 方法的对象）
+      if (value && typeof value === 'object' && typeof value.isZero === 'function') {
+        return value.toString ? value.toString() : String(value)
+      }
+      return value
+    }))
+  } catch (e) {
+    console.warn('[ConversationStore] Failed to clone object, returning original:', e)
+    return obj
+  }
+}
+
 // 会话列表管理
 export default {
   namespaced: true,
@@ -80,7 +102,9 @@ export default {
         item => item.conversationId === conversationId
       )
       if (index > -1) {
-        Vue.set(state.conversationList, index, { ...state.conversationList[index], ...updates })
+        // 深克隆更新内容以移除 SDK 特殊对象，避免微信小程序 JSON.stringify 错误
+        const clonedUpdates = cloneObject(updates)
+        Vue.set(state.conversationList, index, { ...state.conversationList[index], ...clonedUpdates })
       }
     },
     

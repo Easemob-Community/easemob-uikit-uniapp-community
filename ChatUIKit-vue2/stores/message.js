@@ -4,6 +4,29 @@ import Vue from 'vue'
 const PAGE_SIZE = 15
 const MAX_MESSAGES_PER_CONVERSATION = 100
 
+/**
+ * 深克隆消息对象，移除 SDK 添加的特殊原型方法
+ * 解决微信小程序中 JSON.stringify 无法序列化 SDK 自定义对象（如 Long 类型）的问题
+ * @param {Object} msg - SDK 消息对象
+ * @returns {Object} - 纯数据对象
+ */
+function cloneMessage(msg) {
+  if (!msg) return msg
+  try {
+    // 使用 JSON 序列化/反序列化进行深拷贝，处理循环引用和特殊类型
+    return JSON.parse(JSON.stringify(msg, (key, value) => {
+      // 跳过 SDK 内部的特殊对象（如包含 isZero 方法的对象）
+      if (value && typeof value === 'object' && typeof value.isZero === 'function') {
+        return value.toString ? value.toString() : String(value)
+      }
+      return value
+    }))
+  } catch (e) {
+    console.warn('[MessageStore] Failed to clone message, returning original:', e)
+    return msg
+  }
+}
+
 export default {
   namespaced: true,
 
@@ -67,14 +90,18 @@ export default {
 
   mutations: {
     ADD_MESSAGE_TO_MAP(state, msg) {
-      Vue.set(state.messageMap, msg.id, msg)
+      // 深克隆消息以移除 SDK 特殊对象，避免微信小程序 JSON.stringify 错误
+      const clonedMsg = cloneMessage(msg)
+      Vue.set(state.messageMap, clonedMsg.id, clonedMsg)
     },
 
     UPDATE_MESSAGE_IN_MAP(state, { msgId, updates }) {
       console.log('[MessageStore] UPDATE_MESSAGE_IN_MAP:', msgId, 'exists:', !!state.messageMap[msgId])
       if (state.messageMap[msgId]) {
         const oldMsg = state.messageMap[msgId]
-        const newMsg = { ...oldMsg, ...updates }
+        // 深克隆更新内容以移除 SDK 特殊对象
+        const clonedUpdates = cloneMessage(updates)
+        const newMsg = { ...oldMsg, ...clonedUpdates }
         console.log('[MessageStore] Old msg:', oldMsg.msg)
         console.log('[MessageStore] New msg:', newMsg.msg)
         Vue.set(state.messageMap, msgId, newMsg)
