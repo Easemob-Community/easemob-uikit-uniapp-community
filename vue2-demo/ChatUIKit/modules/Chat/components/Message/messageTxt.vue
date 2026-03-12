@@ -34,6 +34,7 @@ export default {
 
   computed: {
     data() {
+      console.log('[TextMessage] Rendering msg:', this.msg.id, 'content:', this.msg.msg?.substring(0, 20), 'modifiedInfo:', this.msg.modifiedInfo)
       return renderTxt(this.msg.msg)
     },
 
@@ -42,7 +43,7 @@ export default {
       const currentUserId = conn && conn.user
       return this.msg.from === currentUserId || this.msg.from === ''
     }
-  }
+  },
 }
 </script>
 

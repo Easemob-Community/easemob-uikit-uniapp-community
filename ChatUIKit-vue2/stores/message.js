@@ -30,9 +30,15 @@ export default {
     getConversationMessages: state => convId => {
       const info = state.conversationMessagesMap[convId]
       if (!info) return []
-      return info.messageIds
+      const msgs = info.messageIds
         .map(id => state.messageMap[id])
         .filter(Boolean)
+      console.log('[MessageStore] getConversationMessages:', convId, 'count:', msgs.length)
+      // 检查第一条消息的内容和 modifiedInfo
+      if (msgs.length > 0) {
+        console.log('[MessageStore] First msg:', msgs[0].id, 'msg:', msgs[0].msg?.substring(0, 20), 'modifiedInfo:', msgs[0].modifiedInfo)
+      }
+      return msgs
     },
 
     // 获取消息数量
@@ -65,8 +71,16 @@ export default {
     },
 
     UPDATE_MESSAGE_IN_MAP(state, { msgId, updates }) {
+      console.log('[MessageStore] UPDATE_MESSAGE_IN_MAP:', msgId, 'exists:', !!state.messageMap[msgId])
       if (state.messageMap[msgId]) {
-        Vue.set(state.messageMap, msgId, { ...state.messageMap[msgId], ...updates })
+        const oldMsg = state.messageMap[msgId]
+        const newMsg = { ...oldMsg, ...updates }
+        console.log('[MessageStore] Old msg:', oldMsg.msg)
+        console.log('[MessageStore] New msg:', newMsg.msg)
+        Vue.set(state.messageMap, msgId, newMsg)
+        console.log('[MessageStore] After update, msg:', state.messageMap[msgId]?.msg)
+      } else {
+        console.warn('[MessageStore] Message not found in map:', msgId)
       }
     },
 
@@ -566,6 +580,7 @@ export default {
 
     // 设置编辑消息 - 只保存纯数据，避免 SDK 方法导致 Vue 响应式警告
     setEditingMessage({ commit }, msg) {
+      console.log('[MessageStore] setEditingMessage called, msg:', msg?.id)
       if (!msg) {
         commit('SET_EDITING_MESSAGE', null)
         return
@@ -586,7 +601,7 @@ export default {
         ext: msg.ext ? { ...msg.ext } : undefined,
         modifiedInfo: msg.modifiedInfo
       }
-      console.log('[MessageStore] setEditingMessage plain:', plainMsg)
+      console.log('[MessageStore] setEditingMessage plain msg:', plainMsg.id, 'content:', plainMsg.msg?.substring(0, 20))
       commit('SET_EDITING_MESSAGE', plainMsg)
     },
 

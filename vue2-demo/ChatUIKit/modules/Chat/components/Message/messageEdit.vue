@@ -63,14 +63,23 @@ export default {
     },
 
     editMessage() {
+      console.log('[MessageEdit] editMessage called')
       if (this.editAble && this.editingMsg) {
+        console.log('[MessageEdit] Editing msg:', this.editingMsg.id, 'old text:', this.editingMsg.msg?.substring(0, 20))
+        console.log('[MessageEdit] New text:', this.txt.trim()?.substring(0, 20))
         // 调用 store action 修改消息 - 只传递必要的文本，避免 Vue2 响应式警告
         this.$store.dispatch('message/modifyServerMessage', {
           oldMsg: this.editingMsg,
           newMsgText: this.txt.trim()
+        }).then(() => {
+          console.log('[MessageEdit] Message modified successfully')
+        }).catch(err => {
+          console.error('[MessageEdit] Failed to modify message:', err)
         })
         
         this.$store.dispatch('message/setEditingMessage', null)
+      } else {
+        console.log('[MessageEdit] Cannot edit - editAble:', this.editAble, 'editingMsg:', !!this.editingMsg)
       }
     }
   }
