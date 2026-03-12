@@ -90,7 +90,7 @@
 
 <script>
 import Avatar from '../../../../components/Avatar'
-import { renderTxt } from '../../../../utils/index.js'
+import { renderTxt, getTimeStringAutoShort } from '../../../../utils/index.js'
 import { GROUP_AVATAR_URL, USER_AVATAR_URL } from '../../../../const/index.js'
 
 export default {
@@ -218,21 +218,7 @@ export default {
     
     getConversationTime(lastMessage) {
       if (!lastMessage || !lastMessage.time) return ''
-      
-      const date = new Date(lastMessage.time)
-      const now = new Date()
-      const isToday = date.toDateString() === now.toDateString()
-      
-      if (isToday) {
-        return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-      }
-      
-      const isYesterday = new Date(now - 86400000).toDateString() === date.toDateString()
-      if (isYesterday) {
-        return '昨天'
-      }
-      
-      return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
+      return getTimeStringAutoShort(lastMessage.time)
     },
     
     formatLastMessage(conversation) {
