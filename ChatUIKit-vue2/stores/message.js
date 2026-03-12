@@ -607,7 +607,7 @@ export default {
     },
 
     // 修改消息（编辑消息）
-    async modifyServerMessage({ commit, state, rootState }, { oldMsg, newMsgText }) {
+    async modifyServerMessage({ commit, state, rootState }, { oldMsg, modifiedMsg }) {
       console.log('[MessageStore] Modifying message:', oldMsg)
       
       try {
@@ -626,6 +626,9 @@ export default {
         }
         
         console.log('[MessageStore] Using serverMsgId:', msgId)
+        
+        // 从 modifiedMsg 中获取新的消息文本
+        const newMsgText = modifiedMsg.msg || modifiedMsg.body?.msg || ''
         
         const res = await chatConn.modifyMessage({
           id: msgId,

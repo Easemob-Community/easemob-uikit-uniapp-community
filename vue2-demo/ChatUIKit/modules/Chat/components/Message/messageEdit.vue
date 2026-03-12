@@ -1,152 +1,162 @@
 <template>
-  <view class="message-edit-wrap">
-    <view class="edit-header">
-      <text class="edit-title">{{ $t('message.editTitle') }}</text>
-      <view class="close-btn" @tap="closeEdit">
-        <text class="close-icon">×</text>
+  <view style="width: 100%" v-if="editingMsg">
+    <view class="mask" @tap="cancelEdit"></view>
+    <view class="msg-edit-wrap">
+      <view class="title">{{ $t('message.messageEditing') }}</view>
+      <view class="content">
+        <textarea
+          v-model="txt"
+          class="edit-input"
+          cursor-spacing="20"
+          :auto-height="true"
+          :focus="isFocus"
+          :confirm-type="'send'"
+          :adjust-position="false"
+          :show-confirm-bar="false"
+        />
+        <view
+          @tap="editMessage"
+          :class="editAble ? 'edit' : 'edit-disabled'"
+        ></view>
       </view>
-    </view>
-    <view class="edit-content">
-      <textarea
-        class="edit-textarea"
-        v-model="editText"
-        auto-height
-        :focus="isFocus"
-        :show-confirm-bar="false"
-      />
-    </view>
-    <view class="edit-footer">
-      <button class="send-btn" @tap="sendEdit">{{ $t('common.send') }}</button>
     </view>
   </view>
 </template>
 
 <script>
+import { formatTextMessage } from '../../../../utils/index'
+
 export default {
   name: 'MessageEdit',
 
   data() {
     return {
-      editText: '',
+      txt: '',
       isFocus: true
     }
   },
 
   computed: {
-    editingMessage() {
+    editingMsg() {
       return this.$store.state.message.editingMessage
+    },
+
+    editAble() {
+      return (
+        this.txt !== this.editingMsg?.msg && formatTextMessage(this.txt).trim()
+      )
     }
   },
 
   watch: {
-    editingMessage: {
+    editingMsg: {
       immediate: true,
-      handler(msg) {
-        if (msg) {
-          this.editText = msg.msg || ''
-        }
+      handler(newMsg) {
+        this.txt = newMsg?.msg || ''
       }
     }
   },
 
   methods: {
-    closeEdit() {
+    cancelEdit() {
       this.$store.dispatch('message/setEditingMessage', null)
     },
 
-    sendEdit() {
-      const text = this.editText.trim()
-      if (!text) {
-        uni.showToast({ title: this.$t('message.inputPlaceholder'), icon: 'none' })
-        return
-      }
+    editMessage() {
+      if (this.editAble && this.editingMsg) {
+        const chatSDK = this.$store.state.conn.chatSDK
+        
+        if (!chatSDK || !chatSDK.message) {
+          console.error('[MessageEdit] SDK not initialized')
+          uni.showToast({ title: this.$t('errors.sdkNotInit') || 'SDK未初始化', icon: 'none' })
+          return
+        }
 
-      const oldMsg = this.editingMessage
-      if (!oldMsg) return
-
-      const chatSDK = this.$store.state.conn.chatSDK
-
-      if (!chatSDK || !chatSDK.message) {
-        console.error('SDK not initialized')
-        uni.showToast({ title: this.$t('errors.sdkNotInit') || 'SDK未初始化', icon: 'none' })
-        return
-      }
-
-      // 调用修改消息接口 - 直接传递新的消息文本
-      this.$store.dispatch('message/modifyServerMessage', { oldMsg, newMsgText: text })
-        .then(() => {
-          uni.showToast({ title: '修改成功', icon: 'success' })
-          this.closeEdit()
+        // 使用 chatSDK.message.create 创建修改后的消息对象（贴近 Vue3 原版）
+        const modifiedMsg = chatSDK.message.create({
+          to: this.editingMsg.to,
+          type: this.editingMsg.type,
+          chatType: this.editingMsg.chatType,
+          msg: this.txt
         })
-        .catch(error => {
-          console.error('修改消息失败:', error)
-          uni.showToast({ title: this.$t('errors.sendFailed') || '修改失败', icon: 'none' })
+
+        // 调用 store action 修改消息
+        this.$store.dispatch('message/modifyServerMessage', {
+          oldMsg: this.editingMsg,
+          modifiedMsg: modifiedMsg
         })
+        
+        this.$store.dispatch('message/setEditingMessage', null)
+      }
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.message-edit-wrap {
+.mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 999;
+}
+.msg-edit-wrap {
+  width: 100vw;
+  position: absolute;
+  z-index: 999;
+  bottom: 0;
+  background: #f9fafa;
+}
+
+.title {
   display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: #fff;
+  padding: 7px 12px;
+  color: #5270ad;
+  background: #f1f2f3;
+  font-size: 12px;
+  line-height: 16px;
 }
 
-.edit-header {
+.title::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: url("../../../../assets/icon/msg-edit.png") no-repeat;
+  background-size: 100% 100%;
+  margin-right: 2px;
+}
+
+.content {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 8px 12px;
+  align-items: flex-end;
 }
 
-.edit-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: #171a1c;
-}
-
-.close-btn {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.close-icon {
-  font-size: 24px;
-  color: #999;
-}
-
-.edit-content {
+.edit-input {
   flex: 1;
-  padding: 16px;
-}
-
-.edit-textarea {
   width: 100%;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #171a1c;
-}
-
-.edit-footer {
-  padding: 12px 16px;
-  border-top: 1px solid #e0e0e0;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.send-btn {
-  background: #009dff;
-  color: #fff;
-  padding: 8px 20px;
+  background: #f1f2f3;
+  padding: 8px;
+  margin-right: 12px;
   border-radius: 4px;
-  font-size: 14px;
-  border: none;
+  max-height: 60px;
+}
+
+.edit {
+  width: 30px;
+  height: 30px;
+  background: url("../../../../assets/icon/checked.png") no-repeat;
+  background-size: 100% 100%;
+}
+
+.edit-disabled {
+  width: 30px;
+  height: 30px;
+  background: url("../../../../assets/icon/unchecked.png") no-repeat;
+  background-size: 100% 100%;
 }
 </style>
