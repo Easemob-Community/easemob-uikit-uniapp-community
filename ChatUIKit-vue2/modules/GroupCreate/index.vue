@@ -1,420 +1,371 @@
 <template>
-  <view class="group-create">
-    <!-- 步骤1：选择成员 -->
-    <view v-if="step === 1" class="step-container">
-      <SearchList
-        @onCreateGroup="onMembersSelected"
-        @onCancel="onCancel"
-      />
-    </view>
-    
-    <!-- 步骤2：设置群信息 -->
-    <view v-else-if="step === 2" class="step-container">
-      <view class="group-form">
-        <!-- 群头像 -->
-        <view class="form-item avatar-item">
-          <text class="label">{{ $t('groupCreate.avatar') }}</text>
-          <view class="avatar-upload" @tap="chooseAvatar">
-            <image 
-              v-if="groupForm.avatar" 
-              class="avatar-img" 
-              :src="groupForm.avatar" 
-              mode="aspectFill"
-            />
-            <text v-else class="upload-placeholder">+</text>
+  <view class="group-create-wrap">
+    <view class="group-create-content" v-if="!isSearch">
+      <NavBar class="nav-bar" @onLeftTap="onBack">
+        <template v-slot:left>
+          <view class="title">{{ $t('createGroup') }}</view>
+        </template>
+      </NavBar>
+      <view class="search-wrap" @tap="isSearch = true">
+        <SearchButton :placeholder="$t('searchContact')" />
+      </view>
+      <!-- #ifndef MP-WEIXIN -->
+      <IndexedList
+        v-if="contactList.length"
+        class="contact-indexed-list"
+        :checkedList="selectedUserIds"
+        :options="contactList"
+        :withCheckbox="true"
+        @checkboxChange="onCheckboxChange"
+      >
+        <template v-slot:indexedItem="slotProps">
+          <UserItem class="contact-item" :user="slotProps.item" />
+        </template>
+      </IndexedList>
+      <!-- #endif -->
+      <!-- #ifdef MP-WEIXIN -->
+      <scroll-view
+        v-if="contactList.length"
+        scroll-y
+        class="contact-indexed-list"
+      >
+        <view
+          v-for="group in indexedContactList"
+          :key="group.letter"
+          :id="'group-' + group.letter"
+        >
+          <view class="group-title">{{ group.letter }}</view>
+          <view
+            v-for="contact in group.data"
+            :key="contact.userId"
+            class="contact-item-wrap"
+            @tap="toggleContact(contact.userId)"
+          >
+            <view class="checkbox-wrap">
+              <view
+                :class="['checkbox', { checked: selectedUserIds.includes(contact.userId) }]"
+              >
+                <text v-if="selectedUserIds.includes(contact.userId)" class="check-icon">✓</text>
+              </view>
+            </view>
+            <UserItem class="contact-item" :user="contact" />
           </view>
         </view>
-        
-        <!-- 群名称 -->
-        <view class="form-item">
-          <text class="label">{{ $t('groupCreate.name') }}</text>
-          <input 
-            class="input"
-            v-model="groupForm.name"
-            :placeholder="$t('groupCreate.namePlaceholder')"
-            maxlength="32"
-          />
-        </view>
-        
-        <!-- 群介绍 -->
-        <view class="form-item">
-          <text class="label">{{ $t('groupCreate.description') }}</text>
-          <textarea 
-            class="textarea"
-            v-model="groupForm.description"
-            :placeholder="$t('groupCreate.descPlaceholder')"
-            maxlength="200"
-          />
-        </view>
-        
-        <!-- 群类型 -->
-        <view class="form-item">
-          <text class="label">{{ $t('groupCreate.type') }}</text>
-          <view class="radio-group">
-            <view 
-              class="radio-item"
-              :class="{ active: groupForm.type === 'public' }"
-              @tap="groupForm.type = 'public'"
-            >
-              <text class="radio-circle">{{ groupForm.type === 'public' ? '●' : '○' }}</text>
-              <text class="radio-label">{{ $t('groupCreate.public') }}</text>
-            </view>
-            <view 
-              class="radio-item"
-              :class="{ active: groupForm.type === 'private' }"
-              @tap="groupForm.type = 'private'"
-            >
-              <text class="radio-circle">{{ groupForm.type === 'private' ? '●' : '○' }}</text>
-              <text class="radio-label">{{ $t('groupCreate.private') }}</text>
-            </view>
-          </view>
-        </view>
-        
-        <!-- 邀请确认 -->
-        <view class="form-item switch-item">
-          <text class="label">{{ $t('groupCreate.needConfirm') }}</text>
-          <switch 
-            :checked="groupForm.needConfirm"
-            @change="e => groupForm.needConfirm = e.detail.value"
-            color="#009dff"
-          />
-        </view>
-        
-        <!-- 已选成员 -->
-        <view class="form-item members-item">
-          <text class="label">{{ $t('groupCreate.members', { count: selectedMembers.length }) }}</text>
-          <view class="members-preview">
-            <view 
-              v-for="member in selectedMembers.slice(0, 6)" 
-              :key="member.userId"
-              class="member-tag"
-            >
-              {{ member.nickname || member.userId }}
-            </view>
-            <text v-if="selectedMembers.length > 6" class="more-members">
-              +{{ selectedMembers.length - 6 }}
-            </text>
-          </view>
+      </scroll-view>
+      <view class="index-sidebar" v-if="contactList.length">
+        <view
+          v-for="letter in indexLetters"
+          :key="letter"
+          class="index-letter"
+          @tap="scrollToLetter(letter)"
+        >
+          {{ letter }}
         </view>
       </view>
-      
-      <!-- 底部按钮 -->
-      <view class="form-actions">
-        <button class="btn btn-secondary" @tap="step = 1">{{ $t('groupCreate.previous') }}</button>
-        <button 
-          class="btn btn-primary" 
-          :disabled="!canSubmit"
-          :loading="creating"
+      <!-- #endif -->
+      <view class="empty-wrap" v-if="!contactList.length">
+        <Empty />
+      </view>
+      <view class="create-btn-wrap">
+        <Button
+          class="crate-btn"
+          :disabled="!selectedUserIds.length"
           @tap="createGroup"
         >
-          {{ $t('groupCreate.create') }}
-        </button>
+          {{ $t('createGroupBtn') + '(' + selectedUserIds.length + ')' }}
+        </Button>
       </view>
     </view>
+    <SearchList
+      v-else
+      class="search-list-comp"
+      :checkedList="selectedUserIds"
+      @checkboxChange="onCheckboxChange"
+      @cancel="isSearch = false"
+    />
   </view>
 </template>
 
 <script>
-import SearchList from './searchList.vue'
-import { mapState } from 'vuex'
+import SearchButton from '../../components/SearchButton'
+import NavBar from '../../components/NavBar'
+import UserItem from '../ContactList/components/UserItem'
+import Empty from '../../components/Empty'
+// #ifndef MP-WEIXIN
+import IndexedList from '../../components/IndexedList'
+// #endif
+// #ifdef MP-WEIXIN
+import { groupByName } from '../../utils/index'
+// #endif
+import Button from '../../components/Button'
+import SearchList from './searchList'
 
 export default {
   name: 'GroupCreate',
-  
+
   components: {
+    SearchButton,
+    NavBar,
+    UserItem,
+    Empty,
+    // #ifndef MP-WEIXIN
+    IndexedList,
+    // #endif
+    Button,
     SearchList
   },
-  
+
   data() {
     return {
-      step: 1,
-      selectedMembers: [],
-      groupForm: {
-        name: '',
-        description: '',
-        avatar: '',
-        type: 'public', // public | private
-        needConfirm: true
-      },
-      creating: false
+      isSearch: false,
+      selectedUserIds: [],
+      scrollIntoView: '' // MP-WEIXIN only
     }
   },
-  
+
   computed: {
-    ...mapState('appUser', {
-      userInfo: state => state.userInfos
-    }),
-    
-    canSubmit() {
-      return this.groupForm.name.trim().length > 0 && !this.creating
-    }
-  },
-  
-  methods: {
-    // 成员选择完成
-    onMembersSelected(data) {
-      this.selectedMembers = data.memberDetails || []
-      // 默认群名
-      if (!this.groupForm.name) {
-        const myName = this.userInfo?.nickname || this.userInfo?.userId || '我'
-        this.groupForm.name = `${myName}创建的群`
-      }
-      this.step = 2
-    },
-    
-    // 选择头像
-    chooseAvatar() {
-      uni.chooseImage({
-        count: 1,
-        sizeType: ['compressed'],
-        sourceType: ['album', 'camera'],
-        success: (res) => {
-          const tempFilePath = res.tempFilePaths[0]
-          // 上传头像
-          this.uploadAvatar(tempFilePath)
+    contactList() {
+      const contacts = this.$store.state.contact.contacts || []
+      return contacts.map((contact) => {
+        const userInfo = this.$store.getters['appUser/getUserInfo'](contact.userId) || {}
+        return {
+          ...contact,
+          ...userInfo,
+          id: contact.userId
         }
       })
     },
-    
-    // 上传头像
-    uploadAvatar(filePath) {
-      uni.showLoading({ title: $t('common.uploading') })
-      
-      // 这里应该调用 SDK 上传文件
-      // 暂时使用本地路径作为演示
-      setTimeout(() => {
-        this.groupForm.avatar = filePath
-        uni.hideLoading()
-      }, 500)
+
+    // #ifdef MP-WEIXIN
+    indexedContactList() {
+      const groups = {}
+      this.contactList.forEach(contact => {
+        const name = contact.name || contact.nickname || contact.userId
+        const initial = groupByName(name)
+        if (!groups[initial]) {
+          groups[initial] = []
+        }
+        groups[initial].push(contact)
+      })
+      const sortedKeys = Object.keys(groups).sort((a, b) => {
+        if (a === '#') return 1
+        if (b === '#') return -1
+        return a.localeCompare(b)
+      })
+      return sortedKeys.map(letter => ({
+        letter,
+        data: groups[letter]
+      }))
     },
-    
-    // 创建群组
-    createGroup() {
-      if (!this.canSubmit) return
-      
-      this.creating = true
-      uni.showLoading({ title: $t('common.creating') })
-      
-      const memberIds = this.selectedMembers.map(m => m.userId)
-      
-      const groupData = {
-        name: this.groupForm.name.trim(),
-        description: this.groupForm.description.trim(),
-        avatar: this.groupForm.avatar,
-        type: this.groupForm.type,
-        needConfirm: this.groupForm.needConfirm,
-        members: memberIds
+
+    indexLetters() {
+      return this.indexedContactList.map(g => g.letter)
+    }
+    // #endif
+  },
+
+  methods: {
+    // #ifdef MP-WEIXIN
+    toggleContact(userId) {
+      const index = this.selectedUserIds.indexOf(userId)
+      if (index === -1) {
+        this.selectedUserIds.push(userId)
+      } else {
+        this.selectedUserIds.splice(index, 1)
       }
-      
-      this.$store.dispatch('group/createGroup', groupData)
-        .then((group) => {
-          uni.hideLoading()
-          uni.showToast({
-            title: $t('common.success'),
-            icon: 'success'
-          })
-          
-          // 跳转到群聊页面
-          setTimeout(() => {
-            uni.redirectTo({
-              url: `/pages/chat/index?type=groupChat&id=${group.groupId}`
-            })
-          }, 1500)
+    },
+
+    scrollToLetter(letter) {
+      this.scrollIntoView = 'group-' + letter
+      setTimeout(() => {
+        this.scrollIntoView = ''
+      }, 300)
+    },
+    // #endif
+
+    onCheckboxChange(values) {
+      this.selectedUserIds = values
+    },
+
+    createGroup() {
+      if (!this.selectedUserIds.length) {
+        return
+      }
+
+      const selfInfo = this.$store.getters['appUser/getSelfUserInfo']()
+      const selfName = selfInfo ? selfInfo.name : ''
+
+      let groupName = this.selectedUserIds
+        .map((userId) => {
+          const userInfo = this.$store.getters['appUser/getUserInfo'](userId)
+          return userInfo ? userInfo.name : userId
         })
-        .catch((error) => {
+        .join('、')
+      
+      // 群组名字为当前用户的名字加上选中的用户的名字
+      groupName = selfName + '、' + groupName
+
+      const params = {
+        groupname: groupName,
+        members: this.selectedUserIds,
+        desc: groupName,
+        public: true,
+        allowinvites: true,
+        inviteNeedConfirm: false,
+        approval: false, // 无需审批即可加入群组
+        maxusers: 1000
+      }
+
+      uni.showLoading({
+        title: 'loading',
+        mask: true
+      })
+
+      this.$store
+        .dispatch('group/createGroup', { data: params })
+        .then(async (res) => {
+          const groupId = res.data?.groupid || res.data?.groupId
+          if (groupId) {
+            // 添加新群组到列表并获取详情
+            await this.$store.dispatch('group/addNewGroup', {
+              groupid: groupId,
+              groupname: params.groupname,
+              groupId: groupId,
+              groupName: params.groupname
+            })
+            uni.redirectTo({
+              url: `/ChatUIKit/modules/Chat/index?type=groupChat&id=${groupId}`
+            })
+          }
+        })
+        .finally(() => {
           uni.hideLoading()
-          this.creating = false
-          uni.showToast({
-            title: error.message || $t('common.error'),
-            icon: 'none'
-          })
         })
     },
-    
-    // 取消创建
-    onCancel() {
-      uni.navigateBack()
+
+    onBack() {
+      uni.redirectTo({
+        url: '/ChatUIKit/modules/Conversation/index'
+      })
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.group-create {
-  height: 100vh;
-  background-color: #f5f5f5;
+.title {
+  color: #171a1c;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 22px;
 }
 
-.step-container {
-  height: 100%;
+.search-wrap {
+  flex-shrink: 0;
+  padding: 7px 8px;
 }
 
-// 表单样式
-.group-form {
-  padding: 12px;
-}
-
-.form-item {
-  display: flex;
-  align-items: flex-start;
-  background-color: #fff;
-  padding: 12px 16px;
-  margin-bottom: 1px;
-  
-  &.avatar-item {
-    align-items: center;
-  }
-  
-  &.switch-item {
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  &.members-item {
-    flex-direction: column;
-    
-    .label {
-      margin-bottom: 10px;
-    }
-  }
-}
-
-.label {
-  width: 80px;
-  font-size: 14px;
-  color: #333;
+.nav-bar {
   flex-shrink: 0;
 }
 
-.avatar-upload {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
-  background-color: #f5f5f5;
+.group-create-content {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  height: 100%;
   overflow: hidden;
 }
 
-.avatar-img {
-  width: 100%;
+.group-create-wrap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.contact-indexed-list {
+  flex: 1;
+  overflow-y: scroll;
+}
+
+.empty-wrap {
+  flex: 1;
+}
+
+.create-btn-wrap {
+  flex-shrink: 0;
+  display: flex;
+  padding: 14px;
+  align-items: center;
+  border-top: 0.5px solid #e3e6e8;
+  background: #f9fafa;
+  backdrop-filter: blur(10px);
+  margin-bottom: 45px;
+}
+
+.search-list-comp {
   height: 100%;
 }
 
-.upload-placeholder {
-  font-size: 24px;
-  color: #999;
+.crate-btn {
+  width: 100%;
 }
 
-.input {
-  flex: 1;
-  font-size: 14px;
-  color: #333;
-  height: 24px;
-}
-
-.textarea {
-  flex: 1;
-  font-size: 14px;
-  color: #333;
-  height: 60px;
-  line-height: 1.5;
-}
-
-.radio-group {
-  display: flex;
-  gap: 24px;
-}
-
-.radio-item {
+// MP-WEIXIN styles
+.contact-item-wrap {
   display: flex;
   align-items: center;
-  cursor: pointer;
-  
-  &.active {
-    .radio-circle {
-      color: #009dff;
-    }
-    .radio-label {
-      color: #333;
-    }
-  }
+  padding: 10px 15px;
+  background-color: #fff;
+  border-bottom: 0.5px solid #e3e6e8;
 }
 
-.radio-circle {
-  font-size: 16px;
-  color: #999;
-  margin-right: 6px;
+.checkbox-wrap {
+  margin-right: 12px;
 }
 
-.radio-label {
-  font-size: 14px;
-  color: #666;
-}
-
-.members-preview {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.member-tag {
-  background-color: #f0f0f0;
-  color: #666;
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.more-members {
-  font-size: 12px;
-  color: #999;
-  padding: 4px 8px;
-}
-
-// 底部按钮
-.form-actions {
-  display: flex;
-  gap: 12px;
-  padding: 16px;
-  margin-top: 20px;
-}
-
-.btn {
-  flex: 1;
-  height: 44px;
-  border-radius: 6px;
-  font-size: 15px;
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  &.checked {
+    background-color: #009dff;
+    border-color: #009dff;
+  }
 }
 
-.btn-secondary {
+.check-icon {
+  color: #fff;
+  font-size: 12px;
+}
+
+.group-title {
+  padding: 8px 15px;
   background-color: #f5f5f5;
   color: #666;
-  
-  &:active {
-    background-color: #e5e5e5;
-  }
+  font-size: 14px;
 }
 
-.btn-primary {
-  background-color: #009dff;
-  color: #fff;
-  
-  &[disabled] {
-    background-color: #ccc;
-    color: #fff;
-  }
-  
-  &:active:not([disabled]) {
-    opacity: 0.9;
-  }
+.index-sidebar {
+  position: fixed;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 100;
+}
+
+.index-letter {
+  padding: 2px 5px;
+  font-size: 11px;
+  color: #666;
 }
 </style>

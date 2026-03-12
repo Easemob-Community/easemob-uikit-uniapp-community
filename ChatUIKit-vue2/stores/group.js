@@ -153,13 +153,15 @@ export default {
       if (!chatConn) throw new Error('未连接')
 
       try {
-        // 转换参数格式
-        const groupParams = {
+        // 支持两种参数格式：
+        // 1. { data: { groupname, members, desc, public, ... } } - 原始实现格式
+        // 2. { name, description, type, members, ... } - 新格式
+        const groupParams = params.data || {
           data: {
             groupname: params.name,
             desc: params.description || '',
             public: params.type === 'public',
-            approval: params.needConfirm !== false, // 默认需要确认
+            approval: params.needConfirm !== false,
             inviteNeedConfirm: params.needConfirm !== false,
             members: params.members || []
           }
@@ -168,20 +170,21 @@ export default {
         const res = await chatConn.createGroup(groupParams)
         
         // 添加到本地群组列表
-        if (res.data && res.data.groupid) {
+        const groupId = res.data?.groupid || res.data?.groupId
+        if (groupId) {
+          const groupName = params.data?.groupname || params.name
           const newGroup = {
-            groupId: res.data.groupid,
-            groupName: params.name,
-            groupname: params.name,
-            description: params.description,
-            type: params.type,
+            groupId: groupId,
+            groupName: groupName,
+            groupname: groupName,
+            description: params.data?.desc || params.description,
+            type: params.data?.public ? 'public' : 'private',
             avatar: params.avatar || ''
           }
           commit('ADD_GROUP', newGroup)
-          return newGroup
         }
         
-        return res.data
+        return res
       } catch (error) {
         console.error('创建群组失败:', error)
         throw error
