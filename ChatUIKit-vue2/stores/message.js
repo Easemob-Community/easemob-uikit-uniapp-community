@@ -691,16 +691,28 @@ export default {
         }
         console.log('[MessageStore] modifyParams:', modifyParams)
         
-        const res = await chatConn.modifyMessage(modifyParams)
+        let res
+        try {
+          res = await chatConn.modifyMessage(modifyParams)
+        } catch (sdkError) {
+          if (typeof alert !== 'undefined') {
+            alert('modifyMessage SDK error: ' + (sdkError.message || sdkError))
+          }
+          throw sdkError
+        }
 
         console.log('[MessageStore] Message modified:', res)
         if (typeof alert !== 'undefined') {
-          alert('Message modified successfully!')
+          alert('Message modified successfully! res=' + JSON.stringify(res ? { id: res.id } : null))
         }
 
         // 更新本地消息 - 使用本地消息ID
         const localMsgId = oldMsg.id || oldMsg.mid
         console.log('[MessageStore] Updating local msg:', localMsgId, 'exists:', !!state.messageMap[localMsgId])
+        if (typeof alert !== 'undefined') {
+          alert('localMsgId=' + localMsgId + ', exists=' + !!state.messageMap[localMsgId] + ', serverMsgId=' + oldMsg.serverMsgId)
+        }
+        
         if (localMsgId && state.messageMap[localMsgId]) {
           commit('UPDATE_MESSAGE_IN_MAP', {
             msgId: localMsgId,
@@ -713,6 +725,9 @@ export default {
             }
           })
           console.log('[MessageStore] Local msg updated:', localMsgId)
+          if (typeof alert !== 'undefined') {
+            alert('Local msg updated: ' + localMsgId)
+          }
         }
 
         // 同时更新 serverMsgId 对应的记录
@@ -728,12 +743,18 @@ export default {
             }
           })
           console.log('[MessageStore] Server msg updated:', oldMsg.serverMsgId)
+          if (typeof alert !== 'undefined') {
+            alert('Server msg updated: ' + oldMsg.serverMsgId)
+          }
         }
 
         console.log('[MessageStore] Message update completed')
         return res
       } catch (error) {
         console.error('[MessageStore] Failed to modify message:', error)
+        if (typeof alert !== 'undefined') {
+          alert('Failed to modify message: ' + (error.message || error))
+        }
         throw error
       }
     },
