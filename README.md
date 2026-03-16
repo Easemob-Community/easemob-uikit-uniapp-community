@@ -1,10 +1,6 @@
 # 环信 ChatUIKit for UniApp - Vue2 版本
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/placeholder/logo.png" width="120" />
-</p>
-
-<p align="center">
   基于 Vue2 + Vuex 的环信即时通讯 UIKit，支持 H5、App、微信小程序
 </p>
 
@@ -35,8 +31,6 @@
 - ✅ **功能丰富**: 单聊、群聊、消息类型（文本/图片/语音/视频/文件）
 - ✅ **状态管理**: 基于 Vuex 的模块化状态管理
 - ✅ **国际化**: 内置中英文语言包
-- ✅ **TypeScript 友好**: 源码基于 TS，类型提示完善
-- ✅ **与 Vue3 API 一致**: 迁移成本低
 
 ---
 
@@ -200,16 +194,21 @@ $bg-color: #f9fafa;           // 背景色
 
 ---
 
-## 🌐 多平台适配
+## 📱 平台兼容性
+
+> ⚠️ **注意**：当前版本仅确保以下平台兼容性，其他平台（如支付宝小程序、百度小程序、字节跳动小程序等）不做特别兼容测试。
 
 | 平台 | 支持情况 | 说明 |
-|------|---------|------|
-| H5 | ✅ 完整支持 | 推荐使用 Chrome |
-| App | ✅ 完整支持 | Android/iOS |
-| 微信小程序 | ✅ 完整支持 | 需注意 slot 限制 |
+|------|:--------:|------|
+| H5 | ✅ | 推荐使用 Chrome 浏览器 |
+| UniApp App (Android/iOS) | ✅ | 完整支持 |
+| 微信小程序 | ✅ | 需注意 Vue2 slot 限制 |
+| 支付宝小程序 | ⚠️ | 未测试 |
+| 百度小程序 | ⚠️ | 未测试 |
+| 字节跳动小程序 | ⚠️ | 未测试 |
 
 **小程序注意事项：**
-Vue2 在小程序中对 scoped slot 支持有限，相关组件已内置条件编译处理，直接使用即可。
+Vue2 在小程序中对 scoped slot 支持有限，相关组件已内置条件编译处理（`#ifdef MP-WEIXIN`），直接使用即可。
 
 ---
 
@@ -251,10 +250,9 @@ this.$ChatUIKit.init({
 
 ## 📞 技术支持
 
-- 📖 **官方文档**: https://docs.easemob.com/
+- 📖 **官方文档**: https://doc.easemob.com/document/applet/uniapp.html
 - 🐙 **GitHub**: https://github.com/Easemob-Community/easemob-uikit-uniapp-community
 - 🐛 **问题反馈**: [GitHub Issues](https://github.com/Easemob-Community/easemob-uikit-uniapp-community/issues)
-- 💬 **技术交流**: [环信开发者社区](https://www.easemob.com/community)
 
 ---
 

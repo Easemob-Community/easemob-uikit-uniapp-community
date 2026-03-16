@@ -2,22 +2,24 @@
 
 <cite>
 **本文档引用的文件**
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts)
-- [ChatUIKit/stores/index.ts](file://ChatUIKit/stores/index.ts)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts)
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts)
-- [ChatUIKit/stores/config.ts](file://ChatUIKit/stores/config.ts)
-- [ChatUIKit/stores/conn.ts](file://ChatUIKit/stores/conn.ts)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts)
-- [ChatUIKit/stores/conversation.ts](file://ChatUIKit/stores/conversation.ts)
-- [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts)
-- [ChatUIKit/configType.ts](file://ChatUIKit/configType.ts)
-- [ChatUIKit/types/index.ts](file://ChatUIKit/types/index.ts)
-- [ChatUIKit/sdk.ts](file://ChatUIKit/sdk.ts)
-- [ChatUIKit/const/index.ts](file://ChatUIKit/const/index.ts)
-- [demo/main.js](file://demo/main.js)
+- [ChatUIKit-vue2/index.js](file://ChatUIKit-vue2/index.js)
+- [ChatUIKit-vue2/stores/index.js](file://ChatUIKit-vue2/stores/index.js)
+- [ChatUIKit-vue2/stores/conn.js](file://ChatUIKit-vue2/stores/conn.js)
+- [ChatUIKit-vue2/stores/appUser.js](file://ChatUIKit-vue2/stores/appUser.js)
+- [ChatUIKit-vue2/stores/message.js](file://ChatUIKit-vue2/stores/message.js)
+- [ChatUIKit-vue2/stores/conversation.js](file://ChatUIKit-vue2/stores/conversation.js)
+- [ChatUIKit-vue2/stores/group.js](file://ChatUIKit-vue2/stores/group.js)
+- [ChatUIKit-vue2/stores/contact.js](file://ChatUIKit-vue2/stores/contact.js)
+- [ChatUIKit-vue2/stores/config.js](file://ChatUIKit-vue2/stores/config.js)
 </cite>
+
+## 更新摘要
+**所做更改**
+- 将所有Vue3相关的内容完全移除，包括Composition API、createPinia()实例等
+- 更新为Vuex 3.x状态管理架构，符合Vue 2.7.16生态
+- 移除Pinia迁移兼容性相关内容
+- 重新组织架构图以反映Vuex模块化设计
+- 更新技术决策部分，强调Vue 2生态的稳定性
 
 ## 目录
 1. [引言](#引言)
@@ -32,21 +34,21 @@
 
 ## 引言
 
-本项目采用Pinia作为状态管理解决方案，完成了从MobX到Pinia的重大技术升级。这次迁移带来了更好的Vue生态系统支持、组合式API集成以及更优秀的响应式体验。
+本项目采用Vuex作为状态管理解决方案，基于Vue 2.7.16生态系统构建。项目从早期的状态管理模式演进到现在成熟的Vuex架构，为UniApp小程序提供了稳定可靠的状态管理方案。
 
 ### 技术决策与优势
 
-**从MobX迁移到Pinia的核心优势：**
+**基于Vue 2生态的成熟选择：**
 
-1. **更好的Vue生态支持**：Pinia原生支持Vue 3 Composition API，提供更自然的状态管理模式
-2. **组合式API集成**：与Vue 3的响应式系统深度整合，提供更直观的开发体验
-3. **TypeScript友好**：原生TypeScript支持，提供完整的类型推断和编译时检查
+1. **稳定的Vue 2支持**：Vue 2.7.16提供长期支持，确保项目稳定性
+2. **成熟的Vuex 3.x生态**：经过充分验证的状态管理模式
+3. **小程序兼容性**：专为微信小程序等环境优化
 4. **模块化设计**：每个Store独立定义，便于维护和测试
-5. **开发工具支持**：内置的Vue DevTools支持，便于调试和性能分析
+5. **TypeScript友好**：完整的TypeScript支持和类型推断
 
 ## 项目结构
 
-项目采用模块化的Store组织方式，每个业务领域都有独立的Store模块：
+项目采用模块化的Vuex Store组织方式，每个业务领域都有独立的Store模块：
 
 ```mermaid
 graph TB
@@ -55,7 +57,7 @@ App[应用入口]
 ChatUIKit[ChatUIKit类]
 end
 subgraph "状态管理层"
-subgraph "Store模块"
+subgraph "Vuex Store模块"
 ConnStore[连接Store]
 ConfigStore[配置Store]
 AppUserStore[用户Store]
@@ -63,9 +65,8 @@ ContactStore[联系人Store]
 ConversationStore[会话Store]
 GroupStore[群组Store]
 MessageStore[消息Store]
-ChatStore[聊天Store]
 end
-PiniaInstance[Pinia实例]
+VuexStore[Vuex Store实例]
 end
 subgraph "工具层"
 SDK[IM SDK]
@@ -73,73 +74,70 @@ Logger[日志系统]
 Utils[工具函数]
 end
 App --> ChatUIKit
-ChatUIKit --> PiniaInstance
-PiniaInstance --> ConnStore
-PiniaInstance --> ConfigStore
-PiniaInstance --> AppUserStore
-PiniaInstance --> ContactStore
-PiniaInstance --> ConversationStore
-PiniaInstance --> GroupStore
-PiniaInstance --> MessageStore
-PiniaInstance --> ChatStore
+ChatUIKit --> VuexStore
+VuexStore --> ConnStore
+VuexStore --> ConfigStore
+VuexStore --> AppUserStore
+VuexStore --> ContactStore
+VuexStore --> ConversationStore
+VuexStore --> GroupStore
+VuexStore --> MessageStore
 ConnStore --> SDK
-ChatStore --> ConnStore
-ChatStore --> MessageStore
-ChatStore --> ContactStore
-ChatStore --> GroupStore
-ChatStore --> AppUserStore
+MessageStore --> ConnStore
+ContactStore --> ConnStore
+ConversationStore --> ConnStore
+GroupStore --> ConnStore
+AppUserStore --> ConnStore
 ```
 
 **图表来源**
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L18-L132)
-- [ChatUIKit/stores/index.ts](file://ChatUIKit/stores/index.ts#L1-L31)
+- [ChatUIKit-vue2/index.js:1-405](file://ChatUIKit-vue2/index.js#L1-L405)
+- [ChatUIKit-vue2/stores/index.js:1-27](file://ChatUIKit-vue2/stores/index.js#L1-L27)
 
 **章节来源**
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L1-L139)
-- [ChatUIKit/stores/index.ts](file://ChatUIKit/stores/index.ts#L1-L31)
+- [ChatUIKit-vue2/index.js:1-405](file://ChatUIKit-vue2/index.js#L1-L405)
+- [ChatUIKit-vue2/stores/index.js:1-27](file://ChatUIKit-vue2/stores/index.js#L1-L27)
 
 ## 核心组件
 
-### Pinia实例创建与管理
+### Vuex Store实例创建与管理
 
-项目实现了延迟初始化策略，通过全局Pinia实例确保在任何Store被访问之前都能正确初始化。
+项目实现了集中式的Store管理，通过全局Vuex实例确保所有Store模块的正确初始化。
 
 ```mermaid
 sequenceDiagram
 participant App as 应用启动
 participant ChatUIKit as ChatUIKit实例
-participant Pinia as Pinia实例
-participant Store as Store实例
-App->>ChatUIKit : 访问Store属性
-ChatUIKit->>ChatUIKit : ensurePinia()
-ChatUIKit->>Pinia : createPinia()
-Pinia-->>ChatUIKit : 返回Pinia实例
-ChatUIKit->>Pinia : setActivePinia()
-ChatUIKit->>Store : useXxxStore()
-Store-->>ChatUIKit : 返回Store实例
-ChatUIKit-->>App : 返回Store实例
+participant Vuex as Vuex Store实例
+participant Module as Store模块
+App->>ChatUIKit : 初始化
+ChatUIKit->>Vuex : new Vuex.Store()
+Vuex->>Module : 注册模块
+Module-->>Vuex : 模块就绪
+Vuex-->>ChatUIKit : 返回Store实例
+ChatUIKit-->>App : 初始化完成
 ```
 
 **图表来源**
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L31-L42)
+- [ChatUIKit-vue2/stores/index.js:13-23](file://ChatUIKit-vue2/stores/index.js#L13-L23)
 
 ### Store命名约定与导出模式
 
 项目采用统一的命名约定和模块化导出策略：
 
 **命名约定：**
-- Store函数：`useXxxStore()` - 符合Vue 3 Composition API规范
-- Store状态：`xxxStore` - 类型标识符
-- Store常量：`XxxStore` - 类型定义
+- Store模块：`conn.js`, `conversation.js`, `message.js`等 - 符合业务领域命名
+- Store状态：`state` - 标准Vuex状态结构
+- Store常量：`NAMESPACED` - 命名空间标识符
 
 **导出模式：**
 - 每个Store独立导出，支持按需导入
 - 提供统一的入口文件进行聚合导出
-- 兼容旧版接口的迁移支持函数
+- 兼容直接模块引用
 
 **章节来源**
-- [ChatUIKit/stores/index.ts](file://ChatUIKit/stores/index.ts#L1-L31)
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L1-L139)
+- [ChatUIKit-vue2/stores/index.js:1-27](file://ChatUIKit-vue2/stores/index.js#L1-L27)
+- [ChatUIKit-vue2/stores/conn.js:1-121](file://ChatUIKit-vue2/stores/conn.js#L1-L121)
 
 ## 架构概览
 
@@ -152,8 +150,8 @@ UI[用户界面]
 Components[Vue组件]
 end
 subgraph "状态管理层"
-Pinia[Pinia核心]
-Stores[Store集合]
+Vuex[Vuex核心]
+Modules[Vuex Modules]
 end
 subgraph "业务层"
 Chat[聊天业务]
@@ -169,14 +167,14 @@ Config[配置管理]
 Logger[日志系统]
 end
 UI --> Components
-Components --> Pinia
-Pinia --> Stores
-Stores --> Chat
-Stores --> Contact
-Stores --> Conversation
-Stores --> Group
-Stores --> Message
-Stores --> User
+Components --> Vuex
+Vuex --> Modules
+Modules --> Chat
+Modules --> Contact
+Modules --> Conversation
+Modules --> Group
+Modules --> Message
+Modules --> User
 Chat --> SDK
 Contact --> SDK
 Conversation --> SDK
@@ -197,12 +195,12 @@ User --> Logger
 ```
 
 **图表来源**
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L1-L407)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L1-L282)
-- [ChatUIKit/stores/conversation.ts](file://ChatUIKit/stores/conversation.ts#L1-L421)
-- [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts#L1-L317)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L1-L581)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L1-L242)
+- [ChatUIKit-vue2/stores/index.js:13-23](file://ChatUIKit-vue2/stores/index.js#L13-L23)
+- [ChatUIKit-vue2/stores/message.js:1-800](file://ChatUIKit-vue2/stores/message.js#L1-L800)
+- [ChatUIKit-vue2/stores/conversation.js:1-340](file://ChatUIKit-vue2/stores/conversation.js#L1-L340)
+- [ChatUIKit-vue2/stores/group.js:1-212](file://ChatUIKit-vue2/stores/group.js#L1-L212)
+- [ChatUIKit-vue2/stores/contact.js:1-222](file://ChatUIKit-vue2/stores/contact.js#L1-L222)
+- [ChatUIKit-vue2/stores/appUser.js:1-235](file://ChatUIKit-vue2/stores/appUser.js#L1-L235)
 
 ### 数据流架构
 
@@ -213,7 +211,7 @@ SDK[IM SDK]
 Server[服务器]
 end
 subgraph "状态管理"
-subgraph "Store层"
+subgraph "Vuex Store层"
 A[ConnStore]
 B[ConfigStore]
 C[AppUserStore]
@@ -221,28 +219,25 @@ D[ContactStore]
 E[ConversationStore]
 F[GroupStore]
 G[MessageStore]
-H[ChatStore]
 end
 end
 subgraph "业务协调"
-Coordinator[ChatStore协调器]
+Coordinator[ChatUIKit协调器]
 end
 SDK --> A
 A --> Coordinator
-Coordinator --> H
+Coordinator --> G
 Coordinator --> C
 Coordinator --> D
 Coordinator --> E
 Coordinator --> F
-Coordinator --> G
-H --> Server
+G --> Server
 C --> Server
 D --> Server
 E --> Server
 F --> Server
-G --> Server
 subgraph "响应式更新"
-Reactive[响应式更新]
+Reactive[Vuex响应式更新]
 end
 A --> Reactive
 B --> Reactive
@@ -251,101 +246,100 @@ D --> Reactive
 E --> Reactive
 F --> Reactive
 G --> Reactive
-H --> Reactive
 ```
 
 **图表来源**
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L67-L221)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L341-L388)
+- [ChatUIKit-vue2/index.js:72-309](file://ChatUIKit-vue2/index.js#L72-L309)
+- [ChatUIKit-vue2/stores/message.js:496-555](file://ChatUIKit-vue2/stores/message.js#L496-L555)
 
 ## 详细组件分析
 
-### ChatStore - 聊天协调器
+### ChatUIKit - 应用协调器
 
-ChatStore作为整个聊天系统的协调器，负责管理SDK事件监听和跨Store的数据流协调。
+ChatUIKit作为整个应用的协调器，负责管理SDK事件监听和跨Store的数据流协调。
 
 ```mermaid
 classDiagram
-class ChatStore {
-+boolean isInitEvent
-+ConnState connState
-+getConnState() ConnState
-+isLogin() boolean
-+setConnState(state : ConnState) void
-+initSDKEvent() void
-+handleReceivedMessage(msg : MixedMessageBody) void
-+handleGroupEvent(event : GroupEvent) void
-+login(params : LoginParams) Promise
-+logout() Promise
-+clearStore() void
+class ChatUIKit {
++boolean _initialized
++Connection _chatConn
++string _eventHandlerName
++boolean _listenersSetup
++init(params) void
++_setupSDKListeners() void
++_handleReceivedMessage(msg) void
++_stringifyId(id) string
++_loadInitialData() void
 +onShow() void
-+loadInitialData() void
++getStore() Store
++isLoggedIn() boolean
++getChatConn() Connection
 }
 class ConnStore {
-+Chat.Connection conn
-+getChatConn() Chat.Connection
-+isInitialized() boolean
-+setChatConn(conn : Chat.Connection) void
-+initChatConn(options : ConnectionParameters) Chat.Connection
-+closeConnection() void
-+clear() void
++boolean isLogin
++boolean connected
++object user
++object getChatConn()
++object getChatSDK()
++SET_CHAT_CONN(state, conn) void
++SET_CHAT_SDK(state, sdk) void
++login(context, payload) Promise
++logout(context, payload) Promise
 }
 class MessageStore {
-+Record~string, MixedMessageBody~ messageMap
-+Record~string, ConversationMessagesInfo~ conversationMessagesMap
-+getMessageById(msgId : string) MixedMessageBody
-+getConversationMessages(convId : string) MixedMessageBody[]
-+onMessage(msg : MixedMessageBody) void
-+sendMessage(msg : MixedMessageBody) Promise
-+recallMessage(msg : MixedMessageBody) Promise
-+deleteMessage(cvs : ConversationBaseInfo, msg : MixedMessageBody) Promise
++object messageMap
++object conversationMessagesMap
++object playingAudioMsgId
++object getMessageById(msgId) object
++getConversationMessages(convId) object[]
++sendMessage(context, payload) Promise
++onMessage(context, msg) void
++recallMessage(context, msg) Promise
 }
-class ContactStore {
-+Chat.ContactItem[] contacts
-+ContactNoticeInfo contactsNoticeInfo
-+getContactList() Chat.ContactItem[]
-+getContactsNoticeList() ContactNotice[]
-+getContacts() void
-+addContact(userId : string) Promise
-+deleteContact(userId : string) Promise
+class ConversationStore {
++array conversationList
++object currentConversation
++boolean loading
++number totalUnreadCount
++getServerConversations(context, payload) Promise
++selectConversation(context, conversation) void
++markConversationAsRead(context, conversation) Promise
++deleteConversation(context, payload) Promise
 }
 class GroupStore {
-+Chat.GroupItem[] groupList
-+Record~string, GroupDetailInfo~ groupInfoMap
-+getGroupList() Chat.GroupItem[]
-+getJoinedGroupList() Promise
-+fetchGroupDetails(groupIds : string[]) void
-+createGroup(params : CreateGroupParams) Promise
-+destroyGroup(groupId : string) Promise
++array groupList
++object groupMap
++getGroupList() array
++getJoinedGroupList(context, payload) Promise
++createGroup(context, params) Promise
++getGroupDetails(context, payload) Promise
 }
 class AppUserStore {
-+Record~string, UpdateOwnUserInfoParams~ userInfoMap
-+Record~string, PresenceInfo~ userPresenceMap
-+getUserInfo(userId : string) UserInfoWithPresence
-+getSelfUserInfo() UserInfoWithPresence
-+getUsersInfoFromServer(props : GetUsersInfoProps) Promise
-+getUsersPresenceFromServer(props : GetUsersPresenceProps) Promise
-+setUserInfo(userId : string, userInfo : UpdateOwnUserInfoParams) void
-+updateUserInfo(params : UpdateOwnUserInfoParams) Promise
++object userMap
++object userPresenceMap
++object selfUserInfo
++getUserInfo(context, userId) object
++getSelfUserInfo(context) object
++getUsersInfoFromServer(context, payload) Promise
++updateUserInfo(context, payload) Promise
 }
-ChatStore --> ConnStore : "使用"
-ChatStore --> MessageStore : "协调"
-ChatStore --> ContactStore : "协调"
-ChatStore --> GroupStore : "协调"
-ChatStore --> AppUserStore : "协调"
-ChatStore --> ChatStore : "事件处理"
+ChatUIKit --> ConnStore : "协调"
+ChatUIKit --> MessageStore : "协调"
+ChatUIKit --> ConversationStore : "协调"
+ChatUIKit --> GroupStore : "协调"
+ChatUIKit --> AppUserStore : "协调"
 ```
 
 **图表来源**
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L22-L398)
-- [ChatUIKit/stores/conn.ts](file://ChatUIKit/stores/conn.ts#L15-L84)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L25-L581)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L16-L282)
-- [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts#L16-L317)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L17-L242)
+- [ChatUIKit-vue2/index.js:6-398](file://ChatUIKit-vue2/index.js#L6-L398)
+- [ChatUIKit-vue2/stores/conn.js:8-121](file://ChatUIKit-vue2/stores/conn.js#L8-L121)
+- [ChatUIKit-vue2/stores/message.js:50-800](file://ChatUIKit-vue2/stores/message.js#L50-L800)
+- [ChatUIKit-vue2/stores/conversation.js:47-340](file://ChatUIKit-vue2/stores/conversation.js#L47-L340)
+- [ChatUIKit-vue2/stores/group.js:4-212](file://ChatUIKit-vue2/stores/group.js#L4-L212)
+- [ChatUIKit-vue2/stores/appUser.js:5-235](file://ChatUIKit-vue2/stores/appUser.js#L5-L235)
 
 **章节来源**
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L1-L407)
+- [ChatUIKit-vue2/index.js:1-405](file://ChatUIKit-vue2/index.js#L1-L405)
 
 ### Store初始化流程
 
@@ -353,67 +347,64 @@ ChatStore --> ChatStore : "事件处理"
 sequenceDiagram
 participant App as 应用
 participant ChatUIKit as ChatUIKit
-participant Pinia as Pinia实例
-participant Store as Store实例
-App->>ChatUIKit : 访问store属性
-ChatUIKit->>ChatUIKit : ensurePinia()
-ChatUIKit->>Pinia : createPinia()
-Pinia-->>ChatUIKit : 返回实例
-ChatUIKit->>Pinia : setActivePinia()
-loop 延迟初始化
-ChatUIKit->>Store : useXxxStore()
-Store->>Pinia : 注册Store
-Store-->>ChatUIKit : 返回Store实例
-end
-ChatUIKit-->>App : 返回Store实例
+participant Vuex as Vuex Store
+participant Module as Store模块
+App->>ChatUIKit : init()
+ChatUIKit->>Vuex : new Vuex.Store()
+Vuex->>Module : 注册模块
+Module->>Vuex : commit('SET_CHAT_CONN', conn)
+Vuex-->>ChatUIKit : Store实例
+ChatUIKit-->>App : 初始化完成
 ```
 
 **图表来源**
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L31-L78)
+- [ChatUIKit-vue2/index.js:22-66](file://ChatUIKit-vue2/index.js#L22-L66)
+- [ChatUIKit-vue2/stores/index.js:13-23](file://ChatUIKit-vue2/stores/index.js#L13-L23)
 
 **章节来源**
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L1-L139)
+- [ChatUIKit-vue2/index.js:1-405](file://ChatUIKit-vue2/index.js#L1-L405)
 
 ### 数据模型设计
 
 ```mermaid
 erDiagram
 CONN_STATE {
-Chat.Connection conn
-boolean isInitialized
+boolean isLogin
+boolean connected
+object user
 }
 CONFIG_STATE {
-ThemeConfig themeConfig
-FeatureConfig featureConfig
+object themeConfig
+object featureConfig
 }
 APP_USER_STATE {
-json userInfoMap
-json userPresenceMap
+object userMap
+object userPresenceMap
+object selfUserInfo
 }
 CONTACT_STATE {
 array contacts
 object contactsNoticeInfo
-ContactItem viewedUserInfo
+object viewedUserInfo
 }
 CONVERSATION_STATE {
 array conversationList
-ConversationBaseInfo currConversation
-json muteConvsMap
-object pageParams
-object pinParams
+object currentConversation
+boolean loading
+number totalUnreadCount
+object muteConvsMap
+number lastFetchTime
 }
 GROUP_STATE {
 array groupList
-json groupInfoMap
-object groupNoticeInfo
-object pageParams
+object groupMap
 }
 MESSAGE_STATE {
-json messageMap
-json conversationMessagesMap
+object messageMap
+object conversationMessagesMap
 string playingAudioMsgId
-MixedMessageBody quoteMessage
-ModifiedMsg editingMessage
+object quoteMessage
+object editingMessage
 }
 CONN_STATE ||--|| CONFIG_STATE : "配置"
 CONFIG_STATE ||--|| APP_USER_STATE : "用户"
@@ -425,22 +416,22 @@ MESSAGE_STATE ||--|| APP_USER_STATE : "用户"
 ```
 
 **图表来源**
-- [ChatUIKit/stores/conn.ts](file://ChatUIKit/stores/conn.ts#L15-L18)
-- [ChatUIKit/stores/config.ts](file://ChatUIKit/stores/config.ts#L14-L17)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L17-L22)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L16-L23)
-- [ChatUIKit/stores/conversation.ts](file://ChatUIKit/stores/conversation.ts#L27-L38)
-- [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts#L16-L25)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L25-L44)
+- [ChatUIKit-vue2/stores/conn.js:11-20](file://ChatUIKit-vue2/stores/conn.js#L11-L20)
+- [ChatUIKit-vue2/stores/config.js:73-76](file://ChatUIKit-vue2/stores/config.js#L73-L76)
+- [ChatUIKit-vue2/stores/appUser.js:8-22](file://ChatUIKit-vue2/stores/appUser.js#L8-L22)
+- [ChatUIKit-vue2/stores/contact.js:7-17](file://ChatUIKit-vue2/stores/contact.js#L7-L17)
+- [ChatUIKit-vue2/stores/conversation.js:50-63](file://ChatUIKit-vue2/stores/conversation.js#L50-L63)
+- [ChatUIKit-vue2/stores/group.js:7-12](file://ChatUIKit-vue2/stores/group.js#L7-L12)
+- [ChatUIKit-vue2/stores/message.js:53-64](file://ChatUIKit-vue2/stores/message.js#L53-L64)
 
 **章节来源**
-- [ChatUIKit/stores/conn.ts](file://ChatUIKit/stores/conn.ts#L1-L84)
-- [ChatUIKit/stores/config.ts](file://ChatUIKit/stores/config.ts#L1-L124)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L1-L242)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L1-L282)
-- [ChatUIKit/stores/conversation.ts](file://ChatUIKit/stores/conversation.ts#L1-L421)
-- [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts#L1-L317)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L1-L581)
+- [ChatUIKit-vue2/stores/conn.js:1-121](file://ChatUIKit-vue2/stores/conn.js#L1-L121)
+- [ChatUIKit-vue2/stores/config.js:1-196](file://ChatUIKit-vue2/stores/config.js#L1-L196)
+- [ChatUIKit-vue2/stores/appUser.js:1-235](file://ChatUIKit-vue2/stores/appUser.js#L1-L235)
+- [ChatUIKit-vue2/stores/contact.js:1-222](file://ChatUIKit-vue2/stores/contact.js#L1-L222)
+- [ChatUIKit-vue2/stores/conversation.js:1-340](file://ChatUIKit-vue2/stores/conversation.js#L1-L340)
+- [ChatUIKit-vue2/stores/group.js:1-212](file://ChatUIKit-vue2/stores/group.js#L1-L212)
+- [ChatUIKit-vue2/stores/message.js:1-800](file://ChatUIKit-vue2/stores/message.js#L1-L800)
 
 ## 依赖关系分析
 
@@ -449,7 +440,7 @@ MESSAGE_STATE ||--|| APP_USER_STATE : "用户"
 ```mermaid
 graph TD
 subgraph "核心依赖"
-ChatStore[ChatStore]
+ChatUIKit[ChatUIKit]
 ConnStore[ConnStore]
 end
 subgraph "业务依赖"
@@ -464,12 +455,12 @@ SDK[IM SDK]
 Logger[日志系统]
 Utils[工具函数]
 end
-ChatStore --> ConnStore
-ChatStore --> MessageStore
-ChatStore --> ContactStore
-ChatStore --> ConversationStore
-ChatStore --> GroupStore
-ChatStore --> AppUserStore
+ChatUIKit --> ConnStore
+ChatUIKit --> MessageStore
+ChatUIKit --> ContactStore
+ChatUIKit --> ConversationStore
+ChatUIKit --> GroupStore
+ChatUIKit --> AppUserStore
 MessageStore --> ConnStore
 MessageStore --> ConversationStore
 MessageStore --> AppUserStore
@@ -482,108 +473,94 @@ GroupStore --> ConnStore
 GroupStore --> AppUserStore
 AppUserStore --> ConnStore
 AppUserStore --> Logger
-ChatStore --> Logger
+ChatUIKit --> Logger
 MessageStore --> Logger
 ContactStore --> Logger
 ConversationStore --> Logger
 GroupStore --> Logger
-AppUserStore --> Logger
-ConnStore --> SDK
-MessageStore --> SDK
-ContactStore --> SDK
-ConversationStore --> SDK
-GroupStore --> SDK
 ```
 
 **图表来源**
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L10-L20)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L11-L21)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L10-L13)
-- [ChatUIKit/stores/conversation.ts](file://ChatUIKit/stores/conversation.ts#L11-L22)
-- [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts#L10-L13)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L10-L15)
+- [ChatUIKit-vue2/index.js:35-38](file://ChatUIKit-vue2/index.js#L35-L38)
+- [ChatUIKit-vue2/stores/message.js:360-494](file://ChatUIKit-vue2/stores/message.js#L360-L494)
+- [ChatUIKit-vue2/stores/contact.js:118-134](file://ChatUIKit-vue2/stores/contact.js#L118-L134)
+- [ChatUIKit-vue2/stores/conversation.js:159-227](file://ChatUIKit-vue2/stores/conversation.js#L159-L227)
+- [ChatUIKit-vue2/stores/group.js:75-97](file://ChatUIKit-vue2/stores/group.js#L75-L97)
+- [ChatUIKit-vue2/stores/appUser.js:83-102](file://ChatUIKit-vue2/stores/appUser.js#L83-L102)
 
 ### 迁移兼容性
 
-项目提供了完整的迁移兼容机制：
+**重要说明**：项目已完全迁移到Vuex架构，移除了所有Pinia相关代码和兼容层。新的架构具有以下特点：
 
 ```mermaid
 flowchart TD
-subgraph "迁移阶段"
-Old[旧版MobX代码]
-New[新版Pinia代码]
-Compatibility[兼容层]
+subgraph "当前架构"
+VuexStore[Vuex Store]
+Modules[Vuex Modules]
+DirectAccess[直接模块访问]
 end
-subgraph "兼容函数"
-InitPiniaStores[initPiniaStores]
-CompatFunctions[兼容函数集合]
+subgraph "架构优势"
+Stability[稳定性]
+Compatibility[兼容性]
+Performance[性能]
+Maintenance[Maintenance]
 end
-Old --> Compatibility
-New --> Compatibility
-Compatibility --> InitPiniaStores
-Compatibility --> CompatFunctions
-InitPiniaStores --> New
-CompatFunctions --> New
-subgraph "渐进式迁移"
-Phase1[阶段1: 并行运行]
-Phase2[阶段2: 逐步替换]
-Phase3[阶段3: 完全迁移]
-end
-Compatibility --> Phase1
-Phase1 --> Phase2
-Phase2 --> Phase3
+VuexStore --> Modules
+Modules --> DirectAccess
+DirectAccess --> Stability
+DirectAccess --> Compatibility
+DirectAccess --> Performance
+DirectAccess --> Maintenance
 ```
 
-**图表来源**
-- [ChatUIKit/stores/index.ts](file://ChatUIKit/stores/index.ts#L23-L30)
-
 **章节来源**
-- [ChatUIKit/stores/index.ts](file://ChatUIKit/stores/index.ts#L1-L31)
+- [ChatUIKit-vue2/stores/index.js:1-27](file://ChatUIKit-vue2/stores/index.js#L1-L27)
 
 ## 性能考虑
 
 ### 响应式优化策略
 
-1. **延迟初始化**：Store仅在首次访问时创建，减少初始内存占用
-2. **计算属性缓存**：使用getter缓存派生状态，避免重复计算
-3. **增量数据加载**：支持分页加载和增量更新
-4. **消息清理机制**：自动清理超出限制的历史消息
+1. **模块化设计**：Store按业务领域拆分，减少不必要的响应式更新
+2. **深拷贝策略**：使用深拷贝函数处理SDK特殊对象，避免Vue响应式陷阱
+3. **缓存机制**：合理使用缓存避免重复计算和网络请求
+4. **内存管理**：实现消息清理机制，控制内存使用
 
 ### 内存管理
 
 ```mermaid
 flowchart TD
 subgraph "内存优化"
-LazyInit[延迟初始化]
+ModuleSplit[模块化拆分]
+DeepClone[深拷贝处理]
 Cache[缓存策略]
 Cleanup[清理机制]
 Pool[对象池]
 end
 subgraph "优化技术"
-Computed[计算属性]
-Reactive[响应式更新]
-Batch[批量更新]
-Debounce[防抖处理]
+Mutation[Mutations]
+Action[Actions]
+Getter[Getters]
+DirectAccess[直接访问]
 end
-LazyInit --> Computed
-Cache --> Reactive
-Cleanup --> Batch
-Pool --> Debounce
-Computed --> Memory[内存效率]
-Reactive --> Memory
-Batch --> Memory
-Debounce --> Memory
+ModuleSplit --> Mutation
+DeepClone --> Action
+Cache --> Getter
+Cleanup --> DirectAccess
+Mutation --> Memory[内存效率]
+Action --> Memory
+Getter --> Memory
+DirectAccess --> Memory
 ```
 
 ### 最佳实践建议
 
 1. **Store设计原则**：
-   - 每个Store专注于单一职责
+   - 每个Store专注于单一业务领域
    - 使用清晰的命名约定
-   - 合理划分state、getters、actions
+   - 合理划分state、getters、mutations、actions
 
 2. **性能优化技巧**：
-   - 使用计算属性缓存复杂计算结果
+   - 使用深拷贝处理SDK特殊对象
    - 实现适当的防抖和节流
    - 优化大数据量的渲染
 
@@ -605,23 +582,23 @@ NetworkError[网络错误]
 MemoryError[内存错误]
 end
 subgraph "诊断步骤"
-CheckPinia[检查Pinia实例]
-CheckStore[检查Store状态]
+CheckVuex[检查Vuex实例]
+CheckModule[检查Store模块]
 CheckNetwork[检查网络连接]
 CheckMemory[检查内存使用]
 end
 subgraph "解决方案"
-ResetPinia[重置Pinia实例]
-ResetStore[重置Store状态]
+ResetVuex[重置Vuex实例]
+ResetModule[重置Store模块]
 RetryNetwork[重试网络请求]
 CleanupMemory[清理内存]
 end
-InitError --> CheckPinia
-SyncError --> CheckStore
+InitError --> CheckVuex
+SyncError --> CheckModule
 NetworkError --> CheckNetwork
 MemoryError --> CheckMemory
-CheckPinia --> ResetPinia
-CheckStore --> ResetStore
+CheckVuex --> ResetVuex
+CheckModule --> ResetModule
 CheckNetwork --> RetryNetwork
 CheckMemory --> CleanupMemory
 ```
@@ -636,20 +613,20 @@ CheckMemory --> CleanupMemory
 4. **优雅降级**：在网络异常时提供基础功能
 
 **章节来源**
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L333-L345)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L332-L336)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L127-L130)
+- [ChatUIKit-vue2/stores/conn.js:96-108](file://ChatUIKit-vue2/stores/conn.js#L96-L108)
+- [ChatUIKit-vue2/stores/message.js:486-494](file://ChatUIKit-vue2/stores/message.js#L486-L494)
+- [ChatUIKit-vue2/stores/contact.js:137-148](file://ChatUIKit-vue2/stores/contact.js#L137-L148)
 
 ## 结论
 
-本项目的Pinia状态管理实现展现了现代Vue应用的最佳实践：
+本项目的Vuex状态管理实现展现了Vue 2生态下的最佳实践：
 
 ### 技术优势总结
 
 1. **架构清晰**：模块化设计，职责分离明确
-2. **性能优秀**：延迟初始化、计算属性缓存等优化策略
+2. **性能优秀**：深拷贝处理、缓存策略等优化
 3. **易于维护**：TypeScript支持，完整的类型系统
-4. **迁移友好**：提供完整的迁移兼容机制
+4. **稳定性强**：基于Vue 2.7.16长期支持版本
 
 ### 未来发展方向
 
@@ -658,4 +635,4 @@ CheckMemory --> CleanupMemory
 3. **测试完善**：增加单元测试和集成测试覆盖率
 4. **文档扩展**：完善API文档和使用示例
 
-通过这次从MobX到Pinia的成功迁移，项目不仅获得了更好的技术栈支持，也为未来的功能扩展奠定了坚实的基础。
+通过这次从早期状态管理模式到成熟Vuex架构的成功迁移，项目不仅获得了更好的技术栈支持，也为未来的功能扩展奠定了坚实的基础。
