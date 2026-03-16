@@ -1,62 +1,269 @@
-# Easemob UIKit for Uniapp (Vue3)
+# 环信 ChatUIKit for UniApp - Vue2 版本
 
-<Toc />
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/placeholder/logo.png" width="120" />
+</p>
 
-环信单群聊 UIKit 是基于环信即时通讯云 IM SDK 开发的一款即时通讯 UI 组件库，提供各种组件实现会话列表、聊天界面、联系人列表及后续界面等功能，帮助开发者根据实际业务需求快速搭建包含 UI 界面的即时通讯应用。
+<p align="center">
+  基于 Vue2 + Vuex 的环信即时通讯 UIKit，支持 H5、App、微信小程序
+</p>
 
-## 支持平台（vue3）
+<p align="center">
+  <a href="https://www.easemob.com/">官网</a> •
+  <a href="https://docs.easemob.com/">文档</a> •
+  <a href="#快速开始">快速开始</a> •
+  <a href="#示例项目">示例项目</a>
+</p>
 
-- Android
-- iOS
-- 微信小程序
-- H5
+---
 
-## UIKit 基本项目结构
+## 📖 文档导航
+
+| 文档 | 说明 | 适合人群 |
+|:------|:------|:----------|
+| **[VUE2_QUICK_START.md](./VUE2_QUICK_START.md)** | 15 分钟快速上手指南 | ⭐ 初次使用 |
+| **[VUE2_INTEGRATION_GUIDE.md](./VUE2_INTEGRATION_GUIDE.md)** | 完整集成指南 | 项目开发者 |
+| **[VUE2_API_REFERENCE.md](./VUE2_API_REFERENCE.md)** | 详细 API 参考 | 进阶开发者 |
+| **[VUE2_ARCHITECTURE.md](./VUE2_ARCHITECTURE.md)** | 架构设计说明 | 架构师/贡献者 |
+
+---
+
+## ✨ 特性
+
+- ✅ **开箱即用**: 提供完整的聊天界面组件，一行代码集成
+- ✅ **多平台支持**: 一套代码，同时支持 H5、App、微信小程序
+- ✅ **功能丰富**: 单聊、群聊、消息类型（文本/图片/语音/视频/文件）
+- ✅ **状态管理**: 基于 Vuex 的模块化状态管理
+- ✅ **国际化**: 内置中英文语言包
+- ✅ **TypeScript 友好**: 源码基于 TS，类型提示完善
+- ✅ **与 Vue3 API 一致**: 迁移成本低
+
+---
+
+## 🚀 快速开始
+
+### 环境要求
+
+- [Node.js](https://nodejs.org/) 16+
+- [HBuilderX](https://www.dcloud.io/hbuilderx.html) 3.6+
+- 环信应用 App Key ([免费注册](https://www.easemob.com/))
+
+### 安装依赖
+
+```bash
+npm install easemob-websdk vuex pinyin-pro easemob-uniapp-logger-plugin
+```
+
+### 复制 ChatUIKit
+
+```bash
+cp -r ChatUIKit-vue2 your-project/ChatUIKit
+```
+
+### 初始化
+
+```javascript
+// main.js
+import Vue from 'vue'
+import ChatUIKit, { store } from './ChatUIKit'
+import { t, i18n } from './ChatUIKit/locales'
+
+i18n.init()
+Vue.prototype.$ChatUIKit = ChatUIKit
+Vue.prototype.$t = t
+
+new Vue({ store, ...App }).$mount()
+```
+
+详细步骤请查看 **[快速上手指南](./VUE2_QUICK_START.md)**。
+
+---
+
+## 📂 项目结构
 
 ```
-└── ChatUIKit
-    ├── assets                                 // UIKit 资源文件
-    ├── components                             // UIKit 通用组件
-    ├── const                                  // UIKit 常量
-    ├── locales                                // UIKit 国际化
-    ├── modules                                // UIKit 页面组件
-    │   ├── Chat                                  // 聊天功能模块
-    │   ├── ChatNew                               // 发起新会话模块
-    │   ├── ContactAdd                            // 添加联系人模块
-    │   ├── ContactList                           // 联系人列表模块      
-    │   ├── ContactRequestList                    // 联系人好友请求列表模块
-    │   ├── ContactSearchList                     // 联系人搜索列表模块
-    │   ├── Conversation                          // 会话列表模块
-    │   ├── ConversationSearchList                // 会话搜索列表模块
-    │   ├── GroupCreate                           // 创建群组模块
-    │   ├── GroupList                             // 群组列表模块
-    │   ├── VideoPreview                          // 视频消息预览模块
-    ├── store                                  // UIKit store
-    │   ├── appUser.ts                            // UIKit用户属性store
-    │   ├── chat.ts                               // IM连接状态和事件处理
-    │   ├── config.ts                             // UIKit Config
-    │   ├── conn.ts                               // 管理SDK实例
-    │   ├── contact.ts                            // 联系人相关store
-    │   ├── conversation.ts                       // 会话相关store
-    │   ├── group.ts                              // 群组相关store
-    │   ├── message.ts                            // 消息相关store
-    ├── styles                                 // UIKit 通用样式
-    ├── types                                  // UIKit 类型定义
-    ├── utils                                  // UIKit 通用工具函数
-    ├── configTypes.ts                         // UIKit 配置类型定义
-    ├── index.ts                               // UIKit 入口文件
-    ├── log.ts                                 // UIKit 日志类
-    ├── sdk.ts                                 // UIKit IM SDK 类型
+├── ChatUIKit-vue2/          # ChatUIKit Vue2 源码
+│   ├── components/          # 通用组件（Avatar、IndexedList 等）
+│   ├── modules/             # 业务模块（Chat、Conversation、ContactList 等）
+│   ├── stores/              # Vuex Store 模块
+│   ├── locales/             # 国际化
+│   └── index.js             # ChatUIKit 主类
+│
+├── vue2-demo/               # 完整示例项目
+│   ├── pages/               # 页面
+│   ├── ChatUIKit/           # 复制的 ChatUIKit（通过脚本同步）
+│   └── manifest.json        # 应用配置
+│
+├── VUE2_QUICK_START.md      # 快速上手指南
+├── VUE2_INTEGRATION_GUIDE.md # 完整集成指南
+├── VUE2_API_REFERENCE.md    # API 参考手册
+├── VUE2_ARCHITECTURE.md     # 架构设计说明
+└── copy-chat-uikit-vue2.js  # 同步脚本
 ```
 
-## 源码集成
+---
 
-请参考[集成文档](https://doc.easemob.com/uikit/chatuikit/uniapp/chatuikit_integrated.html)
+## 🎯 核心功能
 
-## 静态资源说明
+| 功能 | 说明 |
+|------|------|
+| 💬 **即时消息** | 文本、图片、语音、视频、文件、自定义消息 |
+| 📋 **会话管理** | 置顶、删除、免打扰、未读数、草稿 |
+| 👥 **联系人** | 添加、删除、黑名单、好友申请处理 |
+| 🏘️ **群组** | 创建、解散、邀请、踢人、群信息管理 |
+| 👤 **用户属性** | 头像、昵称、在线状态（Presence）|
+| 🔧 **消息操作** | 撤回、编辑、引用、表情反应 |
 
-UIKit中依赖的静态资源（`ChatUIKit/assets`）放置在环信服务器中,有访问频率限制，建议您将静态资源放置在您的业务服务器上，然后修改 `ChatUIKit/const/index.ts` 文件中的 `ASSETS_URL` 为您的资源服务器地址。
+---
 
-## 相关资源
-- [UIKit 概述](https://doc.easemob.com/uikit/chatuikit/uniapp/chatuikit_overview.html);
-- [快速开始](https://doc.easemob.com/uikit/chatuikit/uniapp/chatuikit_quickstart.html);
+## 💻 示例项目
+
+位于 `vue2-demo/` 目录，包含完整功能：
+
+- ✅ 登录/注册页面
+- ✅ TabBar 导航（会话、联系人、我的）
+- ✅ 聊天页面（单聊/群聊）
+- ✅ 群组管理（列表、创建、详情）
+- ✅ 联系人管理（列表、添加、申请列表）
+- ✅ 个人中心（资料编辑、设置）
+
+**运行示例：**
+
+```bash
+cd vue2-demo
+npm install
+# 在 HBuilderX 中运行到浏览器或小程序
+```
+
+---
+
+## 📘 常用 API
+
+### 发送消息
+
+```javascript
+// 发送文本消息
+this.$store.dispatch('message/sendTextMessage', {
+  to: 'userId',
+  chatType: 'singleChat',
+  msg: 'Hello World'
+})
+```
+
+### 获取数据
+
+```javascript
+// 获取联系人列表
+this.$store.dispatch('contact/getContactsFromServer')
+
+// 获取用户信息
+const userInfo = this.$store.getters['appUser/getUserInfo'](userId)
+```
+
+### 监听事件
+
+```javascript
+// 监听新消息
+uni.$on('chatOnNewMessage', (msg) => {
+  console.log('新消息:', msg)
+})
+```
+
+更多 API 请查看 **[API 参考手册](./VUE2_API_REFERENCE.md)**。
+
+---
+
+## 🛠️ 开发指南
+
+### 同步 ChatUIKit 到 demo
+
+当修改了 `ChatUIKit-vue2/` 源码后，运行同步脚本：
+
+```bash
+node copy-chat-uikit-vue2.js
+```
+
+### 自定义主题
+
+修改 `ChatUIKit-vue2/styles/common.scss`：
+
+```scss
+$primary-color: #00a4fd;      // 主题色
+$text-color: #171a1c;         // 文字颜色
+$bg-color: #f9fafa;           // 背景色
+```
+
+### 添加新语言
+
+1. 在 `ChatUIKit-vue2/locales/lang/` 创建语言文件
+2. 在 `ChatUIKit-vue2/locales/index.js` 中注册
+
+---
+
+## 🌐 多平台适配
+
+| 平台 | 支持情况 | 说明 |
+|------|---------|------|
+| H5 | ✅ 完整支持 | 推荐使用 Chrome |
+| App | ✅ 完整支持 | Android/iOS |
+| 微信小程序 | ✅ 完整支持 | 需注意 slot 限制 |
+
+**小程序注意事项：**
+Vue2 在小程序中对 scoped slot 支持有限，相关组件已内置条件编译处理，直接使用即可。
+
+---
+
+## 🐛 常见问题
+
+**Q: 微信小程序提示 "util is not defined"**
+
+A: 确保在 `main.js` 中添加了 Polyfill，详见 [集成指南](./VUE2_INTEGRATION_GUIDE.md)。
+
+**Q: 联系人列表不显示**
+
+A: 检查：1) ChatUIKit 是否初始化 2) 用户是否登录 3) 生命周期是否正确调用
+
+**Q: 如何调试 SDK？**
+
+A: 初始化时开启调试模式：
+```javascript
+this.$ChatUIKit.init({
+  chat: EMClient,
+  config: { isDebug: true }
+})
+```
+
+更多问题请查看 [集成指南 - 常见问题](./VUE2_INTEGRATION_GUIDE.md#常见问题)。
+
+---
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 PR！
+
+1. Fork 本仓库
+2. 创建分支 (`git checkout -b feature/xxx`)
+3. 提交更改 (`git commit -am 'Add xxx'`)
+4. 推送分支 (`git push origin feature/xxx`)
+5. 创建 Pull Request
+
+---
+
+## 📞 技术支持
+
+- 📖 **官方文档**: https://docs.easemob.com/
+- 🐙 **GitHub**: https://github.com/Easemob-Community/easemob-uikit-uniapp-community
+- 🐛 **问题反馈**: [GitHub Issues](https://github.com/Easemob-Community/easemob-uikit-uniapp-community/issues)
+- 💬 **技术交流**: [环信开发者社区](https://www.easemob.com/community)
+
+---
+
+## 📄 许可证
+
+[MIT License](./LICENSE)
+
+---
+
+<p align="center">
+  Copyright © 2026 环信. All rights reserved.
+</p>
