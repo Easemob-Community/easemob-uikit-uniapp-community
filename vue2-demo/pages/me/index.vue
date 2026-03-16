@@ -1,15 +1,17 @@
 <template>
   <view class="me-wrap">
     <view class="me-info-wrap">
-      <Avatar
-        class="me-avatar"
-        :src="userInfo.avatar"
-        :size="100"
-        :placeholder="USER_AVATAR_URL"
-        :withPresence="true"
-        :presenceExt="userInfo.presenceExt"
-        :isOnline="userInfo.isOnline"
-      />
+      <view class="avatar-wrap">
+        <Avatar
+          class="me-avatar"
+          :src="userInfo.avatar"
+          :size="100"
+          :placeholder="USER_AVATAR_URL"
+          :withPresence="true"
+          :presenceExt="userInfo.presenceExt"
+          :isOnline="userInfo.isOnline"
+        />
+      </view>
       <view class="name">{{ userInfo.name || userId }}</view>
       <view class="userId">
         {{ "ID: " + userId }}
@@ -180,6 +182,19 @@ export default {
   background-color: #F9FAFA;
   padding-top: calc(60px + var(--status-bar-height));
   padding-bottom: 20px;
+}
+
+.avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-edit-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #009DFF;
 }
 
 .name {

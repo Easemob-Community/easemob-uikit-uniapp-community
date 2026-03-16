@@ -18,14 +18,17 @@
 - [ChatUIKit/log.ts](file://ChatUIKit/log.ts)
 - [ChatUIKit/utils/index.ts](file://ChatUIKit/utils/index.ts)
 - [ChatUIKit/index.ts](file://ChatUIKit/index.ts)
+- [ChatUIKit-vue2/utils/index.js](file://ChatUIKit-vue2/utils/index.js)
+- [ChatUIKit-vue2/index.js](file://ChatUIKit-vue2/index.js)
 </cite>
 
 ## 更新摘要
 **所做更改**
-- 新增深拷贝机制处理SDK特殊对象的章节
-- 更新消息状态管理的服务器消息ID处理机制
-- 改进stores文件的参数格式支持和错误处理
-- 增强消息状态管理的服务器消息ID处理机制
+- 更新SDK实例管理架构：所有store现在使用rootGetters访问SDK连接而非rootState
+- 新增toPlainMessage工具函数处理SDK消息对象转换，解决Vue观察SDK实例的问题
+- 改进消息状态管理的服务器消息ID处理机制
+- 增强stores文件的参数格式支持和错误处理
+- 优化深拷贝机制处理SDK特殊对象
 
 ## 目录
 1. [简介](#简介)
@@ -41,6 +44,8 @@
 
 ## 简介
 本文件面向基于 Pinia 的 Store 状态管理系统，系统由 8 个核心 Store 组成，覆盖连接管理、配置、用户信息、联系人、会话、群组、消息以及聊天协调等模块。文档阐述各 Store 的职责、状态结构、动作定义、初始化流程与生命周期管理策略；解释全局 Pinia 实例的延迟初始化与激活机制；总结数据流向与组件间通信方式；并提供状态更新最佳实践与性能优化建议。
+
+**更新** 系统现已采用rootGetters模式管理SDK实例，通过toPlainMessage工具函数解决Vue观察SDK实例的问题，提升了系统的稳定性和性能表现。
 
 ## 项目结构
 - Store 层位于 ChatUIKit/stores，采用按领域拆分的模块化组织，每个 Store 独立定义状态、Getter 与 Action。
@@ -121,6 +126,8 @@ Config --> Chat
 - ConnStore 与 ConfigStore 作为基础设施，被多个业务 Store 依赖。
 - MessageStore 与 ConversationStore 之间建立紧密协作，保证消息与会话状态一致性。
 
+**更新** SDK实例管理架构已重构，采用rootGetters模式替代rootState，通过toPlainMessage工具函数处理SDK消息对象转换，解决Vue观察SDK实例的问题。
+
 ```mermaid
 sequenceDiagram
 participant SDK as "IM SDK"
@@ -160,9 +167,11 @@ Chat->>AppUser : "getUsersInfoFromServer([self])"
 - 依赖
   - ConnStore、ConfigStore、AppUserStore、ContactStore、ConversationStore、GroupStore、MessageStore。
 
+**更新** 采用rootGetters模式访问SDK连接实例，通过useConnStore().getChatConn()获取连接，避免直接访问rootState中的SDK实例。
+
 ```mermaid
 flowchart TD
-Start(["登录"]) --> Open["ConnStore.open(...)"]
+Start(["登录"]) --> Open["ConnStore.getChatConn.open(...)"]
 Open --> InitEvent["initSDKEvent()"]
 InitEvent --> Load["loadInitialData()"]
 Load --> ConvList["ConversationStore.getConversationList()"]
@@ -195,6 +204,8 @@ SelfPresence --> End
   - setChatConn/initChatConn/closeConnection/clear：连接生命周期管理。
 - 依赖
   - chatSDK（外部 SDK）。
+
+**更新** SDK实例管理已重构，采用更简洁的模式管理连接实例，提供类型安全的连接访问。
 
 **章节来源**
 - [ChatUIKit/stores/conn.ts:20-83](file://ChatUIKit/stores/conn.ts#L20-L83)
@@ -326,6 +337,11 @@ SelfPresence --> End
 - 改进了消息映射表的管理，支持本地消息ID与服务器消息ID的双向关联
 - 优化了消息状态更新的时机和方式，提升用户体验
 
+**更新** 新增toPlainMessage工具函数：
+- 专门处理SDK消息对象转换，解决Vue观察SDK实例的问题
+- 支持Long类型对象的转换，避免JSON.stringify序列化问题
+- 在消息处理流程中自动应用，确保消息对象的纯数据特性
+
 **章节来源**
 - [ChatUIKit/stores/message.ts:48-580](file://ChatUIKit/stores/message.ts#L48-L580)
 - [ChatUIKit/const/index.ts:14-15](file://ChatUIKit/const/index.ts#L14-L15)
@@ -352,6 +368,8 @@ SelfPresence --> End
   - pinyin-pro 用于分组排序。
 - 潜在循环依赖
   - 通过函数式调用与延迟初始化避免循环依赖风险。
+
+**更新** SDK实例管理依赖已优化，采用rootGetters模式替代rootState，通过useConnStore().getChatConn()访问连接实例，提升代码的可维护性和性能。
 
 ```mermaid
 graph LR
@@ -402,6 +420,11 @@ AppUser --> Conn
 - 避免了不必要的深拷贝操作，仅对需要的对象进行处理
 - 提升了消息处理的性能，特别是在大量消息场景下的表现
 
+**更新** toPlainMessage工具函数的性能优化：
+- 专门处理Long类型对象，避免Vue响应式系统的问题
+- 智能检测SDK对象特征，提供高效的转换机制
+- 在消息处理流程中自动应用，减少手动转换的开销
+
 **章节来源**
 - [ChatUIKit/stores/appUser.ts:102-125](file://ChatUIKit/stores/appUser.ts#L102-L125)
 - [ChatUIKit/stores/contact.ts:83-107](file://ChatUIKit/stores/contact.ts#L83-L107)
@@ -438,6 +461,12 @@ AppUser --> Conn
 - **新增**：SDK对象引用问题
   - 现象：消息内容显示异常或状态更新不生效。
   - 排查：确认 deepClone 机制是否正确应用，检查SDK返回对象的引用情况；验证消息对象的深拷贝处理。
+- **新增**：toPlainMessage转换异常
+  - 现象：消息对象转换失败或Long类型处理异常。
+  - 排查：确认toPlainMessage函数的调用时机，检查SDK对象的特征检测逻辑；验证转换后的对象结构。
+- **新增**：rootGetters访问问题
+  - 现象：通过rootGetters访问SDK连接实例失败。
+  - 排查：确认useConnStore().getChatConn()的调用方式，检查store的初始化状态；验证SDK实例的正确设置。
 - 消息超量导致卡顿
   - 现象：消息列表滚动卡顿。
   - 排查：确认 cleanupRemovedMessages 是否按阈值清理；适当增大阈值或优化渲染。
@@ -452,7 +481,7 @@ AppUser --> Conn
 - [ChatUIKit/log.ts:5-78](file://ChatUIKit/log.ts#L5-L78)
 
 ## 结论
-该状态管理系统以 Pinia 为核心，通过 ChatStore 协调各领域 Store，形成高内聚、低耦合的状态架构。通过延迟初始化、计算属性缓存、分页与批量请求、超量清理等策略，兼顾了可维护性与性能表现。**最新的增强包括新增的用户信息更新和在线状态发布功能，以及配置系统的架构重构，还有深拷贝机制处理SDK特殊对象、改进stores文件的参数格式支持和错误处理、增强消息状态管理的服务器消息ID处理机制**，进一步提升了系统稳定性、数据一致性和用户体验。建议在复杂场景下继续细化事件分发与状态快照，以进一步增强可观测性与可测试性。
+该状态管理系统以 Pinia 为核心，通过 ChatStore 协调各领域 Store，形成高内聚、低耦合的状态架构。通过延迟初始化、计算属性缓存、分页与批量请求、超量清理等策略，兼顾了可维护性与性能表现。**最新的增强包括新增的用户信息更新和在线状态发布功能，以及配置系统的架构重构，还有深拷贝机制处理SDK特殊对象、改进stores文件的参数格式支持和错误处理、增强消息状态管理的服务器消息ID处理机制，以及采用rootGetters模式管理SDK实例和新增toPlainMessage工具函数**，进一步提升了系统稳定性、数据一致性和用户体验。建议在复杂场景下继续细化事件分发与状态快照，以进一步增强可观测性与可测试性。
 
 ## 附录
 
@@ -461,13 +490,37 @@ AppUser --> Conn
   - ChatUIKit 单例在首次访问任一 Store Getter 时创建并激活 Pinia 实例。
 - 生命周期管理
   - onShow：在页面 onShow 时检测连接有效性。
-  - logout/clearStore：登出或切换账号时清理所有 Store 状态。
 - 兼容性
   - stores/index.ts 提供 createStores 与 initPiniaStores 兼容函数，便于迁移期使用。
 
 **章节来源**
 - [ChatUIKit/index.ts:18-132](file://ChatUIKit/index.ts#L18-L132)
 - [ChatUIKit/stores/index.ts:18-31](file://ChatUIKit/stores/index.ts#L18-L31)
+
+### SDK实例管理架构重构说明
+**更新** SDK实例管理已进行全面重构，主要改进包括：
+
+#### rootGetters模式的应用
+- **从rootState到rootGetters**：所有store现在使用rootGetters访问SDK连接而非rootState
+- **类型安全访问**：通过useConnStore().getChatConn()提供类型安全的连接访问
+- **避免响应式问题**：解决Vue响应式系统观察SDK实例导致的问题
+
+#### toPlainMessage工具函数
+- **专门的消息转换**：处理SDK消息对象转换，解决Vue观察SDK实例的问题
+- **Long类型支持**：智能检测和转换Long类型对象，避免JSON.stringify序列化问题
+- **自动应用**：在消息处理流程中自动应用，确保消息对象的纯数据特性
+
+#### 最佳实践
+- 使用useConnStore().getChatConn()访问SDK连接实例
+- 在消息处理前使用toPlainMessage转换SDK对象
+- 避免直接访问store.state中的SDK实例
+- 通过rootGetters模式管理SDK状态
+
+**章节来源**
+- [ChatUIKit/stores/conn.ts:25-40](file://ChatUIKit/stores/conn.ts#L25-L40)
+- [ChatUIKit/stores/chat.ts:70-72](file://ChatUIKit/stores/chat.ts#L70-L72)
+- [ChatUIKit/stores/message.ts:228-232](file://ChatUIKit/stores/message.ts#L228-L232)
+- [ChatUIKit-vue2/utils/index.js:9-45](file://ChatUIKit-vue2/utils/index.js#L9-L45)
 
 ### 配置系统架构重构说明
 **更新** 配置系统已完成重大架构重构，主要改进包括：
@@ -543,6 +596,35 @@ AppUser --> Conn
 
 **章节来源**
 - [ChatUIKit/utils/index.ts:135-183](file://ChatUIKit/utils/index.ts#L135-L183)
+
+### toPlainMessage工具函数详解
+**新增** 为了解决Vue响应式系统观察SDK实例的问题，系统引入了toPlainMessage工具函数：
+
+#### 功能特性
+- **Long类型处理**：智能检测SDK Long类型对象，提供安全的转换机制
+- **递归转换**：支持嵌套对象和数组的深度转换
+- **函数过滤**：自动跳过函数类型的属性，避免转换过程中的错误
+
+#### 转换逻辑
+1. **基础类型检查**：非对象类型直接返回
+2. **Long类型检测**：通过low、high属性特征检测Long对象
+3. **数值安全处理**：优先转换为安全整数，否则转为字符串
+4. **数组和对象处理**：递归处理子元素和属性
+5. **函数属性过滤**：跳过函数类型的属性
+
+#### 应用场景
+- 消息对象转换：在消息处理前确保对象的纯数据特性
+- 事件回调处理：避免SDK对象被Vue响应式系统观察
+- 数据持久化：确保可序列化的数据结构
+
+#### 性能优化
+- 智能特征检测，避免不必要的转换操作
+- 递归处理时的性能优化，减少内存分配
+- 在消息处理流程中的自动应用，提升开发效率
+
+**章节来源**
+- [ChatUIKit-vue2/utils/index.js:9-45](file://ChatUIKit-vue2/utils/index.js#L9-L45)
+- [ChatUIKit-vue2/index.js:318-327](file://ChatUIKit-vue2/index.js#L318-L327)
 
 ### 消息状态管理的服务器消息ID处理机制
 **新增** 为了确保消息状态与服务器的完全一致，系统增强了服务器消息ID的处理机制：

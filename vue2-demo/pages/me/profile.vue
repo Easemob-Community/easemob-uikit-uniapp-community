@@ -83,29 +83,12 @@ export default {
     },
     
     changeAvatar() {
-      uni.chooseImage({
-        count: 1,
-        success: (res) => {
-          const tempFilePath = res.tempFilePaths[0]
-          // 上传头像
-          this.uploadAvatar(tempFilePath)
-        }
+      uni.showModal({
+        title: '提示',
+        content: '头像上传功能需要您自行准备文件上传服务，将图片上传后获取返回的URL地址，再通过 updateUserInfo 接口设置到用户属性中。',
+        showCancel: false,
+        confirmText: '知道了'
       })
-    },
-    
-    uploadAvatar(filePath) {
-      uni.showLoading({ title: '上传中...' })
-      
-      // 这里简化处理，实际应该调用上传接口
-      setTimeout(() => {
-        // 更新本地用户信息
-        this.$store.commit('appUser/SET_SELF_USER_INFO', {
-          avatar: filePath
-        })
-        this.getUserInfo()
-        uni.hideLoading()
-        uni.showToast({ title: '上传成功', icon: 'success' })
-      }, 1000)
     }
   }
 }

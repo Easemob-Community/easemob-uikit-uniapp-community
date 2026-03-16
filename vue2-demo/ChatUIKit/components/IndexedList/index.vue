@@ -45,8 +45,6 @@
         >
           <!-- 使用作用域插槽，小程序环境通过 $scopedSlots 访问 -->
           <slot name="indexedItem" :item="item" :index="idx"></slot>
-          <!-- 默认内容在没有插槽内容时显示 -->
-          <view v-if="!hasIndexedItemSlot" class="default-item">{{ item.name || item.userId }}</view>
         </view>
       </view>
     </scroll-view>
