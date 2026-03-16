@@ -402,8 +402,7 @@ this.$store.dispatch('contact/clearContactNoticeUnread')
 | 属性 | 类型 | 说明 |
 |------|------|------|
 | groupList | Array | 加入的群组列表 |
-| currentGroup | Object | 当前群组信息 |
-| groupMembers | Array | 当前群组成员 |
+| groupMap | Object | 群组详情映射（groupId -> groupInfo）|
 
 #### Getters
 
@@ -429,33 +428,13 @@ this.$store.dispatch('group/createGroup', {
   name: '群组名称',
   description: '群组描述',
   members: ['user1', 'user2'], // 初始成员
-  isPublic: true,
-  allowInvite: true
+  type: 'public' // 'public' 或 'private'
 })
 
-// 解散群组
-this.$store.dispatch('group/destroyGroup', 'groupId')
-
-// 退出群组
-this.$store.dispatch('group/leaveGroup', 'groupId')
-
-// 获取群成员列表
-this.$store.dispatch('group/getGroupMembers', {
+// 添加新群组到列表
+this.$store.dispatch('group/addNewGroup', {
   groupId: 'groupId',
-  page: 1,
-  limit: 20
-})
-
-// 邀请用户入群
-this.$store.dispatch('group/inviteUserToGroup', {
-  groupId: 'groupId',
-  users: ['user1', 'user2']
-})
-
-// 移除群成员
-this.$store.dispatch('group/removeGroupMember', {
-  groupId: 'groupId',
-  userId: 'userId'
+  groupName: '群组名称'
 })
 ```
 
