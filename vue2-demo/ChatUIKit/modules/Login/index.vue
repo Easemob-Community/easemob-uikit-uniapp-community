@@ -179,7 +179,7 @@ export default {
         // 跳转会话列表（使用 switchTab 跳转到 tabbar 页面）
         setTimeout(() => {
           uni.switchTab({
-            url: '/ChatUIKit/modules/Conversation/index'
+            url: '/pages/conversation/index'
           })
         }, 500)
         

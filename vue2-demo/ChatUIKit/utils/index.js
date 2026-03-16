@@ -1,5 +1,49 @@
 // 工具函数集合
 
+/**
+ * 将 SDK 消息对象转换为纯数据对象
+ * 解决微信小程序中 JSON.stringify 无法序列化 SDK 自定义对象（如 Long 类型）的问题
+ * @param {Object} msg - SDK 消息对象
+ * @returns {Object} - 纯数据对象
+ */
+export function toPlainMessage(msg) {
+  if (!msg || typeof msg !== 'object') return msg
+
+  // 处理 SDK Long 类型对象（通过特征检测）
+  // Long 类型通常有: low, high, unsigned 属性和 toNumber, toString, isZero 等方法
+  if (typeof msg.low === 'number' && typeof msg.high === 'number') {
+    try {
+      // 优先转为数字，如果太大则转为字符串
+      if (msg.toNumber) {
+        const num = msg.toNumber()
+        // 检查是否安全整数
+        if (Number.isSafeInteger(num)) return num
+      }
+      // 转为字符串
+      return msg.toString ? msg.toString() : String(msg)
+    } catch (e) {
+      return String(msg)
+    }
+  }
+
+  // 处理数组
+  if (Array.isArray(msg)) {
+    return msg.map(item => toPlainMessage(item))
+  }
+
+  // 处理普通对象
+  const result = {}
+  for (const key in msg) {
+    if (msg.hasOwnProperty(key)) {
+      const value = msg[key]
+      // 跳过函数
+      if (typeof value === 'function') continue
+      result[key] = toPlainMessage(value)
+    }
+  }
+  return result
+}
+
 // 格式化日期
 export const formatDate = function (date, fmt = '') {
   const o = {
