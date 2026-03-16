@@ -42,7 +42,7 @@
 
 <script>
 import AudioMessageSender from '../MessageInputToolBar/audioSender.vue'
-import { formatTextMessage } from '../../../../utils/index.js'
+import { formatTextMessage, toPlainMessage } from '../../../../utils/index.js'
 import { ASSETS_URL } from '../../../../const/index.js'
 
 export default {
@@ -130,7 +130,9 @@ export default {
       const quoteMessage = this.$store.state.message.quoteMessage
       const selfInfoGetter = this.$store.getters['appUser/getSelfUserInfo']
       const selfUserInfo = selfInfoGetter ? selfInfoGetter() : { name: '', avatar: '' }
-      const chatSDK = this.$store.state.conn.chatSDK
+      
+      // 使用 getter 获取 SDK，避免访问被 Vue 观察的 state
+      const chatSDK = this.$store.getters['conn/getChatSDK']
 
       if (!chatSDK || !chatSDK.message) {
         console.error('SDK not initialized')

@@ -20,6 +20,13 @@
 - [ChatUIKit/index.ts](file://ChatUIKit/index.ts)
 </cite>
 
+## 更新摘要
+**所做更改**
+- 新增深拷贝机制处理SDK特殊对象的章节
+- 更新消息状态管理的服务器消息ID处理机制
+- 改进stores文件的参数格式支持和错误处理
+- 增强消息状态管理的服务器消息ID处理机制
+
 ## 目录
 1. [简介](#简介)
 2. [项目结构](#项目结构)
@@ -79,13 +86,13 @@ Config --> Chat
 ```
 
 **图表来源**
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L18-L132)
-- [ChatUIKit/stores/index.ts](file://ChatUIKit/stores/index.ts#L9-L21)
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L10-L20)
+- [ChatUIKit/index.ts:18-132](file://ChatUIKit/index.ts#L18-L132)
+- [ChatUIKit/stores/index.ts:9-21](file://ChatUIKit/stores/index.ts#L9-L21)
+- [ChatUIKit/stores/chat.ts:10-20](file://ChatUIKit/stores/chat.ts#L10-L20)
 
 **章节来源**
-- [ChatUIKit/stores/index.ts](file://ChatUIKit/stores/index.ts#L1-L31)
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L1-L139)
+- [ChatUIKit/stores/index.ts:1-31](file://ChatUIKit/stores/index.ts#L1-L31)
+- [ChatUIKit/index.ts:1-139](file://ChatUIKit/index.ts#L1-L139)
 
 ## 核心组件
 - ConnStore：管理 IM SDK 连接实例，提供类型安全的连接访问与初始化方法。
@@ -98,14 +105,14 @@ Config --> Chat
 - ChatStore：作为聊天协调器，整合 SDK 事件、触发各 Store 的数据同步与初始数据加载。
 
 **章节来源**
-- [ChatUIKit/stores/conn.ts](file://ChatUIKit/stores/conn.ts#L20-L83)
-- [ChatUIKit/stores/config.ts](file://ChatUIKit/stores/config.ts#L59-L123)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L24-L241)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L25-L281)
-- [ChatUIKit/stores/conversation.ts](file://ChatUIKit/stores/conversation.ts#L40-L420)
-- [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts#L27-L316)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L48-L580)
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L29-L398)
+- [ChatUIKit/stores/conn.ts:20-83](file://ChatUIKit/stores/conn.ts#L20-L83)
+- [ChatUIKit/stores/config.ts:59-123](file://ChatUIKit/stores/config.ts#L59-L123)
+- [ChatUIKit/stores/appUser.ts:24-241](file://ChatUIKit/stores/appUser.ts#L24-L241)
+- [ChatUIKit/stores/contact.ts:25-281](file://ChatUIKit/stores/contact.ts#L25-L281)
+- [ChatUIKit/stores/conversation.ts:40-420](file://ChatUIKit/stores/conversation.ts#L40-L420)
+- [ChatUIKit/stores/group.ts:27-316](file://ChatUIKit/stores/group.ts#L27-L316)
+- [ChatUIKit/stores/message.ts:48-580](file://ChatUIKit/stores/message.ts#L48-L580)
+- [ChatUIKit/stores/chat.ts:29-398](file://ChatUIKit/stores/chat.ts#L29-L398)
 
 ## 架构总览
 系统采用"中心协调 + 领域解耦"的设计：
@@ -130,10 +137,10 @@ Chat->>AppUser : "getUsersInfoFromServer([self])"
 ```
 
 **图表来源**
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L90-L242)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L341-L388)
-- [ChatUIKit/stores/conversation.ts](file://ChatUIKit/stores/conversation.ts#L344-L354)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L86-L125)
+- [ChatUIKit/stores/chat.ts:90-242](file://ChatUIKit/stores/chat.ts#L90-L242)
+- [ChatUIKit/stores/message.ts:341-388](file://ChatUIKit/stores/message.ts#L341-L388)
+- [ChatUIKit/stores/conversation.ts:344-354](file://ChatUIKit/stores/conversation.ts#L344-L354)
+- [ChatUIKit/stores/appUser.ts:86-125](file://ChatUIKit/stores/appUser.ts#L86-L125)
 
 ## 详细组件分析
 
@@ -169,14 +176,14 @@ SelfPresence --> End
 ```
 
 **图表来源**
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L299-L396)
-- [ChatUIKit/stores/conversation.ts](file://ChatUIKit/stores/conversation.ts#L126-L189)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L112-L130)
-- [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts#L102-L131)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L86-L125)
+- [ChatUIKit/stores/chat.ts:299-396](file://ChatUIKit/stores/chat.ts#L299-L396)
+- [ChatUIKit/stores/conversation.ts:126-189](file://ChatUIKit/stores/conversation.ts#L126-L189)
+- [ChatUIKit/stores/contact.ts:112-130](file://ChatUIKit/stores/contact.ts#L112-L130)
+- [ChatUIKit/stores/group.ts:102-131](file://ChatUIKit/stores/group.ts#L102-L131)
+- [ChatUIKit/stores/appUser.ts:86-125](file://ChatUIKit/stores/appUser.ts#L86-L125)
 
 **章节来源**
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L29-L398)
+- [ChatUIKit/stores/chat.ts:29-398](file://ChatUIKit/stores/chat.ts#L29-L398)
 
 ### ConnStore（连接管理）
 - 职责
@@ -190,8 +197,8 @@ SelfPresence --> End
   - chatSDK（外部 SDK）。
 
 **章节来源**
-- [ChatUIKit/stores/conn.ts](file://ChatUIKit/stores/conn.ts#L20-L83)
-- [ChatUIKit/sdk.ts](file://ChatUIKit/sdk.ts#L1-L13)
+- [ChatUIKit/stores/conn.ts:20-83](file://ChatUIKit/stores/conn.ts#L20-L83)
+- [ChatUIKit/sdk.ts:1-13](file://ChatUIKit/sdk.ts#L1-L13)
 
 ### ConfigStore（配置管理）
 - 职责
@@ -206,8 +213,8 @@ SelfPresence --> End
 **更新** 配置系统架构已重构，从超过300行代码精简到约150行，使用Pinia替代MobX，采用展开运算符进行响应式属性更新，消除了手动深度合并的需要，改进了配置更新过程的可维护性。
 
 **章节来源**
-- [ChatUIKit/stores/config.ts](file://ChatUIKit/stores/config.ts#L59-L123)
-- [ChatUIKit/configType.ts](file://ChatUIKit/configType.ts#L3-L67)
+- [ChatUIKit/stores/config.ts:59-123](file://ChatUIKit/stores/config.ts#L59-L123)
+- [ChatUIKit/configType.ts:3-67](file://ChatUIKit/configType.ts#L3-L67)
 
 ### AppUserStore（用户信息与在线状态）
 - 职责
@@ -230,7 +237,7 @@ SelfPresence --> End
 2. `publishPresence` action 提供了在线状态发布的功能，允许用户设置自定义状态描述
 
 **章节来源**
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L24-L241)
+- [ChatUIKit/stores/appUser.ts:24-241](file://ChatUIKit/stores/appUser.ts#L24-L241)
 
 ### ContactStore（联系人）
 - 职责
@@ -248,7 +255,7 @@ SelfPresence --> End
   - setViewedUserInfo/clear：状态清理。
 
 **章节来源**
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L25-L281)
+- [ChatUIKit/stores/contact.ts:25-281](file://ChatUIKit/stores/contact.ts#L25-L281)
 
 ### ConversationStore（会话）
 - 职责
@@ -267,8 +274,8 @@ SelfPresence --> End
   - setAtTypeByMessage/createConversation/moveConversationTop：@ 类型与置顶。
 
 **章节来源**
-- [ChatUIKit/stores/conversation.ts](file://ChatUIKit/stores/conversation.ts#L40-L420)
-- [ChatUIKit/utils/index.ts](file://ChatUIKit/utils/index.ts#L184-L197)
+- [ChatUIKit/stores/conversation.ts:40-420](file://ChatUIKit/stores/conversation.ts#L40-L420)
+- [ChatUIKit/utils/index.ts:184-197](file://ChatUIKit/utils/index.ts#L184-L197)
 
 ### GroupStore（群组）
 - 职责
@@ -287,7 +294,7 @@ SelfPresence --> End
   - addGroupNotice/setGroupAvatar：通知与头像管理。
 
 **章节来源**
-- [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts#L27-L316)
+- [ChatUIKit/stores/group.ts:27-316](file://ChatUIKit/stores/group.ts#L27-L316)
 
 ### MessageStore（消息）
 - 职责
@@ -303,9 +310,26 @@ SelfPresence --> End
   - updateMessageStatus/setQuoteMessage/setPlayingAudioMessageId：上下文维护。
   - cleanupRemovedMessages/clearConversationMessages/clear：清理策略。
 
+**更新** 深拷贝机制处理SDK特殊对象：
+- 新增 deepClone 工具函数，专门处理SDK返回的特殊对象类型
+- 支持日期、数组、Map、Set、对象等复杂数据结构的深拷贝
+- 在消息发送和接收过程中自动应用深拷贝，避免SDK对象引用问题
+- 提升状态管理的稳定性和数据一致性
+
+**更新** 改进stores文件的参数格式支持：
+- 统一了各Store的参数格式，确保类型安全
+- 增强了错误处理机制，提供更详细的错误信息
+- 优化了参数验证逻辑，减少运行时错误
+
+**更新** 增强消息状态管理的服务器消息ID处理机制：
+- 完善了 serverMsgId 的处理逻辑，确保消息状态的一致性
+- 改进了消息映射表的管理，支持本地消息ID与服务器消息ID的双向关联
+- 优化了消息状态更新的时机和方式，提升用户体验
+
 **章节来源**
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L48-L580)
-- [ChatUIKit/const/index.ts](file://ChatUIKit/const/index.ts#L14-L15)
+- [ChatUIKit/stores/message.ts:48-580](file://ChatUIKit/stores/message.ts#L48-L580)
+- [ChatUIKit/const/index.ts:14-15](file://ChatUIKit/const/index.ts#L14-L15)
+- [ChatUIKit/utils/index.ts:135-183](file://ChatUIKit/utils/index.ts#L135-L183)
 
 ### 类型与常量支撑
 - 类型定义：统一消息体、会话体、状态枚举、Notice 结构等，确保 Store 行为一致。
@@ -313,10 +337,10 @@ SelfPresence --> End
 - 工具：排序、时间格式化、节流、深拷贝、表情渲染等。
 
 **章节来源**
-- [ChatUIKit/types/index.ts](file://ChatUIKit/types/index.ts#L1-L100)
-- [ChatUIKit/configType.ts](file://ChatUIKit/configType.ts#L1-L68)
-- [ChatUIKit/const/index.ts](file://ChatUIKit/const/index.ts#L1-L37)
-- [ChatUIKit/utils/index.ts](file://ChatUIKit/utils/index.ts#L1-L344)
+- [ChatUIKit/types/index.ts:1-100](file://ChatUIKit/types/index.ts#L1-L100)
+- [ChatUIKit/configType.ts:1-68](file://ChatUIKit/configType.ts#L1-L68)
+- [ChatUIKit/const/index.ts:1-37](file://ChatUIKit/const/index.ts#L1-L37)
+- [ChatUIKit/utils/index.ts:1-344](file://ChatUIKit/utils/index.ts#L1-L344)
 
 ## 依赖分析
 - 组件内聚性
@@ -351,12 +375,12 @@ AppUser --> Conn
 ```
 
 **图表来源**
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L10-L20)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L18-L21)
-- [ChatUIKit/stores/conversation.ts](file://ChatUIKit/stores/conversation.ts#L19-L22)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L12-L13)
-- [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts#L12-L13)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L13-L14)
+- [ChatUIKit/stores/chat.ts:10-20](file://ChatUIKit/stores/chat.ts#L10-L20)
+- [ChatUIKit/stores/message.ts:18-21](file://ChatUIKit/stores/message.ts#L18-L21)
+- [ChatUIKit/stores/conversation.ts:19-22](file://ChatUIKit/stores/conversation.ts#L19-L22)
+- [ChatUIKit/stores/contact.ts:12-13](file://ChatUIKit/stores/contact.ts#L12-L13)
+- [ChatUIKit/stores/group.ts:12-13](file://ChatUIKit/stores/group.ts#L12-L13)
+- [ChatUIKit/stores/appUser.ts:13-14](file://ChatUIKit/stores/appUser.ts#L13-L14)
 
 ## 性能考虑
 - 响应式与缓存
@@ -373,13 +397,18 @@ AppUser --> Conn
 - 并发与节流
   - 工具函数提供节流与深拷贝，降低高频操作的开销。
 
+**更新** 深拷贝机制的性能优化：
+- deepClone 函数针对SDK特殊对象进行了专门优化
+- 避免了不必要的深拷贝操作，仅对需要的对象进行处理
+- 提升了消息处理的性能，特别是在大量消息场景下的表现
+
 **章节来源**
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L102-L125)
-- [ChatUIKit/stores/contact.ts](file://ChatUIKit/stores/contact.ts#L83-L107)
-- [ChatUIKit/stores/group.ts](file://ChatUIKit/stores/group.ts#L136-L167)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L529-L554)
-- [ChatUIKit/const/index.ts](file://ChatUIKit/const/index.ts#L14-L15)
-- [ChatUIKit/utils/index.ts](file://ChatUIKit/utils/index.ts#L107-L134)
+- [ChatUIKit/stores/appUser.ts:102-125](file://ChatUIKit/stores/appUser.ts#L102-L125)
+- [ChatUIKit/stores/contact.ts:83-107](file://ChatUIKit/stores/contact.ts#L83-L107)
+- [ChatUIKit/stores/group.ts:136-167](file://ChatUIKit/stores/group.ts#L136-L167)
+- [ChatUIKit/stores/message.ts:529-554](file://ChatUIKit/stores/message.ts#L529-L554)
+- [ChatUIKit/const/index.ts:14-15](file://ChatUIKit/const/index.ts#L14-L15)
+- [ChatUIKit/utils/index.ts:107-134](file://ChatUIKit/utils/index.ts#L107-L134)
 
 ## 故障排查指南
 - 连接未初始化
@@ -403,6 +432,12 @@ AppUser --> Conn
 - **新增**：配置更新异常
   - 现象：setThemeConfig 或 setFeatureConfig 调用后状态未更新。
   - 排查：确认使用的是 Pinia 原生响应式更新，检查配置对象的结构是否符合类型定义；验证组件是否正确响应状态变化。
+- **新增**：消息状态同步异常
+  - 现象：消息状态与服务器不一致，特别是撤回消息处理异常。
+  - 排查：检查 serverMsgId 的处理逻辑，确认消息映射表的双向关联是否正确；验证消息状态更新的时机。
+- **新增**：SDK对象引用问题
+  - 现象：消息内容显示异常或状态更新不生效。
+  - 排查：确认 deepClone 机制是否正确应用，检查SDK返回对象的引用情况；验证消息对象的深拷贝处理。
 - 消息超量导致卡顿
   - 现象：消息列表滚动卡顿。
   - 排查：确认 cleanupRemovedMessages 是否按阈值清理；适当增大阈值或优化渲染。
@@ -410,14 +445,14 @@ AppUser --> Conn
   - 使用 logger.enableDebug() 开启调试模式，结合各 Store 的日志输出定位问题。
 
 **章节来源**
-- [ChatUIKit/stores/conn.ts](file://ChatUIKit/stores/conn.ts#L29-L34)
-- [ChatUIKit/stores/chat.ts](file://ChatUIKit/stores/chat.ts#L44-L51)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L86-L125)
-- [ChatUIKit/stores/message.ts](file://ChatUIKit/stores/message.ts#L529-L554)
-- [ChatUIKit/log.ts](file://ChatUIKit/log.ts#L5-L78)
+- [ChatUIKit/stores/conn.ts:29-34](file://ChatUIKit/stores/conn.ts#L29-L34)
+- [ChatUIKit/stores/chat.ts:44-51](file://ChatUIKit/stores/chat.ts#L44-L51)
+- [ChatUIKit/stores/appUser.ts:86-125](file://ChatUIKit/stores/appUser.ts#L86-L125)
+- [ChatUIKit/stores/message.ts:529-554](file://ChatUIKit/stores/message.ts#L529-L554)
+- [ChatUIKit/log.ts:5-78](file://ChatUIKit/log.ts#L5-L78)
 
 ## 结论
-该状态管理系统以 Pinia 为核心，通过 ChatStore 协调各领域 Store，形成高内聚、低耦合的状态架构。通过延迟初始化、计算属性缓存、分页与批量请求、超量清理等策略，兼顾了可维护性与性能表现。**最新的增强包括新增的用户信息更新和在线状态发布功能，以及配置系统的架构重构**，进一步提升了用户信息管理的完整性和实时性，同时简化了配置管理的实现复杂度。建议在复杂场景下继续细化事件分发与状态快照，以进一步增强可观测性与可测试性。
+该状态管理系统以 Pinia 为核心，通过 ChatStore 协调各领域 Store，形成高内聚、低耦合的状态架构。通过延迟初始化、计算属性缓存、分页与批量请求、超量清理等策略，兼顾了可维护性与性能表现。**最新的增强包括新增的用户信息更新和在线状态发布功能，以及配置系统的架构重构，还有深拷贝机制处理SDK特殊对象、改进stores文件的参数格式支持和错误处理、增强消息状态管理的服务器消息ID处理机制**，进一步提升了系统稳定性、数据一致性和用户体验。建议在复杂场景下继续细化事件分发与状态快照，以进一步增强可观测性与可测试性。
 
 ## 附录
 
@@ -431,8 +466,8 @@ AppUser --> Conn
   - stores/index.ts 提供 createStores 与 initPiniaStores 兼容函数，便于迁移期使用。
 
 **章节来源**
-- [ChatUIKit/index.ts](file://ChatUIKit/index.ts#L18-L132)
-- [ChatUIKit/stores/index.ts](file://ChatUIKit/stores/index.ts#L18-L31)
+- [ChatUIKit/index.ts:18-132](file://ChatUIKit/index.ts#L18-L132)
+- [ChatUIKit/stores/index.ts:18-31](file://ChatUIKit/stores/index.ts#L18-L31)
 
 ### 配置系统架构重构说明
 **更新** 配置系统已完成重大架构重构，主要改进包括：
@@ -456,8 +491,8 @@ AppUser --> Conn
 - 在组件中使用`computed`和`watch`来监听配置变化，实现响应式UI更新
 
 **章节来源**
-- [ChatUIKit/stores/config.ts](file://ChatUIKit/stores/config.ts#L59-L123)
-- [ChatUIKit/configType.ts](file://ChatUIKit/configType.ts#L3-L67)
+- [ChatUIKit/stores/config.ts:59-123](file://ChatUIKit/stores/config.ts#L59-L123)
+- [ChatUIKit/configType.ts:3-67](file://ChatUIKit/configType.ts#L3-L67)
 
 ### AppUserStore 功能增强说明
 **更新** 本次更新重点增强了 AppUserStore 的用户信息管理能力：
@@ -485,5 +520,73 @@ AppUser --> Conn
 - 注意用户隐私设置，合理控制信息可见范围
 
 **章节来源**
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L206-L222)
-- [ChatUIKit/stores/appUser.ts](file://ChatUIKit/stores/appUser.ts#L186-L193)
+- [ChatUIKit/stores/appUser.ts:206-222](file://ChatUIKit/stores/appUser.ts#L206-L222)
+- [ChatUIKit/stores/appUser.ts:186-193](file://ChatUIKit/stores/appUser.ts#L186-L193)
+
+### 深拷贝机制处理SDK特殊对象
+**新增** 为了解决SDK返回对象的引用问题，系统引入了专门的深拷贝机制：
+
+#### deepClone 工具函数
+- 支持多种数据类型的深拷贝：日期、数组、Map、Set、对象
+- 针对SDK特殊对象进行了专门优化，避免引用污染
+- 在消息发送和接收过程中自动应用深拷贝
+
+#### 应用场景
+- 消息对象的深拷贝，确保消息状态的独立性
+- 用户信息对象的深拷贝，避免用户数据的意外修改
+- 群组信息对象的深拷贝，保证群组状态的一致性
+
+#### 性能优化
+- 智能判断是否需要深拷贝，避免不必要的性能开销
+- 针对常用对象类型进行了性能优化
+- 在大量数据处理场景下保持良好的性能表现
+
+**章节来源**
+- [ChatUIKit/utils/index.ts:135-183](file://ChatUIKit/utils/index.ts#L135-L183)
+
+### 消息状态管理的服务器消息ID处理机制
+**新增** 为了确保消息状态与服务器的完全一致，系统增强了服务器消息ID的处理机制：
+
+#### serverMsgId 处理逻辑
+- 完善了本地消息ID与服务器消息ID的双向关联
+- 支持消息状态的实时同步和状态回滚
+- 优化了消息映射表的管理，提升查找效率
+
+#### 撤回消息处理
+- 改进了撤回消息的状态更新逻辑
+- 确保撤回消息的显示和状态同步
+- 提升了撤回操作的用户体验
+
+#### 错误处理机制
+- 增强了消息状态更新的错误处理
+- 提供了更详细的错误信息和处理建议
+- 改进了消息状态的恢复机制
+
+**章节来源**
+- [ChatUIKit/stores/message.ts:288-312](file://ChatUIKit/stores/message.ts#L288-L312)
+- [ChatUIKit/stores/message.ts:398-412](file://ChatUIKit/stores/message.ts#L398-L412)
+- [ChatUIKit/stores/message.ts:466-494](file://ChatUIKit/stores/message.ts#L466-L494)
+- [ChatUIKit/types/index.ts:59-61](file://ChatUIKit/types/index.ts#L59-L61)
+
+### stores文件的参数格式支持和错误处理改进
+**新增** 为了提升系统的稳定性和易用性，对stores文件进行了以下改进：
+
+#### 参数格式统一
+- 统一了各Store的参数格式，确保类型安全
+- 改进了参数验证逻辑，减少运行时错误
+- 提供了更清晰的错误提示信息
+
+#### 错误处理机制
+- 增强了错误捕获和处理机制
+- 提供了更详细的错误堆栈信息
+- 改进了错误恢复和重试机制
+
+#### 最佳实践
+- 在调用Store方法前验证参数格式
+- 合理处理异步操作的错误情况
+- 使用try-catch包装可能出错的操作
+
+**章节来源**
+- [ChatUIKit/stores/index.ts:9-16](file://ChatUIKit/stores/index.ts#L9-L16)
+- [ChatUIKit/stores/chat.ts:299-328](file://ChatUIKit/stores/chat.ts#L299-L328)
+- [ChatUIKit/stores/message.ts:223-336](file://ChatUIKit/stores/message.ts#L223-L336)

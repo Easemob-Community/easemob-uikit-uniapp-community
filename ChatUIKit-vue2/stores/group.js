@@ -72,8 +72,8 @@ export default {
 
   actions: {
     // 获取加入的群组列表
-    async getJoinedGroupList({ commit, dispatch, rootState }) {
-      const chatConn = rootState.conn.chatConn
+    async getJoinedGroupList({ commit, dispatch, rootGetters }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) return
 
       try {
@@ -97,8 +97,8 @@ export default {
     },
     
     // 批量获取群组详情
-    async getGroupDetails({ commit, rootState }, { groupIds }) {
-      const chatConn = rootState.conn.chatConn
+    async getGroupDetails({ commit, rootGetters }, { groupIds }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn || !groupIds || groupIds.length === 0) return
 
       try {
@@ -125,8 +125,8 @@ export default {
     },
     
     // 从服务器获取群组详情
-    async getGroupInfoFromServer({ commit, rootState }, { groupId }) {
-      const chatConn = rootState.conn.chatConn
+    async getGroupInfoFromServer({ commit, rootGetters }, { groupId }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) return
 
       try {
@@ -148,8 +148,8 @@ export default {
     },
     
     // 创建群组
-    async createGroup({ commit, rootState }, params) {
-      const chatConn = rootState.conn.chatConn
+    async createGroup({ commit, rootGetters }, params) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) throw new Error('未连接')
 
       try {

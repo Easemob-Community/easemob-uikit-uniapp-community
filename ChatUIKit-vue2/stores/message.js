@@ -102,8 +102,8 @@ export default {
     },
 
     // 检查消息是否来自当前用户
-    checkMessageFromIsSelf: (state, getters, rootState) => msg => {
-      const currentUserId = rootState.conn.chatConn && rootState.conn.chatConn.user
+    checkMessageFromIsSelf: (state, getters, rootState, rootGetters) => msg => {
+      const currentUserId = rootGetters['conn/getChatConn']?.user
       return msg.from === currentUserId
     }
   },
@@ -225,8 +225,8 @@ export default {
     },
 
     // 获取历史消息
-    async getHistoryMessages({ commit, state, rootState }, { conversation, cursor, onSuccess }) {
-      const chatConn = rootState.conn.chatConn
+    async getHistoryMessages({ commit, state, rootGetters }, { conversation, cursor, onSuccess }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) return
 
       try {
@@ -308,17 +308,18 @@ export default {
     },
 
     // 插入新消息
-    insertMessage({ commit, rootState }, msg) {
-      const chatConn = rootState.conn.chatConn
+    insertMessage({ commit, rootGetters }, { msg }) {
+      const chatConn = rootGetters['conn/getChatConn']
       const currentUserId = chatConn && chatConn.user
       const convId = msg.chatType === 'groupChat' ? msg.to : 
         (msg.from === currentUserId ? msg.to : msg.from)
       
+      console.log('[MessageStore] insertMessage:', msg.id, 'convId:', convId)
       commit('ADD_MESSAGE_ID_TO_CONVERSATION', { convId, msgId: msg.id })
     },
 
     // 提取消息的纯数据字段，避免存储 SDK 特殊对象
-    extractPlainMessage(msg, currentUserId) {
+    extractPlainMessage({}, { msg, currentUserId }) {
       // 基础字段
       const plainMsg = {
         id: typeof msg.id === 'string' ? msg.id : String(msg.id || ''),
@@ -356,17 +357,17 @@ export default {
     },
 
     // 发送消息
-    async sendMessage({ commit, state, rootState, dispatch }, { msg, uploadFileFunc }) {
+    async sendMessage({ commit, state, rootState, rootGetters, dispatch }, { msg, uploadFileFunc }) {
       if (msg.type === 'delivery' || msg.type === 'read' || msg.type === 'channel') {
         return
       }
 
-      const chatConn = rootState.conn.chatConn
+      const chatConn = rootGetters['conn/getChatConn']
       const currentUserId = chatConn && chatConn.user
 
       try {
         // 准备本地消息 - 提取纯数据，避免 SDK 特殊对象
-        let msgCopy = dispatch('extractPlainMessage', msg, currentUserId)
+        let msgCopy = await dispatch('extractPlainMessage', { msg, currentUserId })
 
         // 同步附件消息格式
         if (msgCopy.type === 'audio') {
@@ -387,7 +388,7 @@ export default {
 
         // 添加到本地
         commit('ADD_MESSAGE_TO_MAP', msgCopy)
-        dispatch('insertMessage', msgCopy)
+        await dispatch('insertMessage', { msg: msgCopy })
 
         // 上传文件（如有）
         if (uploadFileFunc) {
@@ -444,7 +445,7 @@ export default {
         
         // 同时存储服务器消息（提取纯数据）
         if (res.message) {
-          const plainServerMsg = dispatch('extractPlainMessage', res.message, currentUserId)
+          const plainServerMsg = await dispatch('extractPlainMessage', { msg: res.message, currentUserId })
           plainServerMsg.status = 'sent'
           plainServerMsg.id = res.serverMsgId
           plainServerMsg.serverMsgId = res.serverMsgId
@@ -457,7 +458,7 @@ export default {
             c => c.conversationId === convId
           )
           // 提取纯数据用于 lastMessage
-          const lastMsgPlain = dispatch('extractPlainMessage', msgCopy, currentUserId)
+          const lastMsgPlain = await dispatch('extractPlainMessage', { msg: msgCopy, currentUserId })
           if (conv) {
             commit('conversation/UPDATE_CONVERSATION', {
               conversationId: convId,
@@ -493,18 +494,18 @@ export default {
     },
 
     // 处理接收到的消息
-    onMessage({ commit, state, rootState, dispatch }, msg) {
-      const chatConn = rootState.conn.chatConn
+    async onMessage({ commit, state, rootState, rootGetters, dispatch }, msg) {
+      const chatConn = rootGetters['conn/getChatConn']
       const currentUserId = chatConn && chatConn.user
       
       // 提取纯数据，避免存储 SDK 特殊对象
-      const plainMsg = dispatch('extractPlainMessage', msg, currentUserId)
+      const plainMsg = await dispatch('extractPlainMessage', { msg, currentUserId })
       plainMsg.serverMsgId = msg.serverMsgId || msg.id
       
       // 添加到消息映射
       if (!state.messageMap[plainMsg.id]) {
         commit('ADD_MESSAGE_TO_MAP', plainMsg)
-        dispatch('insertMessage', plainMsg)
+        await dispatch('insertMessage', { msg: plainMsg })
       }
 
       // 获取会话ID
@@ -554,11 +555,11 @@ export default {
     },
 
     // 撤回消息
-    async recallMessage({ commit, state, rootState, dispatch }, msg) {
+    async recallMessage({ commit, state, rootGetters, dispatch }, msg) {
       console.log('[MessageStore] Recalling message:', msg.id)
       
       try {
-        const chatConn = rootState.conn.chatConn
+        const chatConn = rootGetters['conn/getChatConn']
         const mid = msg.serverMsgId || msg.id
         const convId = msg.chatType === 'groupChat' ? msg.to : 
           (msg.from === chatConn && chatConn.user ? msg.to : msg.from)
@@ -578,12 +579,13 @@ export default {
     },
 
     // 处理消息撤回事件
-    onRecallMessage({ commit, state, rootState }, { mid, from }) {
+    onRecallMessage({ commit, state, rootState, rootGetters }, { mid, from }) {
       const recalledMessage = state.messageMap[mid]
       if (!recalledMessage) return
 
+      const chatConn = rootGetters['conn/getChatConn']
       const convId = recalledMessage.chatType === 'groupChat' ? recalledMessage.to : 
-        (recalledMessage.from === rootState.conn.chatConn && chatConn.user ? recalledMessage.to : recalledMessage.from)
+        (recalledMessage.from === chatConn?.user ? recalledMessage.to : recalledMessage.from)
 
       // 标记消息为已撤回
       commit('UPDATE_MESSAGE_IN_MAP', {
@@ -603,7 +605,7 @@ export default {
           c => c.conversationId === convId
         )
         if (conv && conv.lastMessage && conv.lastMessage.id === mid) {
-          const isSelf = from === rootState.conn.chatConn && chatConn.user
+          const isSelf = from === chatConn?.user
           const recallMsg = {
             type: 'txt',
             msg: isSelf ? '你撤回了一条消息' : '对方撤回了一条消息',
@@ -626,11 +628,11 @@ export default {
     },
 
     // 删除消息
-    async deleteMessage({ commit, state, rootState }, { cvs, msg }) {
+    async deleteMessage({ commit, state, rootGetters }, { cvs, msg }) {
       console.log('[MessageStore] Deleting message:', msg.id)
       
       try {
-        const chatConn = rootState.conn.chatConn
+        const chatConn = rootGetters['conn/getChatConn']
         const messageId = msg.serverMsgId || msg.id
         
         await chatConn.removeHistoryMessages({
@@ -735,7 +737,7 @@ export default {
     },
 
     // 修改消息（编辑消息）
-    async modifyServerMessage({ commit, state, rootState }, payload) {
+    async modifyServerMessage({ commit, state, rootState, rootGetters }, payload) {
       console.log('=========================================')
       console.log('[MessageStore] modifyServerMessage called')
       console.log('[MessageStore] payload:', payload)
@@ -745,8 +747,9 @@ export default {
       console.log('[MessageStore] newMsgText:', newMsgText)
       
       try {
-        const chatConn = rootState.conn.chatConn
-        const chatSDK = rootState.conn.chatSDK
+        // 使用 getter 获取 SDK，避免访问被 Vue 观察的 state
+        const chatConn = rootGetters['conn/getChatConn']
+        const chatSDK = rootGetters['conn/getChatSDK']
         console.log('[MessageStore] chatConn:', chatConn ? 'exists' : 'null')
         console.log('[MessageStore] chatSDK:', chatSDK ? 'exists' : 'null')
         if (!chatConn || !chatSDK) {

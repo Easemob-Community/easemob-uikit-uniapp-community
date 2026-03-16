@@ -114,7 +114,7 @@ export default {
     },
     
     selfUserId() {
-      return this.$store.state.conn.chatConn?.user || ''
+      return this.$store.getters['conn/getChatConn']?.user || ''
     }
   },
   

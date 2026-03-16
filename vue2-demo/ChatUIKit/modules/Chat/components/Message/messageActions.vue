@@ -246,7 +246,7 @@ export default {
 
     deleteMessage() {
       const convId = this.msg.chatType === 'groupChat' ? this.msg.to : 
-        (this.msg.from === (this.$store.state.conn.chatConn && this.$store.state.conn.chatConn.user) ? this.msg.to : this.msg.from)
+        (this.msg.from === (this.$store.getters['conn/getChatConn'] && this.$store.getters['conn/getChatConn'].user) ? this.msg.to : this.msg.from)
       
       this.$store.dispatch('message/deleteMessage', {
         cvs: {

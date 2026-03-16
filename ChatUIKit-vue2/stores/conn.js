@@ -1,33 +1,42 @@
 // 连接和登录状态管理
+
+// 使用外部变量存储 SDK，避免 Vue 响应式系统的影响
+// SDK 实例（connection）包含内部状态，被 Vue 观察后会导致小程序报错
+let _chatConn = null
+let _chatSDK = null
+
 export default {
   namespaced: true,
 
   state: {
-    // SDK 实例 (connection)
-    chatConn: null,
-    // SDK 本身 (包含 message 等方法)
-    chatSDK: null,
     // 登录状态
     isLogin: false,
     // 当前用户信息
     user: null,
     // 连接状态
-    connected: false
+    connected: false,
+    // 标记：SDK 是否已初始化（不存储实际 SDK 对象）
+    _sdkInitialized: false
   },
 
   getters: {
     isLoggedIn: state => state.isLogin && state.connected,
     currentUser: state => state.user,
-    getChatConn: state => state.chatConn,
-    getChatSDK: state => state.chatSDK
+    // 从外部变量返回 SDK，避免 Vue 观察
+    getChatConn: () => _chatConn,
+    getChatSDK: () => _chatSDK
   },
 
   mutations: {
     SET_CHAT_CONN(state, conn) {
-      state.chatConn = conn
+      // 存储到外部变量，避免 Vue 响应式处理
+      _chatConn = conn
+      state._sdkInitialized = !!(_chatConn && _chatSDK)
     },
     SET_CHAT_SDK(state, sdk) {
-      state.chatSDK = sdk
+      // 存储到外部变量，避免 Vue 响应式处理
+      _chatSDK = sdk
+      state._sdkInitialized = !!(_chatConn && _chatSDK)
     },
     SET_LOGIN_STATUS(state, status) {
       state.isLogin = status
@@ -48,8 +57,9 @@ export default {
     },
 
     // 登录
-    async login({ commit, dispatch, state }, { user, pwd, accessToken }) {
-      if (!state.chatConn) {
+    async login({ commit, dispatch, getters }, { user, pwd, accessToken }) {
+      const chatConn = getters.getChatConn
+      if (!chatConn) {
         throw new Error('SDK not initialized')
       }
       
@@ -66,7 +76,7 @@ export default {
           throw new Error('Password or accessToken is required')
         }
         
-        const res = await state.chatConn.open(loginParams)
+        const res = await chatConn.open(loginParams)
         
         commit('SET_USER', { userId: user })
         commit('SET_LOGIN_STATUS', true)
@@ -83,10 +93,11 @@ export default {
     },
 
     // 登出
-    async logout({ commit, state }) {
-      if (state.chatConn) {
+    async logout({ commit, getters }) {
+      const chatConn = getters.getChatConn
+      if (chatConn) {
         try {
-          await state.chatConn.close()
+          await chatConn.close()
         } catch (error) {
           console.error('[ConnStore] Logout error:', error)
         }

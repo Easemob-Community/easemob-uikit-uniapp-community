@@ -120,7 +120,7 @@ export default {
 
   computed: {
     isSelf() {
-      const conn = this.$store.state.conn.chatConn
+      const conn = this.$store.getters['conn/getChatConn']
       const currentUserId = conn && conn.user
       return currentUserId === this.msg.from || this.msg.from === ''
     },

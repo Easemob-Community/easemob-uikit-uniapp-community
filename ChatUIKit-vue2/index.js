@@ -1,5 +1,6 @@
 import store from './stores'
 import { i18n } from './locales'
+import { toPlainMessage } from './utils/index.js'
 
 // ChatUIKit 主类
 class ChatUIKit {
@@ -142,37 +143,38 @@ class ChatUIKit {
       // 撤回消息
       onRecallMessage: (msg) => {
         console.log('[ChatUIKit] Message recalled:', msg)
-        // 处理消息撤回
+        // 处理消息撤回 - 转换 ID 为字符串
         this.store.dispatch('message/onRecallMessage', {
-          mid: msg.mid,
+          mid: this._stringifyId(msg.mid),
           from: msg.from
         })
-        uni.$emit('chatRecallMessage', msg)
+        uni.$emit('chatRecallMessage', toPlainMessage(msg))
       },
 
       // 消息被修改（编辑）
       onModifiedMessage: (msg) => {
-        console.log('[ChatUIKit] Message modified:', msg)
-        // 更新本地消息
-        if (msg.mid && msg.msg) {
+        console.log('[ChatUIKit] Message modified (raw):', msg)
+        // 更新本地消息 - 转换 ID 为字符串
+        const mid = this._stringifyId(msg.mid)
+        if (mid && msg.msg) {
           this.store.dispatch('message/updateModifiedMessage', {
-            mid: msg.mid,
+            mid: mid,
             msg: msg.msg,
             from: msg.from
           })
         }
-        uni.$emit('chatModifiedMessage', msg)
+        uni.$emit('chatModifiedMessage', toPlainMessage(msg))
       },
 
       // 消息已读回执
       onReadMessage: (msg) => {
         console.log('[ChatUIKit] Message read:', msg)
-        // 更新消息状态为已读
+        // 更新消息状态为已读 - 转换 ID 为字符串
         this.store.dispatch('message/updateMessageStatus', {
-          msgId: msg.mid,
+          msgId: this._stringifyId(msg.mid),
           status: 'read'
         })
-        uni.$emit('chatReadMessage', msg)
+        uni.$emit('chatReadMessage', toPlainMessage(msg))
       },
 
       // 会话已读（channel ack）
@@ -311,13 +313,40 @@ class ChatUIKit {
    * @param {object} msg - 消息对象
    */
   _handleReceivedMessage(msg) {
-    console.log('[ChatUIKit] Received message:', msg)
+    console.log('[ChatUIKit] Received message (raw):', msg)
+    
+    // 转换 SDK 消息为纯对象，避免 Long 类型被 Vue 观察
+    const plainMsg = toPlainMessage(msg)
+    console.log('[ChatUIKit] Received message (plain):', plainMsg)
     
     // 处理消息 - 添加到消息列表并更新会话
-    this.store.dispatch('message/onMessage', msg)
+    this.store.dispatch('message/onMessage', plainMsg)
     
     // 通知新消息
-    uni.$emit('chatOnNewMessage', msg)
+    uni.$emit('chatOnNewMessage', plainMsg)
+  }
+
+  /**
+   * 转换消息 ID 为字符串（处理 SDK Long 类型）
+   * @param {any} id - 消息 ID（可能是字符串或 Long 类型）
+   * @returns {string} 字符串类型的 ID
+   */
+  _stringifyId(id) {
+    if (!id) return ''
+    if (typeof id === 'string') return id
+    if (typeof id === 'number') return String(id)
+    // 处理 SDK Long 类型
+    if (typeof id === 'object') {
+      if (typeof id.toString === 'function') {
+        try {
+          return id.toString()
+        } catch (e) {
+          console.warn('[ChatUIKit] Failed to convert id to string:', e)
+        }
+      }
+      return String(id)
+    }
+    return String(id)
   }
 
   /**

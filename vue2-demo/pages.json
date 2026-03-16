@@ -101,7 +101,7 @@
 		"backgroundColor": "#F6F8FA",
 		"color": "#999999",
 		"selectedColor": "#00a4fd",
-		"height": "60px",
+		"height": 60,
 		"list": [
 			{
 				"text": "消息",

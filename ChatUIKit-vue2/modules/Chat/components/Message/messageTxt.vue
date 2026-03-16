@@ -38,7 +38,7 @@ export default {
     },
 
     isSelf() {
-      const conn = this.$store.state.conn.chatConn
+      const conn = this.$store.getters['conn/getChatConn']
       const currentUserId = conn && conn.user
       return this.msg.from === currentUserId || this.msg.from === ''
     }

@@ -30,7 +30,8 @@ export default {
     },
 
     chatConn() {
-      return this.$store.state.conn.chatSDK
+      // 使用 getter 获取 SDK，避免访问被 Vue 观察的 state
+      return this.$store.getters['conn/getChatSDK']
     },
 
     selfUserInfo() {
@@ -66,8 +67,9 @@ export default {
     },
 
     sendFileMessage(file) {
-      const chatSDK = this.$store.state.conn.chatSDK
-      const chatConn = this.$store.state.conn.chatConn
+      // 使用 getter 获取 SDK，避免访问被 Vue 观察的 state
+      const chatSDK = this.$store.getters['conn/getChatSDK']
+      const chatConn = this.$store.getters['conn/getChatConn']
 
       if (!chatSDK || !chatSDK.message) {
         console.error('SDK not initialized')

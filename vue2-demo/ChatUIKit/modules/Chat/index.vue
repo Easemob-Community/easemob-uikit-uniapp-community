@@ -215,7 +215,8 @@ export default {
       const userInfo = this.$store.getters['appUser/getUserInfo'](userId)
       const selfInfoGetter = this.$store.getters['appUser/getSelfUserInfo']
       const selfUserInfo = selfInfoGetter ? selfInfoGetter() : { name: '', avatar: '' }
-      const chatSDK = this.$store.state.conn.chatSDK
+      // 使用 getter 获取 SDK，避免访问被 Vue 观察的 state
+      const chatSDK = this.$store.getters['conn/getChatSDK']
       
       if (!chatSDK || !chatSDK.message) {
         console.error('SDK not initialized')

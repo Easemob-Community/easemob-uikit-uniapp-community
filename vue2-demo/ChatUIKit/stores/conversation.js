@@ -156,8 +156,8 @@ export default {
 
   actions: {
     // 从服务器获取会话列表
-    async getServerConversations({ commit, state, rootState, dispatch }) {
-      const chatConn = rootState.conn.chatConn
+    async getServerConversations({ commit, state, rootGetters, dispatch }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) return
 
       // 防重机制：5秒内不允许重复获取
@@ -227,8 +227,8 @@ export default {
     },
 
     // 删除会话
-    async deleteConversation({ commit, rootState }, { conversationId, conversationType }) {
-      const chatConn = rootState.conn.chatConn
+    async deleteConversation({ commit, rootGetters }, { conversationId, conversationType }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) return
 
       try {
@@ -246,9 +246,10 @@ export default {
     },
 
     // 标记会话已读
-    async markConversationAsRead({ commit, rootState }, conversation) {
-      const chatConn = rootState.conn.chatConn
-      const chatSDK = rootState.conn.chatSDK
+    async markConversationAsRead({ commit, rootState, rootGetters }, conversation) {
+      // 使用 getter 获取 SDK，避免访问被 Vue 观察的 state
+      const chatConn = rootGetters['conn/getChatConn']
+      const chatSDK = rootGetters['conn/getChatSDK']
       if (!chatConn || !chatSDK) return
 
       try {
@@ -280,8 +281,8 @@ export default {
     },
     
     // 设置会话静音状态
-    async setSilentModeForConversation({ commit, rootState }, { conversationId, conversationType, isMute }) {
-      const chatConn = rootState.conn.chatConn
+    async setSilentModeForConversation({ commit, rootGetters }, { conversationId, conversationType, isMute }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) return
 
       try {
@@ -308,8 +309,8 @@ export default {
     },
     
     // 置顶/取消置顶会话
-    async pinConversation({ commit, rootState }, { conversationId, conversationType, isPinned }) {
-      const chatConn = rootState.conn.chatConn
+    async pinConversation({ commit, rootGetters }, { conversationId, conversationType, isPinned }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) return
 
       try {

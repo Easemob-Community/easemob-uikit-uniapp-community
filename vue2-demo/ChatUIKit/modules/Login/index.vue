@@ -3,6 +3,7 @@
     <view class="login-box">
       <view class="logo">
         <text class="logo-text">EaseIM Chat</text>
+        <text class="sdk-version" v-if="sdkVersion">SDK v{{ sdkVersion }}</text>
       </view>
       
       <view class="form">
@@ -95,13 +96,16 @@ export default {
       },
       loginType: 'token', // 'token' 或 'password'
       loading: false,
-      showConfigTip: false
+      showConfigTip: false,
+      sdkVersion: ''
     }
   },
   
   mounted() {
     // 检查是否配置了 AppKey
     this.checkAppKeyConfig()
+    // 获取 SDK 版本
+    this.getSDKVersion()
   },
   
   methods: {
@@ -112,6 +116,28 @@ export default {
       const isDefaultAppKey = true // 这里可以读取实际的配置
       if (isDefaultAppKey) {
         this.showConfigTip = true
+      }
+    },
+    
+    getSDKVersion() {
+      try {
+        // 使用 getter 获取 SDK，避免访问被 Vue 观察的 state
+        const chatSDK = this.$store.getters['conn/getChatSDK']
+        if (chatSDK && chatSDK.version) {
+          this.sdkVersion = chatSDK.version
+          console.log('[Login] SDK Version:', this.sdkVersion)
+        } else {
+          // 如果 store 中没有，说明 SDK 还未初始化到 store
+          console.log('[Login] SDK version not available in store, trying direct import...')
+          // 尝试直接导入获取版本
+          const { EMClient } = require('../../../utils/IM')
+          if (EMClient && EMClient.version) {
+            this.sdkVersion = EMClient.version
+            console.log('[Login] SDK Version (from import):', this.sdkVersion)
+          }
+        }
+      } catch (error) {
+        console.log('[Login] Failed to get SDK version:', error)
       }
     },
     
@@ -223,6 +249,14 @@ export default {
   font-size: 48rpx;
   font-weight: bold;
   color: #667eea;
+  display: block;
+}
+
+.sdk-version {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 10rpx;
 }
 
 .form {

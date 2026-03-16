@@ -115,8 +115,8 @@ export default {
 
   actions: {
     // 从服务器获取联系人列表
-    async getContactsFromServer({ commit, rootState }) {
-      const chatConn = rootState.conn.chatConn
+    async getContactsFromServer({ commit, rootGetters }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) return
 
       try {
@@ -134,8 +134,8 @@ export default {
     },
     
     // 添加联系人
-    async addContact({ commit, rootState }, userId) {
-      const chatConn = rootState.conn.chatConn
+    async addContact({ commit, rootGetters }, userId) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) return
 
       try {
@@ -148,8 +148,8 @@ export default {
     },
     
     // 删除联系人
-    async deleteContact({ commit, rootState }, userId) {
-      const chatConn = rootState.conn.chatConn
+    async deleteContact({ commit, rootGetters }, userId) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) return
 
       try {
@@ -162,8 +162,8 @@ export default {
     },
     
     // 接受好友申请
-    async acceptContactInvite({ commit, rootState, dispatch }, userId) {
-      const chatConn = rootState.conn.chatConn
+    async acceptContactInvite({ commit, rootGetters, dispatch }, userId) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) return
 
       try {
@@ -179,8 +179,8 @@ export default {
     },
     
     // 拒绝好友申请
-    async declineContactInvite({ commit, rootState }, userId) {
-      const chatConn = rootState.conn.chatConn
+    async declineContactInvite({ commit, rootGetters }, userId) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) return
 
       try {

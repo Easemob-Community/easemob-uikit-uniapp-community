@@ -224,7 +224,7 @@ export default {
     
     getLastMsgFrom(msg) {
       if (this.conversation.conversationType === 'groupChat') {
-        const from = msg.from || this.$store.state.conn.chatConn.user
+        const from = msg.from || this.$store.getters['conn/getChatConn'].user
         const userInfo = this.$store.getters['appUser/getUserInfo'](from)
         return userInfo ? userInfo.nickname : from
       }

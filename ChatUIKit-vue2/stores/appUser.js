@@ -37,8 +37,8 @@ export default {
     },
     
     // 获取当前用户信息（从 userMap 中获取，兼容 TS 版本）
-    getSelfUserInfo: (state, getters, rootState) => () => {
-      const userId = rootState.conn.chatConn?.user
+    getSelfUserInfo: (state, getters, rootState, rootGetters) => () => {
+      const userId = rootGetters['conn/getChatConn']?.user
       if (!userId) {
         return { name: '', nickname: '', avatar: '', sign: '', presenceExt: '', isOnline: false }
       }
@@ -80,8 +80,8 @@ export default {
 
   actions: {
     // 获取当前登录用户自己的信息
-    async getSelfUserInfoFromServer({ commit, rootState }) {
-      const chatConn = rootState.conn.chatConn
+    async getSelfUserInfoFromServer({ commit, rootGetters }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn || !chatConn.user) return
       
       try {
@@ -102,8 +102,8 @@ export default {
     },
     
     // 从服务器获取用户信息
-    async getUsersInfoFromServer({ commit, state, rootState }, { userIdList }) {
-      const chatConn = rootState.conn.chatConn
+    async getUsersInfoFromServer({ commit, state, rootGetters }, { userIdList }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn || !userIdList || userIdList.length === 0) return
       
       // 过滤掉正在获取中的用户
@@ -138,8 +138,8 @@ export default {
     },
     
     // 获取当前用户的在线状态（备用，通常由 onPresenceStatusChange 事件更新）
-    async getSelfPresenceFromServer({ commit, rootState }) {
-      const chatConn = rootState.conn.chatConn
+    async getSelfPresenceFromServer({ commit, rootGetters }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn || !chatConn.user) return
       
       try {
@@ -177,8 +177,8 @@ export default {
     },
     
     // 发布在线状态（发布后会触发 onPresenceStatusChange 事件）
-    async publishPresence({ commit, rootState }, { presenceExt }) {
-      const chatConn = rootState.conn.chatConn
+    async publishPresence({ commit, rootGetters }, { presenceExt }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) {
         throw new Error('SDK not initialized')
       }
@@ -196,8 +196,8 @@ export default {
     },
     
     // 更新用户信息
-    async updateUserInfo({ commit, rootState }, { nickname, avatar }) {
-      const chatConn = rootState.conn.chatConn
+    async updateUserInfo({ commit, rootGetters }, { nickname, avatar }) {
+      const chatConn = rootGetters['conn/getChatConn']
       if (!chatConn) {
         throw new Error('SDK not initialized')
       }

@@ -24,7 +24,7 @@ export default {
 
       if (noticeInfo.noticeType === 'recall') {
         const from = noticeInfo.ext && noticeInfo.ext.from
-        const conn = this.$store.state.conn.chatConn
+        const conn = this.$store.getters['conn/getChatConn']
         const currentUserId = conn && conn.user
         if (from === currentUserId) {
           return '你撤回了一条消息'
