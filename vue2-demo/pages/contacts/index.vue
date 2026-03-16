@@ -1,35 +1,12 @@
 <template>
   <view class="contacts-wrap">
     <view class="nav-bar">
-      <text class="title">联系人</text>
+      <text class="title">{{ $t('contact.title') }}</text>
     </view>
+    
     <!-- #ifndef MP-WEIXIN -->
-    <!-- H5/App 平台：使用 IndexedList 组件 -->
-    <view class="content">
-      <IndexedList
-        :options="contactList"
-        :hasGroupItem="true"
-        :hasNewRequestItem="true"
-        @onGroupTap="goToGroups"
-        @onContactTap="goToChat"
-        @onNewRequestTap="goToRequests"
-        :requestCount="unreadCount"
-        :groupCount="groupList.length"
-      >
-        <template v-slot:indexedItem="{ item }">
-          <view class="contact-item" @tap.stop="goToChat(item.userId)">
-            <Avatar 
-              :src="item.avatar" 
-              :size="40" 
-              :placeholder="USER_AVATAR_URL"
-              :withPresence="showPresenceIndicator"
-              :userId="item.userId"
-            />
-            <text class="name">{{ item.name || item.userId }}</text>
-          </view>
-        </template>
-      </IndexedList>
-    </view>
+    <!-- H5/App 平台：使用 ContactList 组件 -->
+    <ContactList />
     <!-- #endif -->
     
     <!-- #ifdef MP-WEIXIN -->
@@ -107,7 +84,7 @@
 
 <script>
 // #ifndef MP-WEIXIN
-import IndexedList from '../../ChatUIKit/components/IndexedList/index.vue'
+import ContactList from '../../ChatUIKit/modules/ContactList'
 // #endif
 import Avatar from '../../ChatUIKit/components/Avatar/index.vue'
 import { USER_AVATAR_URL } from '../../ChatUIKit/const/index'
@@ -117,25 +94,26 @@ import { groupByName } from '../../ChatUIKit/utils/index'
 
 export default {
   components: {
-    Avatar
     // #ifndef MP-WEIXIN
-    , IndexedList
+    ContactList,
     // #endif
+    Avatar
   },
   
   data() {
     return {
       USER_AVATAR_URL,
+      // #ifdef MP-WEIXIN
       contactList: [],
       contactRequests: [],
-      groupList: []
-      // #ifdef MP-WEIXIN
-      , scrollIntoView: '',
+      groupList: [],
+      scrollIntoView: '',
       activeLetter: ''
       // #endif
     }
   },
   
+  // #ifdef MP-WEIXIN
   computed: {
     unreadCount() {
       return this.contactRequests.filter(r => !r.isRead).length
@@ -146,16 +124,13 @@ export default {
     },
     
     showPresenceIndicator() {
-      // 检查功能配置是否启用在线状态
       if (this.featureConfig.usePresence === false) {
         return false
       }
       return true
-    }
+    },
     
-    // #ifdef MP-WEIXIN
-    // 按字母分组的联系人列表（仅微信小程序需要）
-    , indexedContactList() {
+    indexedContactList() {
       const groups = {}
       this.contactList.forEach(item => {
         const firstLetter = groupByName(item.name || item.userId || '#')
@@ -165,7 +140,6 @@ export default {
         groups[firstLetter].push(item)
       })
       
-      // 排序：字母在前，# 在最后
       const sortedLetters = Object.keys(groups).sort((a, b) => {
         if (a === '#') return 1
         if (b === '#') return -1
@@ -178,19 +152,15 @@ export default {
       }))
     },
     
-    // 索引字母列表（仅微信小程序需要）
     indexLetters() {
       return this.indexedContactList.map(g => g.letter)
     }
-    // #endif
   },
   
-  // #ifdef MP-WEIXIN
   watch: {
     indexedContactList: {
       immediate: true,
       handler(data) {
-        // 默认高亮第一个字母
         if (data.length > 0 && !this.activeLetter) {
           this.activeLetter = data[0].letter
         }
@@ -199,15 +169,19 @@ export default {
   },
   // #endif
   
-  async onShow() {
-    // 从服务器加载联系人数据
-    await this.$store.dispatch('contact/getContactsFromServer')
-    await this.$store.dispatch('group/getJoinedGroupList')
+  onShow() {
+    // #ifdef MP-WEIXIN
     this.loadData()
+    // #endif
   },
   
   methods: {
-    loadData() {
+    // #ifdef MP-WEIXIN
+    async loadData() {
+      // 加载联系人
+      await this.$store.dispatch('contact/getContactsFromServer')
+      await this.$store.dispatch('group/getJoinedGroupList')
+      
       const store = this.$store.state
       
       // 获取联系人列表
@@ -234,7 +208,32 @@ export default {
       }
     },
     
+    scrollToLetter(letter) {
+      this.activeLetter = letter
+      this.scrollIntoView = 'group-' + letter
+      setTimeout(() => {
+        this.scrollIntoView = ''
+      }, 300)
+    },
+    
+    onScroll(e) {
+      const scrollTop = e.detail.scrollTop
+      const groups = this.indexedContactList
+      
+      let currentHeight = 0
+      for (const group of groups) {
+        const groupHeight = 32 + (group.data.length * 60)
+        if (scrollTop >= currentHeight && scrollTop < currentHeight + groupHeight) {
+          this.activeLetter = group.letter
+          break
+        }
+        currentHeight += groupHeight
+      }
+    },
+    // #endif
+    
     goToChat(userId) {
+      if (!userId) return
       uni.navigateTo({
         url: `/pages/chat/index?type=singleChat&id=${userId}`
       })
@@ -251,33 +250,6 @@ export default {
         url: '/ChatUIKit/modules/GroupList/index'
       })
     }
-    
-    // #ifdef MP-WEIXIN
-    , scrollToLetter(letter) {
-      this.activeLetter = letter
-      this.scrollIntoView = 'group-' + letter
-      setTimeout(() => {
-        this.scrollIntoView = ''
-      }, 300)
-    },
-    
-    // 根据滚动位置更新当前高亮字母
-    onScroll(e) {
-      const scrollTop = e.detail.scrollTop
-      const groups = this.indexedContactList
-      
-      // 估算每个分组的高度（标题32px + 每个item约60px）
-      let currentHeight = 0
-      for (const group of groups) {
-        const groupHeight = 32 + (group.data.length * 60)
-        if (scrollTop >= currentHeight && scrollTop < currentHeight + groupHeight) {
-          this.activeLetter = group.letter
-          break
-        }
-        currentHeight += groupHeight
-      }
-    }
-    // #endif
   }
 }
 </script>
@@ -298,7 +270,6 @@ export default {
   background: #fff;
   border-bottom: 1px solid #eee;
   flex-shrink: 0;
-  /* 避免被刘海屏遮挡 */
   margin-top: max(var(--status-bar-height), constant(safe-area-inset-top));
   margin-top: max(var(--status-bar-height), env(safe-area-inset-top));
   
@@ -316,12 +287,10 @@ export default {
 }
 
 /* #ifdef MP-WEIXIN */
-/* 微信小程序专用样式 */
 .contact-scroll {
   height: 100%;
 }
 
-/* 特殊入口项样式 */
 .special-item {
   background: #fff;
   padding: 0 16px;
@@ -399,7 +368,6 @@ export default {
   justify-content: center;
 }
 
-/* 联系人分组 */
 .contact-group {
   margin-bottom: 10px;
 }
@@ -436,7 +404,6 @@ export default {
   }
 }
 
-/* 侧边索引 */
 .index-sidebar {
   position: absolute;
   right: 8px;
@@ -462,27 +429,6 @@ export default {
     background: #e6f7ff;
     color: #009dff;
     font-weight: 600;
-  }
-}
-/* #endif */
-
-/* #ifndef MP-WEIXIN */
-/* H5/App 平台：使用 IndexedList 组件时的样式 */
-.contact-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: #fff;
-  border-bottom: 0.5px solid #e3e6e8;
-  
-  &:active {
-    background: #f5f5f5;
-  }
-  
-  .name {
-    margin-left: 12px;
-    font-size: 16px;
-    color: #171a1c;
   }
 }
 /* #endif */
