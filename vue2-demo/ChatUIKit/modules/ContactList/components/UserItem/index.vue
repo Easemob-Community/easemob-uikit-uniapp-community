@@ -4,7 +4,7 @@
       :src="userInfo.avatar" 
       :placeholder="userAvatarPlaceholder"
       :withPresence="showPresenceIndicator"
-      :userId="user.userId"
+      :userId="safeUser.userId || ''"
     />
     <view class="user-info">
       <view class="user-name">{{ userInfo.name }}</view>
@@ -41,13 +41,17 @@ export default {
       return this.$store.getters['config/getFeatureConfig'] || {}
     },
     
+    safeUser() {
+      return this.user || {}
+    },
+    
     userInfo() {
-      const userId = this.user.userId
+      const userId = this.safeUser.userId || ''
       // 从 store 获取用户信息
-      const storeUser = this.$store.getters['appUser/getUserInfo'](userId)
+      const storeUser = userId ? this.$store.getters['appUser/getUserInfo'](userId) : {}
       return {
-        name: storeUser.nickname || storeUser.name || this.user.name || userId,
-        avatar: storeUser.avatarURL || storeUser.avatar || this.user.avatar || ''
+        name: storeUser.nickname || storeUser.name || this.safeUser.name || userId,
+        avatar: storeUser.avatarURL || storeUser.avatar || this.safeUser.avatar || ''
       }
     },
     
@@ -62,7 +66,9 @@ export default {
   
   methods: {
     onTap() {
-      this.$emit('onTap', this.user.userId)
+      if (this.safeUser.userId) {
+        this.$emit('onTap', this.safeUser.userId)
+      }
     }
   }
 }
