@@ -7,13 +7,13 @@
 			}
 		},
 		{
-			"path": "pages/conversation/index",
+			"path": "ChatUIKit/modules/Conversation/index",
 			"style": {
 				"navigationStyle": "custom"
 			}
 		},
 		{
-			"path": "pages/contacts/index",
+			"path": "ChatUIKit/modules/ContactList/index",
 			"style": {
 				"navigationStyle": "custom"
 			}
@@ -107,13 +107,13 @@
 				"text": "消息",
 				"iconPath": "static/icon/conversation.png",
 				"selectedIconPath": "static/icon/conversation_active.png",
-				"pagePath": "pages/conversation/index"
+				"pagePath": "ChatUIKit/modules/Conversation/index"
 			},
 			{
 				"text": "联系人",
 				"iconPath": "static/icon/contacts.png",
 				"selectedIconPath": "static/icon/contacts_active.png",
-				"pagePath": "pages/contacts/index"
+				"pagePath": "ChatUIKit/modules/ContactList/index"
 			},
 			{
 				"text": "我的",
