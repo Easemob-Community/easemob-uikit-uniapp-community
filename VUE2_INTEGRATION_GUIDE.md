@@ -263,23 +263,38 @@ page {
 创建 `utils/IM.js`：
 
 ```javascript
-// 环信 SDK 初始化配置
-import SDK from 'easemob-websdk'
+// 环信 SDK 初始化配置（UniApp 专用）
+import SDK from 'easemob-websdk/uniApp/Easemob-chat'
 
-// 你的应用配置
-const APP_KEY = 'your-app-key'
+// 将 SDK 挂载到全局
+const WebIM = uni.WebIM = SDK
+
+// 你的应用配置（注意 "K" 需大写）
+const APP_KEY = 'your-appKey'
 
 // 创建连接实例
-const EMClient = new SDK.connection({
+const EMClient = new WebIM.connection({
   appKey: APP_KEY,
-  url: 'https://a1.easemob.com',
-  apiUrl: 'https://a1.easemob.com',
-  useOwnUploadFun: false,
-  debug: true
+  url: 'wss://im-api-wechat.easemob.com/websocket', // WebSocket 连接地址
+  apiUrl: 'https://a1.easemob.com', // REST API 连接地址
+  useOwnUploadFun: true, // 是否使用自己的上传方式
+  isHttpDNS: false, // 在小程序上需设置为 false，其他平台建议设置为 true
+  isAutoLogin: false // 是否启用自动登录（uniapp SDK 4.19.0+ 支持）
 })
 
 export { EMClient, SDK as EMSDK }
 ```
+
+**配置参数说明：**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| appKey | String | 是 | 应用 App Key（注意 "K" 大写） |
+| url | String | 是 | WebSocket 连接地址，`wss://im-api-wechat.easemob.com/websocket` |
+| apiUrl | String | 是 | REST API 地址，`https://a1.easemob.com` |
+| useOwnUploadFun | Boolean | 否 | 是否使用自己的上传方式，默认 `true` |
+| isHttpDNS | Boolean | 否 | 是否启用 HttpDNS，**小程序必须设为 false** |
+| isAutoLogin | Boolean | 否 | 是否启用自动登录，SDK 4.19.0+ 支持 |
 
 ---
 

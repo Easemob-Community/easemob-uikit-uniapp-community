@@ -62,22 +62,34 @@ cp -r ChatUIKit-vue2 my-uniapp-project/ChatUIKit
 创建 `utils/IM.js`：
 
 ```javascript
-import SDK from 'easemob-websdk'
+// 环信 SDK 初始化配置（UniApp 专用）
+import SDK from 'easemob-websdk/uniApp/Easemob-chat'
 
-// 替换为你的 App Key
-const APP_KEY = 'your-app-key@your-org'
+// 将 SDK 挂载到全局
+const WebIM = uni.WebIM = SDK
+
+// 替换为你的 App Key（注意 "K" 需大写）
+const APP_KEY = 'your-appKey'
 
 // 创建连接实例
-const EMClient = new SDK.connection({
+const EMClient = new WebIM.connection({
   appKey: APP_KEY,
-  url: 'https://a1.easemob.com',
-  apiUrl: 'https://a1.easemob.com',
-  useOwnUploadFun: false,
-  debug: true
+  url: 'wss://im-api-wechat.easemob.com/websocket', // WebSocket 连接地址
+  apiUrl: 'https://a1.easemob.com', // REST API 连接地址
+  useOwnUploadFun: true, // 是否使用自己的上传方式
+  isHttpDNS: false, // 在小程序上需设置为 false，其他平台建议设置为 true
+  isAutoLogin: false // 是否启用自动登录（uniapp SDK 4.19.0+ 支持）
 })
 
 export { EMClient, SDK as EMSDK }
 ```
+
+> **配置说明：**
+> - `url`: WebSocket 连接地址，用于实时消息传输
+> - `apiUrl`: REST API 连接地址，用于数据获取
+> - `useOwnUploadFun`: 是否使用自己的上传方式（如将图片上传到自有服务器）
+> - `isHttpDNS`: 是否启用 HttpDNS，**小程序上必须设置为 false**
+> - `isAutoLogin`: 是否启用自动登录，SDK 4.19.0+ 支持
 
 ### 3.4 修改 main.js
 
