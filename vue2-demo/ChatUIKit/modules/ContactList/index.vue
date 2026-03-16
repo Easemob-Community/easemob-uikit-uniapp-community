@@ -208,8 +208,18 @@ export default {
   },
   // #endif
   
+  onLoad() {
+    // 页面加载时刷新联系人列表（小程序页面生命周期）
+    this.loadContacts()
+  },
+  
   onShow() {
     // 页面显示时刷新联系人列表
+    this.loadContacts()
+  },
+  
+  mounted() {
+    // 组件挂载时也加载数据（作为组件使用时）
     this.loadContacts()
   },
   
