@@ -8,8 +8,10 @@
 - [ChatUIKit-vue2/stores/config.js](file://ChatUIKit-vue2/stores/config.js)
 - [ChatUIKit-vue2/stores/message.js](file://ChatUIKit-vue2/stores/message.js)
 - [ChatUIKit-vue2/stores/conversation.js](file://ChatUIKit-vue2/stores/conversation.js)
+- [ChatUIKit-vue2/stores/group.js](file://ChatUIKit-vue2/stores/group.js)
 - [ChatUIKit-vue2/modules/Chat/index.vue](file://ChatUIKit-vue2/modules/Chat/index.vue)
 - [ChatUIKit-vue2/modules/Login/index.vue](file://ChatUIKit-vue2/modules/Login/index.vue)
+- [ChatUIKit-vue2/modules/GroupCreate/index.vue](file://ChatUIKit-vue2/modules/GroupCreate/index.vue)
 - [ChatUIKit-vue2/utils/index.js](file://ChatUIKit-vue2/utils/index.js)
 - [ChatUIKit-vue2/const/index.js](file://ChatUIKit-vue2/const/index.js)
 - [ChatUIKit-vue2/locales/index.js](file://ChatUIKit-vue2/locales/index.js)
@@ -33,12 +35,12 @@
 
 ## 项目结构
 - 核心入口与单例：ChatUIKit-vue2/index.js 提供全局单例 ChatUIKit，封装初始化、连接获取、主题与功能配置访问、生命周期联动等。
-- 存储层（Vuex）：stores 目录下按领域拆分，如 conn.js（连接）、config.js（主题/功能配置）、message.js（消息）、conversation.js（会话）等。
+- 存储层（Vuex）：stores 目录下按领域拆分，如 conn.js（连接）、config.js（主题/功能配置）、message.js（消息）、conversation.js（会话）、group.js（群组）等。
 - 工具函数：utils/index.js 提供消息转换、日期格式化、权限检查等通用工具。
 - 常量与资源：const/index.js 定义资源地址、最大消息数、群组成员分页大小、@相关常量等。
 - 国际化：locales/index.js 提供 i18n 管理，支持多语言切换。
 - 组件库：components 目录提供 Avatar、Button、Empty、IndexedList、MenuItem、NavBar、PopMenu、SearchButton、SearchInput 等基础组件。
-- 示例模块：modules 目录包含 Chat、Conversation、Login 等业务模块组件。
+- 示例模块：modules 目录包含 Chat、Conversation、Login、GroupCreate 等业务模块组件。
 
 ```mermaid
 graph TB
@@ -46,6 +48,7 @@ subgraph "应用层"
 App["应用入口<br/>Vue2 应用"]
 Login["登录页面<br/>modules/Login/index.vue"]
 Chat["聊天页面<br/>modules/Chat/index.vue"]
+GroupCreate["群组创建<br/>modules/GroupCreate/index.vue"]
 end
 subgraph "UIKit 核心"
 ChatUIKit["ChatUIKit 单例<br/>ChatUIKit-vue2/index.js"]
@@ -59,6 +62,7 @@ ConnStore["连接 Store<br/>ChatUIKit-vue2/stores/conn.js"]
 ConfigStore["配置 Store<br/>ChatUIKit-vue2/stores/config.js"]
 MessageStore["消息 Store<br/>ChatUIKit-vue2/stores/message.js"]
 ConversationStore["会话 Store<br/>ChatUIKit-vue2/stores/conversation.js"]
+GroupStore["群组 Store<br/>ChatUIKit-vue2/stores/group.js"]
 end
 subgraph "组件库"
 AvatarComp["Avatar 组件<br/>components/Avatar/index.vue"]
@@ -67,11 +71,13 @@ end
 App --> ChatUIKit
 Login --> ChatUIKit
 Chat --> ChatUIKit
+GroupCreate --> ChatUIKit
 ChatUIKit --> Stores
 Stores --> ConnStore
 Stores --> ConfigStore
 Stores --> MessageStore
 Stores --> ConversationStore
+Stores --> GroupStore
 ChatUIKit --> Utils
 ChatUIKit --> Const
 ChatUIKit --> I18n
@@ -85,6 +91,7 @@ ChatUIKit --> BaseComponents
 - [ChatUIKit-vue2/stores/config.js:1-196](file://ChatUIKit-vue2/stores/config.js#L1-L196)
 - [ChatUIKit-vue2/stores/message.js:1-880](file://ChatUIKit-vue2/stores/message.js#L1-L880)
 - [ChatUIKit-vue2/stores/conversation.js:1-340](file://ChatUIKit-vue2/stores/conversation.js#L1-L340)
+- [ChatUIKit-vue2/stores/group.js:1-212](file://ChatUIKit-vue2/stores/group.js#L1-L212)
 - [ChatUIKit-vue2/utils/index.js:1-820](file://ChatUIKit-vue2/utils/index.js#L1-L820)
 - [ChatUIKit-vue2/const/index.js:1-36](file://ChatUIKit-vue2/const/index.js#L1-L36)
 - [ChatUIKit-vue2/locales/index.js:1-219](file://ChatUIKit-vue2/locales/index.js#L1-L219)
@@ -150,12 +157,14 @@ participant UIKit as "ChatUIKit 单例<br/>ChatUIKit-vue2/index.js"
 participant Vuex as "全局 Vuex<br/>ChatUIKit-vue2/stores/index.js"
 participant Conn as "连接 Store<br/>ChatUIKit-vue2/stores/conn.js"
 participant Config as "配置 Store<br/>ChatUIKit-vue2/stores/config.js"
+participant Group as "群组 Store<br/>ChatUIKit-vue2/stores/group.js"
 participant SDK as "环信 SDK<br/>SDK 实例"
 App->>UIKit : 调用 ChatUIKit.init({ chat, sdk, config })
 UIKit->>UIKit : 设置 SDK 连接实例
 UIKit->>Config : 初始化配置中心
 UIKit->>UIKit : 初始化 i18n
 UIKit->>Conn : 注入连接实例
+UIKit->>Group : 注册群组模块
 UIKit->>UIKit : 设置 SDK 监听
 App->>Conn : 调用 login({ user, pwd 或 accessToken })
 Conn-->>App : 返回登录结果
@@ -169,6 +178,7 @@ UIKit->>UIKit : 处理事件并更新状态
 - [ChatUIKit-vue2/index.js:22-66](file://ChatUIKit-vue2/index.js#L22-L66)
 - [ChatUIKit-vue2/stores/conn.js:59-108](file://ChatUIKit-vue2/stores/conn.js#L59-L108)
 - [ChatUIKit-vue2/stores/config.js:138-194](file://ChatUIKit-vue2/stores/config.js#L138-L194)
+- [ChatUIKit-vue2/stores/group.js:1-212](file://ChatUIKit-vue2/stores/group.js#L1-L212)
 
 ## 详细组件分析
 
@@ -331,6 +341,46 @@ class ConversationStore {
 **图表来源**
 - [ChatUIKit-vue2/stores/conversation.js:47-340](file://ChatUIKit-vue2/stores/conversation.js#L47-L340)
 
+### 群组管理（GroupStore）
+- 职责：管理群组列表、群组详情、群组成员、群组创建与更新。
+- 关键点：
+  - 使用 `groupMap` 作为群组详情映射，简化 getter 设计。
+  - 支持群组列表获取、详情获取、群组创建、添加新群组等操作。
+  - 自动处理 SDK 返回字段的驼峰化转换。
+  - 支持两种参数格式的群组创建（兼容旧版和新版）。
+- **更新** 移除了已废弃的 `destroyedGroup`、`leaveGroup`、`getGroupMembers`、`inviteUserToGroup`、`removeGroupMember` 动作，新增 `addNewGroup` 功能。
+
+**章节来源**
+- [ChatUIKit-vue2/stores/group.js:1-212](file://ChatUIKit-vue2/stores/group.js#L1-L212)
+
+```mermaid
+classDiagram
+class GroupStore {
++state : Object
++getters : Object
++mutations : Object
++actions : Object
++groupList : Array
++groupMap : Object
++getGroupList(state) Array
++getGroupById(id) Object
++getGroupName(id) String
++getGroupAvatar(id) String
++SET_GROUP_LIST(list) void
++ADD_GROUP(group) void
++REMOVE_GROUP(groupId) void
++UPDATE_GROUP(payload) void
++getJoinedGroupList() Promise
++getGroupDetails(params) Promise
++getGroupInfoFromServer(params) Promise
++createGroup(params) Promise
++addNewGroup(group) Promise
+}
+```
+
+**图表来源**
+- [ChatUIKit-vue2/stores/group.js:14-212](file://ChatUIKit-vue2/stores/group.js#L14-L212)
+
 ### 聊天模块（Chat 模块）
 - 职责：提供聊天界面，包含消息列表、输入框、工具栏、表情选择器等。
 - 关键点：
@@ -377,6 +427,16 @@ MessageInputToolbar --> MessageContactList
 - **章节来源**
   - [ChatUIKit-vue2/modules/Login/index.vue:1-382](file://ChatUIKit-vue2/modules/Login/index.vue#L1-L382)
 
+### 群组创建模块（GroupCreate 模块）
+- 职责：提供群组创建界面，支持联系人选择、群组信息设置、群组创建。
+- 关键点：
+  - 支持联系人搜索和索引列表展示。
+  - 支持多平台适配（微信小程序和其他平台）。
+  - 自动计算群组名称（当前用户 + 选中用户）。
+  - 使用 SDK createGroup 接口创建群组。
+- **章节来源**
+  - [ChatUIKit-vue2/modules/GroupCreate/index.vue:1-394](file://ChatUIKit-vue2/modules/GroupCreate/index.vue#L1-L394)
+
 ### 工具函数（Utils）
 - 职责：提供通用工具函数，包括消息转换、日期格式化、权限检查、文件处理等。
 - 关键点：
@@ -402,7 +462,7 @@ MessageInputToolbar --> MessageContactList
 
 ## 依赖关系分析
 - ChatUIKit 单例依赖 Vuex（全局实例由 ChatUIKit 管理），并通过各 Store 协调业务。
-- Store 之间存在领域耦合：ConnStore 依赖 ConfigStore、MessageStore 依赖 ConnStore、ConversationStore 依赖 ConnStore 等。
+- Store 之间存在领域耦合：ConnStore 依赖 ConfigStore、MessageStore 依赖 ConnStore、ConversationStore 依赖 ConnStore、GroupStore 依赖 ConnStore 等。
 - 工具函数与常量集中管理，便于复用与维护。
 - 组件库提供基础 UI 能力，模块组件基于组件库构建。
 - 国际化系统独立管理，支持多语言切换。
@@ -418,12 +478,16 @@ VuexStore --> ConnStore["ConnStore"]
 VuexStore --> ConfigStore["ConfigStore"]
 VuexStore --> MessageStore["MessageStore"]
 VuexStore --> ConversationStore["ConversationStore"]
+VuexStore --> GroupStore["GroupStore"]
 MessageStore --> ConnStore
 ConversationStore --> ConnStore
+GroupStore --> ConnStore
 ChatModule["Chat 模块"] --> Components
 ChatModule --> MessageStore
 ChatModule --> ConversationStore
 LoginModule["Login 模块"] --> ConnStore
+GroupCreateModule["GroupCreate 模块"] --> GroupStore
+GroupCreateModule --> ConnStore
 ```
 
 **图表来源**
@@ -431,13 +495,16 @@ LoginModule["Login 模块"] --> ConnStore
 - [ChatUIKit-vue2/stores/index.js:1-27](file://ChatUIKit-vue2/stores/index.js#L1-L27)
 - [ChatUIKit-vue2/stores/message.js:1-880](file://ChatUIKit-vue2/stores/message.js#L1-L880)
 - [ChatUIKit-vue2/stores/conversation.js:1-340](file://ChatUIKit-vue2/stores/conversation.js#L1-L340)
+- [ChatUIKit-vue2/stores/group.js:1-212](file://ChatUIKit-vue2/stores/group.js#L1-L212)
 - [ChatUIKit-vue2/modules/Chat/index.vue:1-310](file://ChatUIKit-vue2/modules/Chat/index.vue#L1-L310)
 - [ChatUIKit-vue2/modules/Login/index.vue:1-382](file://ChatUIKit-vue2/modules/Login/index.vue#L1-L382)
+- [ChatUIKit-vue2/modules/GroupCreate/index.vue:1-394](file://ChatUIKit-vue2/modules/GroupCreate/index.vue#L1-L394)
 
 **章节来源**
 - [ChatUIKit-vue2/stores/index.js:1-27](file://ChatUIKit-vue2/stores/index.js#L1-L27)
 - [ChatUIKit-vue2/stores/message.js:1-880](file://ChatUIKit-vue2/stores/message.js#L1-L880)
 - [ChatUIKit-vue2/stores/conversation.js:1-340](file://ChatUIKit-vue2/stores/conversation.js#L1-L340)
+- [ChatUIKit-vue2/stores/group.js:1-212](file://ChatUIKit-vue2/stores/group.js#L1-L212)
 
 ## 性能与优化
 - 消息处理优化：深克隆消息对象，移除 SDK 特殊原型方法，避免 Vue 响应式系统影响。
@@ -537,6 +604,7 @@ LoginModule["Login 模块"] --> ConnStore
   - 登录流程：见 modules/Login/index.vue 的 handleLogin 方法。
   - 连接初始化：见 ChatUIKit-vue2/index.js 的 init 方法。
   - 消息发送：见 stores/message.js 的 sendMessage 方法。
+  - 群组创建：见 stores/group.js 的 createGroup 方法。
 - 最佳实践
   - 在应用入口注册 ChatUIKit，确保 Store 全局一致性。
   - 在 onShow 生命周期调用 ChatUIKit.onShow，维持连接有效性。
@@ -548,6 +616,7 @@ LoginModule["Login 模块"] --> ConnStore
   - [ChatUIKit-vue2/index.js:368-376](file://ChatUIKit-vue2/index.js#L368-L376)
   - [ChatUIKit-vue2/utils/index.js:9-45](file://ChatUIKit-vue2/utils/index.js#L9-L45)
   - [ChatUIKit-vue2/stores/config.js:162-178](file://ChatUIKit-vue2/stores/config.js#L162-L178)
+  - [ChatUIKit-vue2/stores/group.js:150-200](file://ChatUIKit-vue2/stores/group.js#L150-L200)
 
 ### 错误处理策略
 - 连接未初始化：捕获 getChatConn 返回 null，提示先初始化。
@@ -555,11 +624,13 @@ LoginModule["Login 模块"] --> ConnStore
 - SDK 事件处理：对异常分支记录日志，避免影响主流程。
 - 配置持久化：检查本地存储权限，处理存储失败情况。
 - 组件渲染：处理头像加载错误和在线状态更新异常。
+- 群组操作：检查群组创建参数格式，处理群组创建失败情况。
 - **章节来源**
   - [ChatUIKit-vue2/stores/conn.js:25-27](file://ChatUIKit-vue2/stores/conn.js#L25-L27)
   - [ChatUIKit-vue2/stores/conn.js:89-92](file://ChatUIKit-vue2/stores/conn.js#L89-L92)
   - [ChatUIKit-vue2/stores/config.js:50-59](file://ChatUIKit-vue2/stores/config.js#L50-L59)
   - [ChatUIKit-vue2/components/Avatar/index.vue:160-167](file://ChatUIKit-vue2/components/Avatar/index.vue#L160-L167)
+  - [ChatUIKit-vue2/stores/group.js:150-200](file://ChatUIKit-vue2/stores/group.js#L150-L200)
 
 ### 安全考虑
 - 凭证保护：登录使用的 token 与用户 ID 应安全存储，避免明文泄露。
@@ -567,10 +638,12 @@ LoginModule["Login 模块"] --> ConnStore
 - 响应式安全：使用外部变量存储 SDK 实例，避免 Vue 响应式系统影响。
 - 数据序列化：使用深克隆处理 SDK 特殊对象，防止序列化错误。
 - 权限检查：在敏感操作前检查用户权限，如相机、相册、录音等。
+- 群组安全：群组创建时验证成员列表，防止恶意邀请。
 - **章节来源**
   - [ChatUIKit-vue2/stores/conn.js:3-6](file://ChatUIKit-vue2/stores/conn.js#L3-L6)
   - [ChatUIKit-vue2/utils/index.js:13-48](file://ChatUIKit-vue2/utils/index.js#L13-L48)
   - [ChatUIKit-vue2/utils/index.js:755-794](file://ChatUIKit-vue2/utils/index.js#L755-L794)
+  - [ChatUIKit-vue2/stores/group.js:150-200](file://ChatUIKit-vue2/stores/group.js#L150-L200)
 
 ### 速率限制与版本信息
 - 速率限制：静态资源访问存在频率限制，建议迁移至自有服务器。
@@ -591,22 +664,26 @@ LoginModule["Login 模块"] --> ConnStore
   - 实现防重机制，避免频繁请求。
   - 使用外部变量存储 SDK 实例，提升性能。
   - 实现配置持久化，提升用户体验。
+  - 群组管理使用 groupMap 映射，简化数据访问。
 - **章节来源**
   - [ChatUIKit-vue2/index.js:22-66](file://ChatUIKit-vue2/index.js#L22-L66)
   - [ChatUIKit-vue2/stores/conversation.js:163-169](file://ChatUIKit-vue2/stores/conversation.js#L163-L169)
   - [ChatUIKit-vue2/stores/conn.js:3-6](file://ChatUIKit-vue2/stores/conn.js#L3-L6)
   - [ChatUIKit-vue2/stores/config.js:62-68](file://ChatUIKit-vue2/stores/config.js#L62-L68)
+  - [ChatUIKit-vue2/stores/group.js:14-34](file://ChatUIKit-vue2/stores/group.js#L14-L34)
 
 ### 调试工具与监控方法
 - 调试工具
   - 启用调试日志：ChatUIKit.init 时传入 config.isDebug=true。
   - 观察 SDK 事件：在 ChatUIKit._setupSDKListeners 中查看事件回调日志。
   - 检查消息转换：使用 toPlainMessage 验证消息对象转换。
+  - 监控群组操作：在 stores/group.js 中查看群组创建和管理日志。
 - 监控方法
   - 连接状态：通过 ConnStore.getters.isLoggedIn 获取当前状态。
   - 登录/登出：在登录与登出前后记录日志，便于定位问题。
   - 配置状态：检查本地存储中的配置信息。
   - 组件状态：监控 Avatar 组件的加载状态和在线状态更新。
+  - 群组状态：通过 groupMap 监控群组详情更新。
 - **章节来源**
   - [ChatUIKit-vue2/index.js:62-63](file://ChatUIKit-vue2/index.js#L62-L63)
   - [ChatUIKit-vue2/index.js:315-327](file://ChatUIKit-vue2/index.js#L315-L327)
@@ -614,3 +691,63 @@ LoginModule["Login 模块"] --> ConnStore
   - [ChatUIKit-vue2/stores/conn.js:22-24](file://ChatUIKit-vue2/stores/conn.js#L22-L24)
   - [ChatUIKit-vue2/stores/config.js:50-59](file://ChatUIKit-vue2/stores/config.js#L50-L59)
   - [ChatUIKit-vue2/components/Avatar/index.vue:160-167](file://ChatUIKit-vue2/components/Avatar/index.vue#L160-L167)
+  - [ChatUIKit-vue2/stores/group.js:14-34](file://ChatUIKit-vue2/stores/group.js#L14-L34)
+
+### 群组管理 API 参考
+**更新** 本节更新了群组管理 API，移除了已废弃的动作，新增了 `addNewGroup` 功能。
+
+#### State
+- groupList: Array - 加入的群组列表
+- groupMap: Object - 群组详情映射（groupId -> groupInfo）
+
+#### Getters
+```javascript
+// 获取群组列表
+this.$store.getters['group/getGroupList']
+
+// 根据 ID 获取群组
+this.$store.getters['group/getGroupById']('groupId')
+
+// 获取群组名称（兼容 groupName 和 groupname）
+this.$store.getters['group/getGroupName']('groupId')
+
+// 获取群组头像
+this.$store.getters['group/getGroupAvatar']('groupId')
+```
+
+#### Actions
+```javascript
+// 获取加入的群组列表
+this.$store.dispatch('group/getJoinedGroupList')
+
+// 从服务器获取群组详情
+this.$store.dispatch('group/getGroupInfoFromServer', { groupId: 'groupId' })
+
+// 创建群组
+this.$store.dispatch('group/createGroup', {
+  name: '群组名称',
+  description: '群组描述',
+  members: ['user1', 'user2'], // 初始成员
+  type: 'public' // 'public' 或 'private'
+})
+
+// 添加新群组到列表
+this.$store.dispatch('group/addNewGroup', {
+  groupId: 'groupId',
+  groupName: '群组名称'
+})
+```
+
+**已移除的动作**（已废弃）
+- destroyedGroup：群组销毁动作
+- leaveGroup：离开群组动作  
+- getGroupMembers：获取群组成员动作
+- inviteUserToGroup：邀请用户加入群组动作
+- removeGroupMember：移除群组成员动作
+
+**新增功能**
+- addNewGroup：添加新群组到本地列表并获取详情
+
+**章节来源**
+- [ChatUIKit-vue2/stores/group.js:1-212](file://ChatUIKit-vue2/stores/group.js#L1-L212)
+- [ChatUIKit-vue2/stores/group.js:150-212](file://ChatUIKit-vue2/stores/group.js#L150-L212)

@@ -4,12 +4,6 @@
   基于 Vue2 + Vuex 的环信即时通讯 UIKit，支持 H5、App、微信小程序
 </p>
 
-<p align="center">
-  <a href="https://www.easemob.com/">官网</a> •
-  <a href="https://docs.easemob.com/">文档</a> •
-  <a href="#快速开始">快速开始</a> •
-  <a href="#示例项目">示例项目</a>
-</p>
 
 ---
 
