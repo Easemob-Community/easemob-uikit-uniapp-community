@@ -97,7 +97,46 @@ export default {
 
   methods: {
     onBack() {
-      uni.navigateBack()
+      // 获取当前页面栈
+      const pages = getCurrentPages()
+      // 如果页面栈长度大于1，可以正常返回
+      if (pages && pages.length > 1) {
+        uni.navigateBack()
+      } else {
+        // 页面栈为空或只有当前页面，使用 switchTab 返回 tabBar 页面
+        // 根据会话类型决定返回到哪个 tabBar 页面
+        const currentConversation = this.$store.state.conversation.currentConversation
+        if (currentConversation) {
+          if (currentConversation.conversationType === 'singleChat') {
+            // 单聊可能从联系人列表或会话列表进入，优先返回联系人列表
+            uni.switchTab({
+              url: '/ChatUIKit/modules/ContactList/index',
+              fail: () => {
+                // 如果联系人列表不是 tabBar 页面，尝试返回会话列表
+                uni.switchTab({
+                  url: '/ChatUIKit/modules/Conversation/index'
+                })
+              }
+            })
+          } else {
+            // 群聊从群列表或会话列表进入，优先返回群列表
+            uni.switchTab({
+              url: '/ChatUIKit/modules/GroupList/index',
+              fail: () => {
+                // 如果群列表不是 tabBar 页面，尝试返回会话列表
+                uni.switchTab({
+                  url: '/ChatUIKit/modules/Conversation/index'
+                })
+              }
+            })
+          }
+        } else {
+          // 默认返回会话列表
+          uni.switchTab({
+            url: '/ChatUIKit/modules/Conversation/index'
+          })
+        }
+      }
     }
   }
 }
