@@ -301,15 +301,15 @@ export default {
       "style": { "navigationStyle": "custom" }
     },
     {
+      "path": "ChatUIKit/modules/Chat/page",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
       "path": "ChatUIKit/modules/Conversation/index",
       "style": { "navigationStyle": "custom" }
     },
     {
       "path": "ChatUIKit/modules/ContactList/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "pages/chat/index",
       "style": { "navigationStyle": "custom" }
     }
   ],
@@ -331,11 +331,91 @@ export default {
 }
 ```
 
+> **注意：** 以上配置使用内置聊天页面 `ChatUIKit/modules/Chat/page`。如果你选择使用自定义聊天页面，请将 `ChatUIKit/modules/Chat/page` 替换为 `pages/chat/index`。
+
 ---
 
-## 第六步：创建聊天页面
+## 第六步：配置聊天页面
+
+ChatUIKit 提供两种集成聊天页面的方式，你可以根据需求选择：
+
+### 方式一：使用内置页面（推荐，零配置）
+
+UIKit 提供了内置的聊天页面，无需手动创建页面文件，只需在 `pages.json` 中配置路径即可。
+
+修改 `pages.json`：
+
+```json
+{
+  "pages": [
+    {
+      "path": "pages/login/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/Chat/page",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/Conversation/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/ContactList/index",
+      "style": { "navigationStyle": "custom" }
+    }
+  ],
+  "tabBar": {
+    "backgroundColor": "#F6F8FA",
+    "color": "#999999",
+    "selectedColor": "#00a4fd",
+    "list": [
+      {
+        "text": "消息",
+        "pagePath": "ChatUIKit/modules/Conversation/index"
+      },
+      {
+        "text": "联系人",
+        "pagePath": "ChatUIKit/modules/ContactList/index"
+      }
+    ]
+  }
+}
+```
+
+> **说明：** 使用内置页面时，会话列表和联系人列表点击后会自动跳转到 `ChatUIKit/modules/Chat/page`，无需额外处理。
+
+#### 路由跳转与返回机制
+
+使用内置页面时，UIKit 已经为你处理好了所有路由逻辑：
+
+| 入口 | 跳转方式 | 跳转目标 | 返回行为 |
+|------|----------|----------|----------|
+| **会话列表** | `navigateTo` | `ChatUIKit/modules/Chat/page?conversationType=xxx&conversationId=xxx` | `navigateBack` 返回会话列表 |
+| **会话搜索列表** | `navigateTo` | `ChatUIKit/modules/Chat/page?id=xxx&type=xxx` | `navigateBack` 返回搜索列表 |
+| **联系人列表** | `navigateTo` | `ChatUIKit/modules/Chat/page?type=singleChat&id=xxx` | `navigateBack` 返回联系人列表 |
+| **联系人搜索列表** | `redirectTo` | `ChatUIKit/modules/Chat/page?id=xxx&type=singleChat` | 返回联系人列表（关闭搜索页） |
+| **群列表** | `navigateTo` | `ChatUIKit/modules/Chat/page?type=groupChat&id=xxx` | `navigateBack` 返回群列表 |
+| **创建群组** | `redirectTo` | `ChatUIKit/modules/Chat/page?type=groupChat&id=xxx` | 返回群列表（关闭创建页） |
+| **新建会话** | `redirectTo` | `ChatUIKit/modules/Chat/page?type=singleChat&id=xxx` | 返回上一级 |
+
+**关键说明：**
+- 大部分跳转使用 `uni.navigateTo`，返回时使用 `uni.navigateBack` 可以正确返回上一级页面
+- 搜索、创建群组等临时页面使用 `redirectTo`（关闭当前页跳转），返回时直接回到列表页
+- 聊天页面顶部的返回按钮已内置 `navigateBack` 逻辑
+- 无需手动处理返回逻辑，UIKit 已完整实现
+
+---
+
+### 方式二：自定义聊天页面
+
+如果你需要自定义页面逻辑或样式，可以手动创建聊天页面。
+
+#### 1. 创建页面文件
 
 创建 `pages/chat/index.vue`：
+
+> **重要说明：** 聊天组件依赖 `currentConversation` 状态来发送消息。必须在 `onLoad` 中调用 `SET_CURRENT_CONVERSATION` mutation 设置当前会话，否则会导致发送消息失败。
 
 ```vue
 <template>
@@ -361,18 +441,26 @@ export default {
   },
   
   onLoad(options) {
-    this.conversationType = options.type
-    this.conversationId = options.id
+    // 支持两种参数格式：
+    // 1. 从联系人/群组列表进入：?type=singleChat&id=xxx
+    // 2. 从会话列表进入：?conversationType=singleChat&conversationId=xxx
+    this.conversationType = options.type || options.conversationType
+    this.conversationId = options.id || options.conversationId
     
+    // 必须设置 currentConversation，否则发送消息时会报错
     if (this.conversationId) {
       this.$store.commit('conversation/SET_CURRENT_CONVERSATION', {
         conversationId: this.conversationId,
         conversationType: this.conversationType
       })
+    } else {
+      console.error('[ChatPage] conversationId is empty!')
+      uni.showToast({ title: '会话ID不能为空', icon: 'none' })
     }
   },
   
   onUnload() {
+    // 清理状态
     this.$store.dispatch('message/setQuoteMessage', null)
     this.$store.dispatch('message/setEditingMessage', null)
     this.$store.commit('conversation/SET_CURRENT_CONVERSATION', null)
@@ -388,6 +476,81 @@ export default {
 }
 </style>
 ```
+
+#### 2. 配置页面路由
+
+```json
+{
+  "pages": [
+    {
+      "path": "pages/chat/index",
+      "style": { "navigationStyle": "custom" }
+    }
+  ]
+}
+```
+
+#### 参数说明
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| `type` / `conversationType` | string | 会话类型：`singleChat`（单聊）或 `groupChat`（群聊）|
+| `id` / `conversationId` | string | 会话ID：单聊为用户ID，群聊为群组ID |
+
+#### 路由跳转与返回机制
+
+使用自定义页面时，你需要确保从各个入口正确跳转到聊天页面：
+
+**从会话列表跳转：**
+```javascript
+uni.navigateTo({
+  url: `/pages/chat/index?conversationType=${conversationType}&conversationId=${conversationId}`
+})
+```
+
+**从联系人列表跳转：**
+```javascript
+uni.navigateTo({
+  url: `/pages/chat/index?type=singleChat&id=${userId}`
+})
+```
+
+**从群列表跳转：**
+```javascript
+uni.navigateTo({
+  url: `/pages/chat/index?type=groupChat&id=${groupId}`
+})
+```
+
+**返回处理：**
+聊天页面顶部返回按钮应调用 `uni.navigateBack()` 返回上一级：
+```javascript
+methods: {
+  onBack() {
+    uni.navigateBack()
+  }
+}
+```
+
+#### 常见问题
+
+**问题1：进入聊天页面后发送消息报错 `Cannot read properties of null (reading 'conversationId')`**
+
+**原因**：`onLoad` 中没有正确设置 `currentConversation`，或者 `conversationId` 参数为空。
+
+**解决方案**：
+1. 检查跳转 URL 是否正确传递了 `type`/`id` 或 `conversationType`/`conversationId` 参数
+2. 确保在 `onLoad` 中调用了 `SET_CURRENT_CONVERSATION` mutation
+3. 添加调试日志检查参数是否正确接收
+
+**问题2：从聊天页面返回时无法正确返回上一级**
+
+**原因**：可能使用了 `redirectTo` 或 `switchTab` 跳转，或者页面栈已清空。
+
+**解决方案**：
+1. 确保使用 `uni.navigateTo` 跳转到聊天页面（保留页面栈）
+2. 确保聊天页面的返回按钮调用 `uni.navigateBack()`
+3. 避免在跳转到聊天页面前使用 `redirectTo` 或 `reLaunch`
 
 ---
 

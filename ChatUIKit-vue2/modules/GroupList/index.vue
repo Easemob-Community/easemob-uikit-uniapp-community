@@ -57,7 +57,7 @@ export default {
         return
       }
       uni.navigateTo({
-        url: `/pages/chat/index?type=groupChat&id=${id}`
+        url: `/ChatUIKit/modules/Chat/page?type=groupChat&id=${id}`
       })
     }
   }

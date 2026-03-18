@@ -249,7 +249,7 @@ export default {
     onContactTap(userId) {
       if (!userId) return
       uni.navigateTo({
-        url: `/pages/chat/index?type=singleChat&id=${userId}`
+        url: `/ChatUIKit/modules/Chat/page?type=singleChat&id=${userId}`
       })
     },
     
