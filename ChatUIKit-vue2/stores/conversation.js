@@ -175,7 +175,7 @@ export default {
         const res = await chatConn.getServerConversations({
           pageSize: 50,
           cursor: '',
-          includeEmptyConversations: true
+          // includeEmptyConversations: true //是否拉取空会话
         })
         console.log('[ConversationStore] getServerConversations res:', res)
         

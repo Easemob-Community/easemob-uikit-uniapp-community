@@ -37,8 +37,7 @@ const EMClient = new websdk.connection({
 	appKey: SDK_CONFIG.appKey,
 	url:'wss://im-api-wechat.easemob.com/websocket',
 	apiUrl:'https://a1.easemob.com',
-	isHttpDNS: false,
-	debug:false
+	isHttpDNS: false
 })
 console.log('>>>>>SDK version',EMClient.version)
 // logger.init({
