@@ -205,6 +205,8 @@ export default {
 
 创建 `pages/login/index.vue`：
 
+> **登录方式说明：** 环信 IM 推荐使用 **user + accessToken** 方式登录，而非 user + password。accessToken 需要从你的服务端获取，或者通过环信管理后台生成。详见：[环信用户 Token 鉴权文档](https://doc.easemob.com/document/server-side/easemob_user_token.html)
+
 ```vue
 <template>
   <view class="login-page">
@@ -215,13 +217,12 @@ export default {
         class="input"
       />
       <input 
-        v-model="password" 
-        placeholder="密码" 
+        v-model="accessToken" 
+        placeholder="AccessToken" 
         password 
         class="input"
       />
       <button @click="login" class="btn">登录</button>
-      <button @click="register" class="btn btn-register">注册</button>
     </view>
   </view>
 </template>
@@ -233,7 +234,7 @@ export default {
   data() {
     return {
       username: '',
-      password: ''
+      accessToken: ''
     }
   },
   
@@ -251,23 +252,11 @@ export default {
       try {
         await EMClient.open({
           user: this.username,
-          pwd: this.password
+          accessToken: this.accessToken
         })
         uni.showToast({ title: '登录成功', icon: 'success' })
       } catch (error) {
         uni.showToast({ title: '登录失败', icon: 'none' })
-      }
-    },
-    
-    async register() {
-      try {
-        await EMClient.registerUser({
-          username: this.username,
-          password: this.password
-        })
-        uni.showToast({ title: '注册成功', icon: 'success' })
-      } catch (error) {
-        uni.showToast({ title: '注册失败', icon: 'none' })
       }
     },
     
@@ -294,10 +283,6 @@ export default {
 }
 .btn {
   margin-top: 16px;
-}
-.btn-register {
-  background: #f0f0f0;
-  color: #333;
 }
 </style>
 ```
