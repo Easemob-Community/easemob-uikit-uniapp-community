@@ -41,6 +41,18 @@ npm install easemob-websdk vuex pinyin-pro easemob-uniapp-logger-plugin
 cp -r ChatUIKit-vue2 my-uniapp-project/ChatUIKit
 ```
 
+同时复制静态资源到项目的 `static` 目录（用于头像、表情等）：
+
+```bash
+# 创建 static 目录（如果不存在）
+mkdir -p my-uniapp-project/static
+
+# 复制静态资源
+cp -r ChatUIKit-vue2/assets/* my-uniapp-project/static/
+```
+
+> **说明：** 静态资源包括默认头像（`user.png`、`group.png`）、表情图片（`emojis/`）、图标（`icon/`）等，这些资源通过 `/static/xxx` 路径被组件引用。
+
 ### 3.2 配置 manifest.json
 
 确保使用 Vue2：
@@ -382,6 +394,14 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.chat-page {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+</style>
 ```
 
 ---
