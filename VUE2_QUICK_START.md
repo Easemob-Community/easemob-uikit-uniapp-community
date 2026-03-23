@@ -25,7 +25,7 @@
 在项目根目录执行：
 
 ```bash
-npm install easemob-websdk vuex pinyin-pro easemob-uniapp-logger-plugin
+npm install easemob-websdk vuex pinyin-pro
 ```
 
 ---

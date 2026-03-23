@@ -39,7 +39,7 @@
 ### 安装依赖
 
 ```bash
-npm install easemob-websdk vuex pinyin-pro easemob-uniapp-logger-plugin
+npm install easemob-websdk vuex pinyin-pro
 ```
 
 ### 复制 ChatUIKit

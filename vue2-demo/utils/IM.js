@@ -17,9 +17,6 @@ if (!global.console) {
 
 import websdk from '../js_sdk/Easemob-chat'
 // import websdk from '../js_sdk/Easemob-chat (1).js'
-// import {
-// 	logger
-// } from 'easemob-uniapp-logger-plugin'
 // SDK 配置
 const SDK_CONFIG = {
 	// 请替换为您的 AppKey，格式：appkey@im-appkey
