@@ -173,6 +173,10 @@ const app = new Vue({
 app.$mount()
 ```
 
+> **常见问题：** 如果出现 `Cannot read properties of undefined (reading 'init')` 错误，请检查：
+> 1. `ChatUIKit/locales/index.js` 文件是否存在
+> 2. 目录名是否与导入路径一致（`ChatUIKit` vs `ChatUIKit-vue2`）
+
 ### 3.5 修改 App.vue
 
 ```vue
