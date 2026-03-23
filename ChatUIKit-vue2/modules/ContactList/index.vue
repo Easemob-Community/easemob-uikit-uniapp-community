@@ -248,8 +248,23 @@ export default {
     
     onContactTap(userId) {
       if (!userId) return
+      
+      // 防止重复跳转
+      if (this._navigatingToChat) {
+        console.log('[ContactList] Prevent duplicate navigation')
+        return
+      }
+      this._navigatingToChat = true
+      
+      console.log('[ContactList] Navigating to chat with user:', userId)
       uni.navigateTo({
-        url: `/ChatUIKit/modules/Chat/page?type=singleChat&id=${userId}`
+        url: `/ChatUIKit/modules/Chat/page?type=singleChat&id=${userId}`,
+        complete: () => {
+          // 重置标志，允许下次跳转
+          setTimeout(() => {
+            this._navigatingToChat = false
+          }, 500)
+        }
       })
     },
     
