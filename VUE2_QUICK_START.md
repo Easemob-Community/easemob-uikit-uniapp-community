@@ -44,9 +44,14 @@ npm install easemob-websdk vuex pinyin-pro
 # 如果 ChatUIKit 目录已存在，先删除旧版本
 rm -rf my-uniapp-project/ChatUIKit
 
-# 复制新版本
+# 复制新版本（注意：必须从 ChatUIKit-vue2 复制，不要从 vue2-demo 复制）
 cp -r ChatUIKit-vue2 my-uniapp-project/ChatUIKit
 ```
+
+> ⚠️ **重要提示：**
+> - **必须从 `ChatUIKit-vue2` 源码目录复制**，不要从 `vue2-demo/ChatUIKit` 复制
+> - `vue2-demo/ChatUIKit` 是旧版本的构建产物，缺少 `page.vue` 等关键文件
+> - 如果报错 `no such file or directory, open '.../ChatUIKit/modules/Chat/page.vue'`，说明复制了错误的目录
 
 同时复制静态资源到项目的 `static` 目录（用于头像、表情等）：
 
