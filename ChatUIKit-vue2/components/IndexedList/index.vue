@@ -41,7 +41,6 @@
           v-for="(item, idx) in group.data"
           :key="idx"
           class="indexed-item"
-          @tap="onItemTap(item)"
         >
           <!-- 使用作用域插槽，小程序环境通过 $scopedSlots 访问 -->
           <slot name="indexedItem" :item="item" :index="idx"></slot>
