@@ -153,6 +153,7 @@ if (!global.util) {
 // #endif
 
 // 引入 ChatUIKit
+// 注意：如果复制后的目录名是 ChatUIKit-vue2，请将路径改为 './ChatUIKit-vue2'
 import ChatUIKit, { store } from './ChatUIKit'
 import { t, i18n } from './ChatUIKit/locales'
 
