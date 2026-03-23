@@ -208,15 +208,15 @@ export default {
 </script>
 
 <style>
-@import url("./common.scss");
+@import url("./common.css");
 </style>
 ```
 
-### 3.6 创建 common.scss 文件
+### 3.6 创建 common.css 文件
 
-在项目根目录创建 `common.scss` 文件：
+在项目根目录创建 `common.css` 文件：
 
-```scss
+```css
 .ellipsis {
   white-space: nowrap;
   /* 禁止换行 */
@@ -235,6 +235,16 @@ export default {
   height: 20px;
 }
 ```
+
+然后修改 `App.vue` 中的导入语句：
+
+```vue
+<style>
+@import url("./common.css");
+</style>
+```
+
+> **注意：** 如果使用 SCSS，也可以创建 `common.scss` 文件，并将导入语句改为 `@import url("./common.scss");`
 
 ---
 
