@@ -429,34 +429,6 @@ export default {
     {
       "path": "ChatUIKit/modules/ContactList/index",
       "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/ConversationSearchList/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/ContactRequestList/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/ContactAdd/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/ContactSearchList/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/GroupList/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/GroupCreate/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/ChatNew/index",
-      "style": { "navigationStyle": "custom" }
     }
   ],
   "tabBar": {
@@ -477,17 +449,45 @@ export default {
 }
 ```
 
-> **注意：**
-> - 以上配置包含所有功能页面，包括会话搜索、联系人搜索、添加好友、群聊列表、创建群组等
+> **说明：**
+> - 以上配置只包含 **4 个基础页面**：登录页、聊天页、会话列表、联系人列表
 > - 使用内置聊天页面 `ChatUIKit/modules/Chat/page`，如果你选择使用自定义聊天页面，请将 `ChatUIKit/modules/Chat/page` 替换为 `pages/chat/index`
-> - **页面清单说明：**
->   - `ConversationSearchList` - 会话搜索页面
->   - `ContactRequestList` - 新的朋友（好友请求）页面
->   - `ContactAdd` - 添加联系人页面
->   - `ContactSearchList` - 联系人搜索页面
->   - `GroupList` - 群聊列表页面
->   - `GroupCreate` - 创建群组页面
->   - `ChatNew` - 新建会话页面
+> - **如果需要更多功能，请在 `pages.json` 中按需添加对应页面（详见下方可选页面列表）**
+
+### 可选页面列表
+
+UIKit 还提供了以下功能页面，根据你的需求在 `pages.json` 中添加：
+
+| 功能 | 页面路径 | 说明 |
+|------|----------|------|
+| 会话搜索 | `ChatUIKit/modules/ConversationSearchList/index` | 点击会话列表搜索入口 |
+| 新的朋友 | `ChatUIKit/modules/ContactRequestList/index` | 点击联系人页面的"新的朋友" |
+| 添加联系人 | `ChatUIKit/modules/ContactAdd/index` | 点击联系人页面右上角加号 |
+| 联系人搜索 | `ChatUIKit/modules/ContactSearchList/index` | 从添加联系人进入搜索 |
+| 群聊列表 | `ChatUIKit/modules/GroupList/index` | 点击联系人页面的"群聊" |
+| 创建群组 | `ChatUIKit/modules/GroupCreate/index` | 从群聊列表创建新群组 |
+| 新建会话 | `ChatUIKit/modules/ChatNew/index` | 点击会话列表右上角加号 |
+
+**添加示例：**
+
+```json
+{
+  "pages": [
+    // ... 基础页面
+    {
+      "path": "ChatUIKit/modules/ConversationSearchList/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/ContactRequestList/index",
+      "style": { "navigationStyle": "custom" }
+    }
+    // ... 其他需要的页面
+  ]
+}
+```
+
+> **提示：** 如果某些功能点击无反应，请检查对应的页面是否已在 `pages.json` 中注册。
 
 ---
 
@@ -499,7 +499,7 @@ ChatUIKit 提供两种集成聊天页面的方式，你可以根据需求选择�
 
 UIKit 提供了内置的聊天页面，无需手动创建页面文件，只需在 `pages.json` 中配置路径即可。
 
-修改 `pages.json`：
+修改 `pages.json`（基础配置）：
 
 ```json
 {
@@ -519,33 +519,6 @@ UIKit 提供了内置的聊天页面，无需手动创建页面文件，只需�
     {
       "path": "ChatUIKit/modules/ContactList/index",
       "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/ConversationSearchList/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/ContactRequestList/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/ContactAdd/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/ContactSearchList/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/GroupList/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/GroupCreate/index",
-      "style": { "navigationStyle": "custom" }
-    },
-    {
-      "path": "ChatUIKit/modules/ChatNew/index",
       "style": { "navigationStyle": "custom" }
     }
   ],
