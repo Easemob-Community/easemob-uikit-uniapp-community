@@ -429,6 +429,34 @@ export default {
     {
       "path": "ChatUIKit/modules/ContactList/index",
       "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/ConversationSearchList/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/ContactRequestList/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/ContactAdd/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/ContactSearchList/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/GroupList/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/GroupCreate/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/ChatNew/index",
+      "style": { "navigationStyle": "custom" }
     }
   ],
   "tabBar": {
@@ -449,7 +477,17 @@ export default {
 }
 ```
 
-> **注意：** 以上配置使用内置聊天页面 `ChatUIKit/modules/Chat/page`。如果你选择使用自定义聊天页面，请将 `ChatUIKit/modules/Chat/page` 替换为 `pages/chat/index`。
+> **注意：**
+> - 以上配置包含所有功能页面，包括会话搜索、联系人搜索、添加好友、群聊列表、创建群组等
+> - 使用内置聊天页面 `ChatUIKit/modules/Chat/page`，如果你选择使用自定义聊天页面，请将 `ChatUIKit/modules/Chat/page` 替换为 `pages/chat/index`
+> - **页面清单说明：**
+>   - `ConversationSearchList` - 会话搜索页面
+>   - `ContactRequestList` - 新的朋友（好友请求）页面
+>   - `ContactAdd` - 添加联系人页面
+>   - `ContactSearchList` - 联系人搜索页面
+>   - `GroupList` - 群聊列表页面
+>   - `GroupCreate` - 创建群组页面
+>   - `ChatNew` - 新建会话页面
 
 ---
 
@@ -480,6 +518,34 @@ UIKit 提供了内置的聊天页面，无需手动创建页面文件，只需�
     },
     {
       "path": "ChatUIKit/modules/ContactList/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/ConversationSearchList/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/ContactRequestList/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/ContactAdd/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/ContactSearchList/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/GroupList/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/GroupCreate/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
+      "path": "ChatUIKit/modules/ChatNew/index",
       "style": { "navigationStyle": "custom" }
     }
   ],
