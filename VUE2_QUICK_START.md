@@ -118,6 +118,10 @@ export { EMClient, SDK as EMSDK }
 
 ### 3.4 修改 main.js
 
+#### 方式一：使用 UIKit 提供的 store（推荐，新项目使用）
+
+如果你的项目没有使用 Vuex，或愿意使用 UIKit 的 store 作为主 store：
+
 ```javascript
 import Vue from 'vue'
 import App from './App'
@@ -168,6 +172,68 @@ App.mpType = 'app'
 
 const app = new Vue({
   store,
+  ...App
+})
+app.$mount()
+```
+
+#### 方式二：合并到你的现有 store（已有 Vuex 项目使用）
+
+如果你的项目已经有 Vuex store，需要将 UIKit 的 modules 合并进去：
+
+```javascript
+// store/index.js
+import Vue from 'vue'
+import Vuex from 'vuex'
+import user from './modules/user'  // 你现有的模块
+
+// 引入 UIKit 的 store modules
+import {
+  conn,
+  conversation,
+  group,
+  appUser,
+  message,
+  contact,
+  config
+} from './ChatUIKit/stores'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+  modules: {
+    // 你的现有模块
+    user,
+    // UIKit 的模块
+    conn,
+    conversation,
+    group,
+    appUser,
+    message,
+    contact,
+    config
+  }
+})
+```
+
+然后在 `main.js` 中使用你自己的 store：
+
+```javascript
+import Vue from 'vue'
+import App from './App'
+import ChatUIKit from './ChatUIKit'
+import { t, i18n } from './ChatUIKit/locales'
+import store from './store'  // 引入你自己的 store
+
+// 初始化国际化
+i18n.init()
+
+// 挂载到 Vue
+Vue.prototype.$ChatUIKit = ChatUIKit
+Vue.prototype.$t = t
+
+const app = new Vue({
+  store,  // 使用你自己的 store（已包含 UIKit 的 modules）
   ...App
 })
 app.$mount()
