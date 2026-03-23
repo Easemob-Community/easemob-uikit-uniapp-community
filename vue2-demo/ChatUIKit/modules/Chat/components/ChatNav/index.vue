@@ -97,7 +97,63 @@ export default {
 
   methods: {
     onBack() {
-      uni.navigateBack()
+      // 获取当前页面栈
+      const pages = getCurrentPages()
+      console.log('[ChatNav] Page stack length:', pages ? pages.length : 0)
+      console.log('[ChatNav] Pages:', pages ? pages.map(p => p.route || p.path) : [])
+      
+      // 尝试 navigateBack，如果失败则使用 switchTab
+      if (pages && pages.length > 1) {
+        console.log('[ChatNav] Using navigateBack')
+        uni.navigateBack({
+          success: () => {
+            console.log('[ChatNav] navigateBack success')
+          },
+          fail: (err) => {
+            console.error('[ChatNav] navigateBack failed:', err)
+            // navigateBack 失败，使用 switchTab 作为备选
+            this.fallbackToTabBar()
+          }
+        })
+      } else {
+        console.log('[ChatNav] Page stack <= 1, using fallback')
+        // 页面栈为空或只有当前页面，使用 switchTab 返回
+        this.fallbackToTabBar()
+      }
+    },
+    
+    fallbackToTabBar() {
+      // 根据会话类型决定返回到哪个 tabBar 页面
+      const currentConversation = this.$store.state.conversation.currentConversation
+      console.log('[ChatNav] Fallback, conversationType:', currentConversation?.conversationType)
+      
+      if (currentConversation) {
+        if (currentConversation.conversationType === 'singleChat') {
+          // 单聊优先返回联系人列表
+          console.log('[ChatNav] Switching to ContactList')
+          uni.switchTab({
+            url: '/ChatUIKit/modules/ContactList/index',
+            fail: (err) => {
+              console.error('[ChatNav] switchTab to ContactList failed:', err)
+              uni.switchTab({
+                url: '/ChatUIKit/modules/Conversation/index'
+              })
+            }
+          })
+        } else {
+          // 群聊优先返回会话列表
+          console.log('[ChatNav] Switching to Conversation')
+          uni.switchTab({
+            url: '/ChatUIKit/modules/Conversation/index'
+          })
+        }
+      } else {
+        // 默认返回会话列表
+        console.log('[ChatNav] No conversation, switching to Conversation')
+        uni.switchTab({
+          url: '/ChatUIKit/modules/Conversation/index'
+        })
+      }
     }
   }
 }

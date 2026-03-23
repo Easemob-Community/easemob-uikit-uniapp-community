@@ -270,7 +270,7 @@ export default {
         return
       }
       uni.navigateTo({
-        url: `/pages/chat/index?conversationType=${this.conversation.conversationType}&conversationId=${this.conversation.conversationId}`
+        url: `/ChatUIKit/modules/Chat/page?conversationType=${this.conversation.conversationType}&conversationId=${this.conversation.conversationId}`
       })
     },
     
