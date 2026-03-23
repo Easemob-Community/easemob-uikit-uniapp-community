@@ -212,6 +212,30 @@ export default {
 </style>
 ```
 
+### 3.6 创建 common.scss 文件
+
+在项目根目录创建 `common.scss` 文件：
+
+```scss
+.ellipsis {
+  white-space: nowrap;
+  /* 禁止换行 */
+  overflow: hidden;
+  /* 超出部分隐藏 */
+  text-overflow: ellipsis;
+  /* 使用省略号替代超出部分 */
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.msg-emoji {
+  width: 20px;
+  height: 20px;
+}
+```
+
 ---
 
 ## 第四步：创建登录页面
