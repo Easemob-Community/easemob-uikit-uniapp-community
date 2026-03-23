@@ -45,6 +45,12 @@ npm install easemob-websdk vuex pinyin-pro
 ### 复制 ChatUIKit
 
 ```bash
+# 注意：请确保在 UniApp 项目根目录（与 pages 同级）执行
+
+# 如果 ChatUIKit 目录已存在，先删除旧版本
+rm -rf your-project/ChatUIKit
+
+# 复制 UIKit
 cp -r ChatUIKit-vue2 your-project/ChatUIKit
 ```
 

@@ -38,20 +38,33 @@ npm install easemob-websdk vuex pinyin-pro
 
 ```bash
 # 假设你的项目目录是 my-uniapp-project
+# 注意：请确保你已在项目根目录（即与 pages 同级目录）执行以下命令
+
+# 复制 UIKit 目录
+# 如果 ChatUIKit 目录已存在，先删除旧版本
+rm -rf my-uniapp-project/ChatUIKit
+
+# 复制新版本
 cp -r ChatUIKit-vue2 my-uniapp-project/ChatUIKit
 ```
 
 同时复制静态资源到项目的 `static` 目录（用于头像、表情等）：
 
 ```bash
-# 创建 static 目录（如果不存在）
+# 先删除旧的 static 目录（如果存在）避免冲突
+rm -rf my-uniapp-project/static
+
+# 创建新的 static 目录
 mkdir -p my-uniapp-project/static
 
 # 复制静态资源
 cp -r ChatUIKit-vue2/assets/* my-uniapp-project/static/
 ```
 
-> **说明：** 静态资源包括默认头像（`user.png`、`group.png`）、表情图片（`emojis/`）、图标（`icon/`）等，这些资源通过 `/static/xxx` 路径被组件引用。
+> **说明：**
+> - 静态资源包括默认头像（`user.png`、`group.png`）、表情图片（`emojis/`）、图标（`icon/`）等，这些资源通过 `/static/xxx` 路径被组件引用
+> - 如果提示 `Not a directory`，说明 `static` 是一个文件而非目录，请先删除该文件再创建目录
+> - 如果提示 `No such file or directory`，请检查你的项目路径是否正确
 
 ### 3.2 配置 manifest.json
 
